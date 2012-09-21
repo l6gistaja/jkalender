@@ -12,9 +12,9 @@ import org.junit.Test;
 
 public class AstronomyTest {
     
-    public static final String delimiter = "-";
+    public static final String DELIMITER = "-";
 
-    public static final int[][] gregorianEasters = {
+    public static final int[][] GREGORIAN_EASTERS = {
         
         {1954,4,18},
         {1991,3,31},
@@ -42,7 +42,7 @@ public class AstronomyTest {
 
     };
 
-    public static final int[][] solstices = {
+    public static final int[][] SOLSTICES = {
         
         {1962,6,21}, //,21,24},
         
@@ -61,13 +61,13 @@ public class AstronomyTest {
         
     };
     
-    public static final int[][] gregorian2jd = {
+    public static final int[][] GREGORIAN2JD = {
         
-        {2000,1,1, (int)Astronomy.jdn2000_01_01} //January 1, 2000 at midday corresponds to JD = 2451545
+        {2000,1,1, (int)Astronomy.JDN2000_01_01} //January 1, 2000 at midday corresponds to JD = 2451545
         
     };
     
-    public static final double[][] sunriseSunset = {
+    public static final double[][] SUNRISE_SUNSET = {
         
         // @Tallinn; Kutsukalender 2011
         {2011,1,2, 9-2,18, 15-2,32, -24.745278, 59.437222},
@@ -87,7 +87,7 @@ public class AstronomyTest {
 
     };
     
-    public static final int[][] moonphases = {
+    public static final int[][] MOONPHASES = {
         
         // Kutsukalender 2011
         
@@ -160,14 +160,14 @@ public class AstronomyTest {
     public String concatenate(int[] array,int len) {
         String y = "";
         for(int i = 0;i<Math.min(array.length,len);i++) {
-            y += (i==0?"":delimiter) + array[i];
+            y += (i==0?"":DELIMITER) + array[i];
         }
         return y;
     }
     
     public int[] eeSolstice(long year, short month) {
         
-        int[] calculation = Astronomy.JD2calendarDate(Astronomy.solstice(year,month));
+        int[] calculation = Astronomy.JD2calendarDate(Astronomy.solstice(year,month, true));
         int calcDate = (calculation[1]<<5)+calculation[2];
         int quarter = (int)Math.floor((calculation[1]-1)/3);
         int solMinDate = 20 + quarter;
@@ -189,11 +189,11 @@ public class AstronomyTest {
     @Test
     public void testGregorianEaster() {
         
-        for(int i=0; i<gregorianEasters.length; i++) {
+        for(int i=0; i<GREGORIAN_EASTERS.length; i++) {
 
-            String testRowS = concatenate( gregorianEasters[i] );
-            int[] astronomyRow = Astronomy.gregorianEaster( gregorianEasters[i][0] );
-            String astronomyRowS = gregorianEasters[i][0] +delimiter +concatenate( astronomyRow );
+            String testRowS = concatenate( GREGORIAN_EASTERS[i] );
+            int[] astronomyRow = Astronomy.gregorianEaster( GREGORIAN_EASTERS[i][0] );
+            String astronomyRowS = GREGORIAN_EASTERS[i][0] +DELIMITER +concatenate( astronomyRow );
             assertEquals("Wrong Gregorian Easter calculation (test no. "+i+")", testRowS, astronomyRowS);
 
         }
@@ -203,11 +203,11 @@ public class AstronomyTest {
     @Test
     public void testSolstice() {
         
-        for(int i=0; i<solstices.length; i++) {
+        for(int i=0; i<SOLSTICES.length; i++) {
             
-            String testRowS = concatenate( solstices[i] );
-            int[] astronomyRow = eeSolstice((long) solstices[i][0], (short) solstices[i][1]);
-            String astronomyRowS = concatenate(astronomyRow, solstices[i].length);
+            String testRowS = concatenate( SOLSTICES[i] );
+            int[] astronomyRow = eeSolstice((long) SOLSTICES[i][0], (short) SOLSTICES[i][1]);
+            String astronomyRowS = concatenate(astronomyRow, SOLSTICES[i].length);
             assertEquals("Wrong solstices calculation (test no. "+i+")", testRowS, astronomyRowS);
 
         }
@@ -217,10 +217,10 @@ public class AstronomyTest {
     @Test
     public void testgregorian2JDN() {
         
-        for(int i=0; i<gregorian2jd.length; i++) {
+        for(int i=0; i<GREGORIAN2JD.length; i++) {
             
-            assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", (int)gregorian2jd[i][3], 
-                    (int)Astronomy.gregorian2JDN(gregorian2jd[i][0], gregorian2jd[i][1], gregorian2jd[i][2]));
+            assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", (int)GREGORIAN2JD[i][3], 
+                    (int)Astronomy.gregorian2JDN(GREGORIAN2JD[i][0], GREGORIAN2JD[i][1], GREGORIAN2JD[i][2]));
 
         }
         
@@ -231,22 +231,22 @@ public class AstronomyTest {
         
         double allowedTimeDifference = 240; //seconds
         
-        for(int i=0; i<sunriseSunset.length; i++) {
+        for(int i=0; i<SUNRISE_SUNSET.length; i++) {
             
             HashMap<String,Double> results = Astronomy.gregorianSunrise(
-                    Astronomy.gregorian2JDN((int)sunriseSunset[i][0], (int)sunriseSunset[i][1], (int)sunriseSunset[i][2]), 
-                    sunriseSunset[i][7], sunriseSunset[i][8]
+                    Astronomy.gregorian2JDN((int)SUNRISE_SUNSET[i][0], (int)SUNRISE_SUNSET[i][1], (int)SUNRISE_SUNSET[i][2]), 
+                    SUNRISE_SUNSET[i][7], SUNRISE_SUNSET[i][8]
             );
             
             for(int j=3; j<7; j+=2) {
-                if(sunriseSunset[i][j] > -1 ) {
+                if(SUNRISE_SUNSET[i][j] > -1 ) {
                     
                     String eventName = (j==3) ? "Sunrise" : "Sunset";
-                    String rKey = (j==3) ? "Jrise" : "Jset";
+                    String rKey = (j==3) ? Astronomy.Keys.J_RISE : Astronomy.Keys.J_SET;
                     double testTime = -0.5 // JDN is at noon, not at midnight
-                        + Astronomy.gregorian2JDN((int)sunriseSunset[i][0], (int)sunriseSunset[i][1], (int)sunriseSunset[i][2])
-                        + (3600*sunriseSunset[i][j] + 60*sunriseSunset[i][j+1]) / Astronomy.secondsInDay;
-                    double diffSecs = Astronomy.secondsInDay * Math.abs(testTime - results.get(rKey));
+                        + Astronomy.gregorian2JDN((int)SUNRISE_SUNSET[i][0], (int)SUNRISE_SUNSET[i][1], (int)SUNRISE_SUNSET[i][2])
+                        + (3600*SUNRISE_SUNSET[i][j] + 60*SUNRISE_SUNSET[i][j+1]) / Astronomy.SECONDS_IN_DAY;
+                    double diffSecs = Astronomy.SECONDS_IN_DAY * Math.abs(testTime - results.get(rKey));
                     if(diffSecs > allowedTimeDifference) {
                         fail(eventName 
                                 + " calculation out of allowed range "
@@ -270,15 +270,15 @@ public class AstronomyTest {
         
         double allowedTimeDifference = 150; //seconds
         
-        for(int i=0; i<moonphases.length; i++) {
-            double actual = Astronomy.moonPhaseCorrected((long)moonphases[i][0], (short)(moonphases[i][1]), (short)moonphases[i][5]);
+        for(int i=0; i<MOONPHASES.length; i++) {
+            double actual = Astronomy.moonPhaseCorrected((long)MOONPHASES[i][0], (short)(MOONPHASES[i][1]), (short)MOONPHASES[i][5], true);
             double expected = -0.5 // JDN is at noon, not at midnight
-                + Astronomy.gregorian2JDN((int)moonphases[i][0], (int)moonphases[i][1], (int)moonphases[i][2])
-                + (3600*moonphases[i][3] + 60*moonphases[i][4]) / (double)Astronomy.secondsInDay;
-            double diffSecs = Astronomy.secondsInDay * Math.abs(expected - actual);
+                + Astronomy.gregorian2JDN((int)MOONPHASES[i][0], (int)MOONPHASES[i][1], (int)MOONPHASES[i][2])
+                + (3600*MOONPHASES[i][3] + 60*MOONPHASES[i][4]) / (double)Astronomy.SECONDS_IN_DAY;
+            double diffSecs = Astronomy.SECONDS_IN_DAY * Math.abs(expected - actual);
             if(diffSecs > allowedTimeDifference) {
                 fail("Moonphase "
-                        + moonphases[i][5]
+                        + MOONPHASES[i][5]
                         + " calculation out of allowed range "
                         + allowedTimeDifference
                         + " s (test no. "

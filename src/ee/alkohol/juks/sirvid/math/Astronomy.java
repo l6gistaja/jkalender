@@ -16,14 +16,14 @@ import java.util.HashMap;
 public class Astronomy {
     
     public static boolean dynamicTime = true;
-    public static final double[] monthDays = {31,28.25,31,30,31,30,31,31,30,31,30,31};
-    public static final double yearDays = 365.25;
-    public static final long unixEpochJD = 2440588;
-    public static final int secondsInDay = 86400;
-    public static final long jdn2000_01_01 = 2451545;
+    public static final double[] MONTH_DAYS = {31,28.25,31,30,31,30,31,31,30,31,30,31};
+    public static final double YEAR_DAYS = 365.25;
+    public static final long UNIX_EPOCH_JD = 2440588;
+    public static final int SECONDS_IN_DAY = 86400;
+    public static final long JDN2000_01_01 = 2451545;
 
 
-    public static final double[][] mfPlanetary = {
+    public static final double[][] MF_PLANETARY = {
         {299.77, 0.107408, 0.325},
         {251.88, 0.016321, 0.165},
         {251.83, 26.651886, 0.164},
@@ -40,7 +40,7 @@ public class Astronomy {
         {331.55, 3.592518, 0.023},
     };
 
-    public static final double[][] mfCorrectMul = {
+    public static final double[][] MF_CORRECT_MUL = {
         {-0.4072, -0.40614, -0.62801},
         {0.17241, 0.17302, 0.17172},
         {0.01608, 0.01614, -0.01183},
@@ -68,7 +68,7 @@ public class Astronomy {
         {0.00002, 0.00002, -0.00002}
     };
 
-    public static final short[][] mfCorrectEPow = {
+    public static final short[][] MF_CORRECT_POW = {
         {0, 0},
         {1, 1},
         {0, 1},
@@ -96,7 +96,7 @@ public class Astronomy {
         {0, 0}
     };
 
-    public static final double[][] solsticeJ = {
+    public static final double[][] SOLSTICE_J = {
         {1721139.29189, 365242.1374, 0.06134, 0.00111, -0.00071},
         {1721233.25401, 365241.72562, -0.05323, 0.00907, 0.00025},
         {1721325.70455, 365242.49558, -0.11677, -0.00297, 0.00074},
@@ -107,7 +107,7 @@ public class Astronomy {
         {2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032}
     };
 
-    public static final double[][] solsticeS = {
+    public static final double[][] SOLSTICE_S = {
         {485, 324.96, 1934.136},
         {203, 337.23, 32964.467},
         {199, 342.08, 20.186},
@@ -133,6 +133,11 @@ public class Astronomy {
         {9, 227.73, 1222.114},
         {8, 15.45, 16859.074}
     };
+    
+    public static final class Keys {
+        public static final String J_SET = "Jset";
+        public static final String J_RISE = "Jrise";
+    }
 
     /**
      * Gregorian Easter
@@ -221,10 +226,11 @@ public class Astronomy {
      * 
      * @param year
      * @param month
+     * @param dynamicTime
      * @return Julian Date of given solstice
      */
     
-    public static double solstice(long year, short month) {
+    public static double solstice(long year, short month, boolean dynamicTime) {
         
         short sol;
         double Y;
@@ -239,25 +245,25 @@ public class Astronomy {
         sol += Math.floor(month/3) -1;
         double Yp2 = Y*Y;
         
-        double JDE0 = solsticeJ[sol][0]
-            +solsticeJ[sol][1]*Y
-            +solsticeJ[sol][2]*Yp2
-            +solsticeJ[sol][3]*Yp2*Y
-            +solsticeJ[sol][4]*Yp2*Yp2;
+        double JDE0 = SOLSTICE_J[sol][0]
+            +SOLSTICE_J[sol][1]*Y
+            +SOLSTICE_J[sol][2]*Yp2
+            +SOLSTICE_J[sol][3]*Yp2*Y
+            +SOLSTICE_J[sol][4]*Yp2*Yp2;
         
-        double T = (JDE0 -jdn2000_01_01) / 36525;
+        double T = (JDE0 -JDN2000_01_01) / 36525;
         double W = 35999.373*T -2.47;
         double dL = 1 +.0334*Math.cos(deg2rad(W)) +.0007*Math.cos(deg2rad(2*W));
         
-        short cycleLen = (short)solsticeS.length;
+        short cycleLen = (short)SOLSTICE_S.length;
         short i;
         double S = 0;
         for(i=0; i<cycleLen; i++) {
-            S += solsticeS[i][0] *Math.cos(deg2rad(solsticeS[i][1] +solsticeS[i][2]*T));
+            S += SOLSTICE_S[i][0] *Math.cos(deg2rad(SOLSTICE_S[i][1] +SOLSTICE_S[i][2]*T));
         }
 
         double JDE = JDE0 + ((.00001*S) /dL);
-        double dT = getDT(JDE);
+        double dT = getDT(JDE, dynamicTime);
         return JDE -dT;
     }
 
@@ -269,11 +275,12 @@ public class Astronomy {
      * @param year
      * @param month
      * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
+     * @param dynamicTime
      * @return Julian Date of given phase
      * @see {@link #moonPhase(long, short, short)}
      */
     
-    public static double moonPhaseCorrected(long year, short month, short phase) {
+    public static double moonPhaseCorrected(long year, short month, short phase, boolean dynamicTime) {
         
         long desiredMonth = 12*year + month -1;
         long currentMonth = desiredMonth;
@@ -286,7 +293,7 @@ public class Astronomy {
         while(true) {
             if(ctl < 1) break;
             m = (short)(currentMonth%12);
-            moonF = moonPhase((long)((currentMonth-m) / 12), (short)(m+1), phase);
+            moonF = moonPhase((long)((currentMonth-m) / 12), (short)(m+1), phase, dynamicTime);
             moonFGregorian = Astronomy.JD2calendarDate(moonF);
             calculatedMonth = 12*moonFGregorian[0] + moonFGregorian[1] -1;
             if (desiredMonth == calculatedMonth) {
@@ -311,11 +318,12 @@ public class Astronomy {
      * @param year
      * @param month
      * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
+     * @param dynamicTime
      * @return nearest requested phase moment in Julian Date
      * @see <a href="http://www.webmasterworld.com/foo/3999789.htm">Moon Phases calculator in VBScript</a>
      */
     
-    public static double moonPhase(long year, short month, short phase) {
+    public static double moonPhase(long year, short month, short phase, boolean dynamicTime) {
         
         short cycleLen;
         short i;
@@ -368,7 +376,7 @@ public class Astronomy {
             +.00000215*Tp3);
         double W = 0;
 
-        cycleLen = (short)mfCorrectMul.length;
+        cycleLen = (short)MF_CORRECT_MUL.length;
         double correction = 0;
         
         if(phase == 0 || phase == 2) { // New or full moon
@@ -401,10 +409,10 @@ public class Astronomy {
                 4*M1
             };
             for(i=0; i<cycleLen; i++) {
-                temp = mfCorrectMul[i][correctionCol] *Math.sin(sr[i]);
-                if(mfCorrectEPow[i][0] == 1) {
+                temp = MF_CORRECT_MUL[i][correctionCol] *Math.sin(sr[i]);
+                if(MF_CORRECT_POW[i][0] == 1) {
                     temp *= E;
-                } else if(mfCorrectEPow[i][0] == 2) {
+                } else if(MF_CORRECT_POW[i][0] == 2) {
                     temp *= Ep2;
                 }
                 correction += temp;
@@ -438,10 +446,10 @@ public class Astronomy {
             3*M1+M
             };
             for(i=0; i<cycleLen; i++) {
-                temp = mfCorrectMul[i][2] *Math.sin(sr[i]);
-                if(mfCorrectEPow[i][1] == 1) {
+                temp = MF_CORRECT_MUL[i][2] *Math.sin(sr[i]);
+                if(MF_CORRECT_POW[i][1] == 1) {
                     temp *= E;
-                } else if(mfCorrectEPow[i][1] == 2) {
+                } else if(MF_CORRECT_POW[i][1] == 2) {
                     temp *= Ep2;
                 }
                 correction += temp;
@@ -456,17 +464,17 @@ public class Astronomy {
             if(phase == 3) { W = -W; }
         }
 
-        cycleLen = (short)mfPlanetary.length;
+        cycleLen = (short)MF_PLANETARY.length;
         temp = -.009173 *Tp2;
         double correctionPlanetary = 0;
         for(i=0; i<cycleLen; i++) {
-            temp += mfPlanetary[i][0] + mfPlanetary[i][1] * k;
-            correctionPlanetary +=  mfPlanetary[i][2]*Math.sin(deg2rad(temp));
+            temp += MF_PLANETARY[i][0] + MF_PLANETARY[i][1] * k;
+            correctionPlanetary +=  MF_PLANETARY[i][2]*Math.sin(deg2rad(temp));
             temp = 0;
         }
         correctionPlanetary /= 1000;
 
-        double dT = getDT(JDE +correction +correctionPlanetary +W);
+        double dT = getDT(JDE +correction +correctionPlanetary +W, dynamicTime);
         return JDE +correction +correctionPlanetary +W -dT;
     }
     
@@ -492,8 +500,8 @@ public class Astronomy {
         }
 
         int B = A +1524;
-        int C = (int)Math.floor((B -122.1)/yearDays);
-        int D = (int)Math.floor(yearDays*C);
+        int C = (int)Math.floor((B -122.1)/YEAR_DAYS);
+        int D = (int)Math.floor(YEAR_DAYS*C);
         int E = (int)Math.floor((B -D)/30.6001);
         int m = (E < 14) ? E -1 : E -13;
 
@@ -515,18 +523,19 @@ public class Astronomy {
         y[5] += (int)Math.round(F);
         return y;
     }
-
+    
     /**
      * Julian Date's dynamic time correction
      * 
      * @param JD Julian Date
+     * @param dynamicTime
      * @return correction
      */
     
-    public static double getDT(double JD) {
+    public static double getDT(double JD, boolean dynamicTime) {
         if(dynamicTime) {
             int[] jTime = JD2calendarDate(JD);
-            return JDE2UTdT((double)jTime[0] +yearFrac((short)jTime[1],jTime[2])) / secondsInDay;
+            return JDE2UTdT((double)jTime[0] +yearFrac((short)jTime[1],jTime[2])) / SECONDS_IN_DAY;
         } else {
             return 0;
         }
@@ -546,15 +555,15 @@ public class Astronomy {
         for(i=0; i<12; i++) {
             if(month == i+1) {
                 if(monthDay >= 0 && monthDay < 1) {
-                    y += monthDays[i] * monthDay;
+                    y += MONTH_DAYS[i] * monthDay;
                 } else { // hey, no babysitting here!
                     y += monthDay;
                 }
                 break;
             }
-            y += monthDays[i];
+            y += MONTH_DAYS[i];
         }
-        return y / yearDays;
+        return y / YEAR_DAYS;
     }
     
     /**
@@ -601,15 +610,15 @@ public class Astronomy {
     public static HashMap<String,Double> gregorianSunrise(double Jdate, double lw, double ln) {
         
         // Calculate current Julian Cycle
-        double np = Jdate -jdn2000_01_01 - 0.0009 - (lw/360);
+        double np = Jdate -JDN2000_01_01 - 0.0009 - (lw/360);
         double n = Math.round(np); // n is the Julian cycle since Jan 1st, 2000
         
         
         // Approximate Solar Noon
-        double Jp = jdn2000_01_01 + 0.0009  + (lw/360) + n; // an approximation of solar noon at lw
+        double Jp = JDN2000_01_01 + 0.0009  + (lw/360) + n; // an approximation of solar noon at lw
         
         // Solar Mean Anomaly
-        double M = 357.5291 + 0.98560028 * (Jp - jdn2000_01_01);
+        double M = 357.5291 + 0.98560028 * (Jp - JDN2000_01_01);
         M -= Math.floor(M/360)*360;
         
         // Equation of Center
@@ -630,7 +639,7 @@ public class Astronomy {
                 / ( Math.cos(deg2rad(ln)) * Math.cos(delta) ) );
         
         // Calculate Sunrise and Sunset
-        double Jpp  = jdn2000_01_01 + 0.0009 + ( ( (180*omega0/Math.PI) + lw) /360) + n;
+        double Jpp  = JDN2000_01_01 + 0.0009 + ( ( (180*omega0/Math.PI) + lw) /360) + n;
         double Jset = Jpp + (0.0053 *Math.sin(deg2rad(M))) - (0.0069 *Math.sin(deg2rad(2*lambda)));
         double Jrise = Jtransit - (Jset - Jtransit);
         
@@ -645,8 +654,8 @@ public class Astronomy {
         result.put("omega0", omega0);
         result.put("Jtransit", Jtransit);
         */
-        result.put("Jset", Jset);
-        result.put("Jrise", Jrise);
+        result.put(Keys.J_SET, Jset);
+        result.put(Keys.J_RISE, Jrise);
         return result;
     }
     

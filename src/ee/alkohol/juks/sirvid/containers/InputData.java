@@ -8,14 +8,28 @@ import java.util.TimeZone;
 
 public class InputData {
     
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    public static final String[] supportedTimespans = {"d","m","y"};
-    public static final String[] supportedOutputFormats = {""};
+    public static final class FLAGS {
+        public static final class PERIOD {
+            public static final String DAY = "d";
+            public static final String MONTH = "m";
+            public static final String YEAR = "y";
+        }
+        public static final class EVENTS {
+            public static final String NONE = "";
+            public static final String ALL_ESTONIAN = "e";
+            public static final String MAAVALLA = "m";
+        }
+    }
+    public static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    public static final String[] SUPPORTED_TIMESPANS = {FLAGS.PERIOD.DAY,FLAGS.PERIOD.MONTH,FLAGS.PERIOD.YEAR};
+    public static final String[] CALENDARDATA = {FLAGS.EVENTS.NONE,FLAGS.EVENTS.ALL_ESTONIAN,FLAGS.EVENTS.MAAVALLA};
+    public static final String[] SUPPORTED_OUTPUT_FORMATS = {"ics","xcs"};
     
-    public final String latitudeName = "Latitude";
-    public final String longitudeName = "Longitude";
-    public final String defaultTrue = "1";
+    public static final String LATITUDE_NAME = "Latitude";
+    public static final String LONGITUDE_NAME = "Longitude";
+    public static final String DEFAULT_TRUE = "1";
     
+    public String jbdcConnect = "jdbc:sqlite:data/kalender.sdb";
     public HashMap<String,String> criticalErrors;
     
     private Date date;
@@ -69,14 +83,14 @@ public class InputData {
         this.calculateSunrisesSunsets = isTrue(calculateSunrisesSunsets);
         if(isCalculateSunrisesSunsets()) {
             
-            String memberName = latitudeName;
+            String memberName = LATITUDE_NAME;
             if(!isInRange(latitude, -90, 90)) {
                 criticalErrors.put(memberName, latitude == null ? "(null)" : latitude.toString());
             } else {
                 criticalErrors.remove(memberName);
             }
             
-            memberName = longitudeName;
+            memberName = LONGITUDE_NAME;
             if(!isInRange(longitude, -180, 180)) {
                 criticalErrors.put(memberName, longitude == null ? "(null)" : longitude.toString());
             } else {
@@ -131,7 +145,7 @@ public class InputData {
     }
 
     public void setOutputFormat(String outputFormat) {
-        this.outputFormat = outputFormat!= null && Arrays.asList(supportedOutputFormats).contains(outputFormat) ? outputFormat : supportedOutputFormats[0];
+        this.outputFormat = outputFormat!= null && Arrays.asList(SUPPORTED_OUTPUT_FORMATS).contains(outputFormat) ? outputFormat : SUPPORTED_OUTPUT_FORMATS[0];
     }
 
     public String getTimespan() {
@@ -139,7 +153,7 @@ public class InputData {
     }
 
     public void setTimespan(String timespan) {
-        this.timespan = timespan!= null && Arrays.asList(supportedTimespans).contains(timespan) ? timespan : supportedTimespans[0];
+        this.timespan = timespan!= null && Arrays.asList(SUPPORTED_TIMESPANS).contains(timespan) ? timespan : SUPPORTED_TIMESPANS[0];
     }
 
     public String getTimezone() {
@@ -147,7 +161,7 @@ public class InputData {
     }
     
     public void setTimezone(String timezone) {
-        this.timezone = timezone != null && Arrays.asList(getAllAvailableTimezones()).contains(timezone) ? timezone : "GMT";
+        this.timezone = timezone != null && Arrays.asList(getAllAvailableTimezones()).contains(timezone) ? timezone : "Etc/GMT";
     }
     
     public Date getDate() {
@@ -161,7 +175,7 @@ public class InputData {
         }
         String memberName = fetchMemberName(Thread.currentThread().getStackTrace()[1].getMethodName());
         try {
-            this.date = dateFormat.parse(date);
+            this.date = DATEFORMAT.parse(date);
             criticalErrors.remove(memberName);
         } catch (Exception e) {
             criticalErrors.put(memberName,date);
@@ -174,7 +188,7 @@ public class InputData {
     
     public void initialize() {
         criticalErrors = new HashMap<String,String>();
-        //setDate(null);
+        setDate(null);
         setTimezone(null);
         setTimespan(null);
         setOutputFormat(null);
@@ -211,7 +225,7 @@ public class InputData {
         
         String delimiter = ";\n";
         String propertyDelimiter = "=";
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String[] mutableFields = {
                 "date",
                 "timezone",

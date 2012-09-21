@@ -14,12 +14,12 @@ public class InputDataTest {
     
     @Test public void setCalculateSunrisesSunsets() {
         
-        String[] coordinates = {inputData.latitudeName, inputData.longitudeName};
+        String[] coordinates = {InputData.LATITUDE_NAME, InputData.LONGITUDE_NAME};
         for(String memberName: coordinates) {
             assertTrue(memberName + " should NOT cause error, when sunrise/sunset calculation isn't needed.", !isError(memberName));
         }
         
-        inputData.setCalculateSunrisesSunsets(inputData.defaultTrue);
+        inputData.setCalculateSunrisesSunsets(InputData.DEFAULT_TRUE);
         
         for(String memberName: coordinates) {
             assertTrue("Null " + memberName + " should cause error.", isError(memberName));
@@ -30,7 +30,7 @@ public class InputDataTest {
     @Test public void setLatitudeLongitude() {
             
         java.lang.reflect.Method method;
-        String[] coordinates = {inputData.latitudeName, inputData.longitudeName};
+        String[] coordinates = {InputData.LATITUDE_NAME, InputData.LONGITUDE_NAME};
         
         try {
             
@@ -46,8 +46,8 @@ public class InputDataTest {
                 method.invoke(inputData, "-961");
                 assertTrue(methodName + ": Dont test range when sunrise/sunset calculation isn't needed:\n\n" + inputData.toString(), !isError(memberName));
                 
-                inputData.setCalculateSunrisesSunsets(inputData.defaultTrue);
-                double extreme = (memberName.equals(inputData.latitudeName)) ? 90 : 180;
+                inputData.setCalculateSunrisesSunsets(InputData.DEFAULT_TRUE);
+                double extreme = (memberName.equals(InputData.LATITUDE_NAME)) ? 90 : 180;
                 
                 double value = -(extreme + 0.1);
                 method.invoke(inputData, ""+value);

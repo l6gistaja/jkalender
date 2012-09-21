@@ -1,11 +1,16 @@
 package ee.alkohol.juks.sirvid.web;
 
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import ee.alkohol.juks.sirvid.containers.ICalculator;
 import ee.alkohol.juks.sirvid.containers.InputData;
 
 public class JKalender extends HttpServlet {
+
 
 @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -23,18 +28,21 @@ public class JKalender extends HttpServlet {
       inputData.setLatitude(request.getParameter("lat"));
       inputData.setLongitude(request.getParameter("lon"));
       inputData.setTimespan(request.getParameter("ts"));
+      //TODO: Should be autodetected
+      inputData.jbdcConnect = "jdbc:sqlite:C:/Users/pantj/workspace/jkalender/WebContent/data/kalender.sdb";
       
-    response.setContentType("text/html");
-    PrintWriter out = response.getWriter();
-    String docType =
-      "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " +
-      "Transitional//EN\">\n";
-    out.println(docType +
-                "<HTML>\n" +
-                "<HEAD><TITLE>Hello</TITLE></HEAD>\n" +
-                "<BODY BGCOLOR=\"#FDF5E6\">\n" +
-                "<H1>InputData</H1>\n" +
-                inputData.toString() +
-                "</BODY></HTML>");
+      ICalculator iCalc;
+      try {
+          iCalc = new ICalculator(inputData);
+          iCalc.initExport();
+          response.setContentType(iCalc.exporter.getMimeType() + "; charset=UTF-8");
+          PrintWriter out = response.getWriter();
+          out.println(iCalc.exporter.generate(iCalc.iCal));
+      } catch(Exception e) {
+          response.setContentType("text/plain; charset=UTF-8");
+          PrintWriter out = response.getWriter();
+          out.println("Error occured : \r\n\r\n\r\n" + e.getMessage());
+      }
+      
   }
 }
