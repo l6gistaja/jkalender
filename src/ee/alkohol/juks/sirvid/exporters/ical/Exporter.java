@@ -8,6 +8,7 @@ import ee.alkohol.juks.sirvid.containers.ICalendar;
 
 public abstract class Exporter {
     
+	public static final String FILENAME_PREFIX = "jkal_";
     ICalendar iCal;
     
     public String generate(ICalendar icalendar) {

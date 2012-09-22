@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import ee.alkohol.juks.sirvid.containers.ICalculator;
 import ee.alkohol.juks.sirvid.containers.InputData;
+import ee.alkohol.juks.sirvid.exporters.ical.Exporter;
 
 public class JKalender extends HttpServlet {
 
@@ -28,20 +29,29 @@ public class JKalender extends HttpServlet {
       inputData.setLatitude(request.getParameter("lat"));
       inputData.setLongitude(request.getParameter("lon"));
       inputData.setTimespan(request.getParameter("ts"));
+      inputData.setCalendarData(request.getParameter("ce"));
+      
       //TODO: Should be autodetected
-      inputData.jbdcConnect = "jdbc:sqlite:C:/Users/pantj/workspace/jkalender/WebContent/data/kalender.sdb";
+      //inputData.jbdcConnect = "jdbc:sqlite:C:/Users/pantj/workspace/jkalender/WebContent/data/kalender.sdb";
+      inputData.jbdcConnect = "jdbc:sqlite:/home/jux/eclipse-workspace/jkalender/data/kalender.sdb";
       
       ICalculator iCalc;
       try {
           iCalc = new ICalculator(inputData);
           iCalc.initExport();
           response.setContentType(iCalc.exporter.getMimeType() + "; charset=UTF-8");
+          if(request.getParameter("dl") != null && request.getParameter("dl").equals("1")) {
+        	  response.setHeader("Content-Disposition", "attachment; filename="
+        			  + Exporter.FILENAME_PREFIX
+        			  + iCalc.timespan
+        			  + iCalc.exporter.getFileExtension());
+          }
           PrintWriter out = response.getWriter();
           out.println(iCalc.exporter.generate(iCalc.iCal));
       } catch(Exception e) {
           response.setContentType("text/plain; charset=UTF-8");
           PrintWriter out = response.getWriter();
-          out.println("Error occured : \r\n\r\n\r\n" + e.getMessage());
+          e.printStackTrace(out);
       }
       
   }

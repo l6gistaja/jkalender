@@ -45,8 +45,21 @@ public class DaoKalenderJDBCSqlite {
         
     }
     
-    public ResultSet getAnniversaries() {
-        return fetchQueryResults("select * from events where id > 100 and id < 1232");
+    public ResultSet getAnniversaries(int start, int end, boolean maausk) {
+    	StringBuilder query = new StringBuilder("select * from events where ");
+    	if(start == end) {
+    		query.append("id = ");
+    		query.append(start);
+    	} else {
+    		query.append("id >= ");
+    		query.append(start);
+    		query.append(" and id <= ");
+    		query.append(end);
+    	}
+    	if(maausk) {
+    		query.append(" maausk is not null and trim(maausk) <> ''");
+    	}
+        return fetchQueryResults(query.toString());
     }
     
 }

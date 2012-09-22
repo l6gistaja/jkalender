@@ -14,7 +14,7 @@ public class InputData {
             public static final String MONTH = "m";
             public static final String YEAR = "y";
         }
-        public static final class EVENTS {
+        public static final class CALDATA {
             public static final String NONE = "";
             public static final String ALL_ESTONIAN = "e";
             public static final String MAAVALLA = "m";
@@ -22,7 +22,7 @@ public class InputData {
     }
     public static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
     public static final String[] SUPPORTED_TIMESPANS = {FLAGS.PERIOD.DAY,FLAGS.PERIOD.MONTH,FLAGS.PERIOD.YEAR};
-    public static final String[] CALENDARDATA = {FLAGS.EVENTS.NONE,FLAGS.EVENTS.ALL_ESTONIAN,FLAGS.EVENTS.MAAVALLA};
+    public static final String[] CALENDARDATA = {FLAGS.CALDATA.NONE,FLAGS.CALDATA.ALL_ESTONIAN,FLAGS.CALDATA.MAAVALLA};
     public static final String[] SUPPORTED_OUTPUT_FORMATS = {"ics","xcs"};
     
     public static final String LATITUDE_NAME = "Latitude";
@@ -44,8 +44,17 @@ public class InputData {
     private boolean calculateJulianEaster = false;
     private Double latitude;
     private Double longitude;
+    private String calendarData;
     
-    public Double getLongitude() {
+    public String getCalendarData() {
+		return calendarData;
+	}
+
+	public void setCalendarData(String calendarData) {
+		this.calendarData = calendarData!= null && Arrays.asList(CALENDARDATA).contains(calendarData) ? calendarData : CALENDARDATA[0];
+	}
+
+	public Double getLongitude() {
         return longitude;
     }
 

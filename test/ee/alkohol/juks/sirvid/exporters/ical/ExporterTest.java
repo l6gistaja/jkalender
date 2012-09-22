@@ -23,7 +23,8 @@ public class ExporterTest {
         inputData.setCalculateJulianEaster(InputData.DEFAULT_TRUE);
         inputData.setLatitude("0");
         inputData.setLongitude("0");
-        inputData.setTimespan("d");
+        inputData.setTimespan(InputData.FLAGS.PERIOD.YEAR);
+        inputData.setCalendarData(InputData.FLAGS.CALDATA.ALL_ESTONIAN);
         
         for(String outputFormat: InputData.SUPPORTED_OUTPUT_FORMATS) {
             inputData.setOutputFormat(outputFormat);
