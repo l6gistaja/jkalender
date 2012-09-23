@@ -9,5 +9,4 @@ import org.junit.runners.Suite;
     ee.alkohol.juks.sirvid.containers.InputDataTest.class,
     ee.alkohol.juks.sirvid.exporters.ical.ExporterTest.class
 })
-public class AllTests {
-} 
+public class AllTests {} 

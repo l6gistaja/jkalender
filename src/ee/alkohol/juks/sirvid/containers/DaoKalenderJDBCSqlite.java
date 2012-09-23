@@ -57,7 +57,7 @@ public class DaoKalenderJDBCSqlite {
     		query.append(end);
     	}
     	if(maausk) {
-    		query.append(" maausk is not null and trim(maausk) <> ''");
+    		query.append(" and maausk is not null and trim(maausk) <> ''");
     	}
         return fetchQueryResults(query.toString());
     }
