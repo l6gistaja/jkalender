@@ -8,6 +8,7 @@ public class ICalEvent {
         public static final int UNDEFINED = -1;
         public static final int SUNRISE = -2;
         public static final int SUNSET = -3;
+        public static final int SOLISTICE = 20;
     }
     
     public int dbID = DBID_STATUSES.UNDEFINED;

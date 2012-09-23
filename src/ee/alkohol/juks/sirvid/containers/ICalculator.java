@@ -109,6 +109,27 @@ public class ICalculator {
         	
         }
         
+        /*
+        if(inputData.isCalculateSolistices()) {
+        	ArrayList<int[]> sol = new ArrayList<int[]>();
+        	if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.YEAR)) {
+        		for(int m = 3; m < 13; m+=3) {
+        			sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), (short)m, inputData.isUseDynamicTime())));
+        		}
+        		ICalEvent event = new ICalEvent();
+                event.dbID = ;
+                event.properties.put(Keys.SUMMARY, new ICalProperty("\u1F728", null));
+                event.properties.put(Keys.UID, 
+                        new ICalProperty("date_" + sg[0] + "-" + sg[1] + "-" + sg[2] + "_" + iCal.generateUID(""+event.dbID), null));
+                event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
+                event.allDayEvent = false;
+                iCal.vEvent.add(event);
+        	}
+        	
+        }
+        */
+        
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection == null) { return; }
         
