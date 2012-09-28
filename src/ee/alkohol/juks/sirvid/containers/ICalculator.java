@@ -22,6 +22,41 @@ public class ICalculator {
     public ArrayList<String> errorMsgs;
     public String timespan;
     
+    public static enum DbIdStatuses {
+        
+        UNDEFINED (-1, ""),
+        MOON_NEW_M2(10,"\u25cf -2d"),
+        MOON_NEW(11,"\u25cf"),
+        MOON_NEW_P2(12,"\u25cf +2d"),
+        MOON_1ST(13,"\u263d"),
+        MOON_FULL_M2(14,"\u25ef -2d"),
+        MOON_FULL(15,"\u25ef"),
+        MOON_FULL_P2(16,"\u25ef +2d"),
+        MOON_LAST(17,"\u263e"),
+        SOLSTICE(20,"\u2609"),
+        SUNRISE(30,"\u263c"),
+        SUNSET(31,"\u2600");
+
+        private int dbId;
+        private String name;
+        
+        public int getDbId() {
+            return dbId;
+        }
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+        
+        DbIdStatuses(int dbId, String name) {
+            this.dbId = dbId;
+            this.name = name;
+        }
+
+    }
+    
     public ICalculator(InputData inputData) throws SQLException {
         
         this.inputData = inputData;
@@ -72,8 +107,8 @@ public class ICalculator {
         	int nextDate;
         	String coordinates = "" + inputData.getLatitude() + ";" + inputData.getLongitude();
         	String[] driverData = {
-                    Astronomy.Keys.J_RISE, "\u263c",
-                    Astronomy.Keys.J_SET, "\u2600"
+                    Astronomy.Keys.J_RISE, DbIdStatuses.SUNRISE.getName(),
+                    Astronomy.Keys.J_SET, DbIdStatuses.SUNSET.getName()
             };
         	
         	while(true) {
@@ -91,8 +126,8 @@ public class ICalculator {
                     
                     ICalEvent event = new ICalEvent();
                     event.dbID = driverData[i].equals(Astronomy.Keys.J_RISE) 
-                            ? ICalEvent.DBID_STATUSES.SUNRISE
-                            : ICalEvent.DBID_STATUSES.SUNSET;
+                            ? DbIdStatuses.SUNRISE.getDbId()
+                            : DbIdStatuses.SUNSET.getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(driverData[i+1], null));
                     event.properties.put(Keys.UID, 
                             new ICalProperty("date_" + sg[0] + "-" + sg[1] + "-" + sg[2] + "_" + iCal.generateUID(""+event.dbID), null));

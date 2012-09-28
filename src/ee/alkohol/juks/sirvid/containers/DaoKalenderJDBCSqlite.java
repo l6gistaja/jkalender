@@ -62,4 +62,10 @@ public class DaoKalenderJDBCSqlite {
         return fetchQueryResults(query.toString());
     }
     
+    public ResultSet getEventTranslations(String eventDbIds) {
+        StringBuilder query = new StringBuilder("select dbid, name from runes where dbid in (");
+        query.append(eventDbIds);
+        query.append(")");
+        return fetchQueryResults(query.toString());
+    }
 }
