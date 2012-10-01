@@ -25,17 +25,18 @@ public class ICalculator {
     public static enum DbIdStatuses {
         
         UNDEFINED (-1, ""),
-        MOON_NEW_M2(10,"\u25cf -2d"),
-        MOON_NEW(11,"\u25cf"),
-        MOON_NEW_P2(12,"\u25cf +2d"),
-        MOON_1ST(13,"\u263d"),
-        MOON_FULL_M2(14,"\u25ef -2d"),
-        MOON_FULL(15,"\u25ef"),
-        MOON_FULL_P2(16,"\u25ef +2d"),
-        MOON_LAST(17,"\u263e"),
-        SOLSTICE(20,"\u2609"),
-        SUNRISE(30,"\u263c"),
-        SUNSET(31,"\u2600");
+        MOON_NEW_M2 (10, "\u25cf -2d"),
+        MOON_NEW (11, "\u25cf"),
+        MOON_NEW_P2 (12, "\u25cf +2d"),
+        MOON_1ST (13, "\u263d"),
+        MOON_FULL_M2 (14, "\u25ef -2d"),
+        MOON_FULL (15, "\u25ef"),
+        MOON_FULL_P2 (16, "\u25ef +2d"),
+        MOON_LAST (17, "\u263e"),
+        SOLSTICE (20, "\u2609"),
+        SUNRISE (30, "\u263c"),
+        SUNSET (31, "\u2600"),
+        LEAPDAY (229, "");
 
         private int dbId;
         private String name;
@@ -101,14 +102,24 @@ public class ICalculator {
         // initialize DB connection
         DaoKalenderJDBCSqlite CalendarDAO = new DaoKalenderJDBCSqlite(inputData.jbdcConnect);
         
+        HashMap<String,String> eventTranslations = new HashMap<String,String> ();
+        if(CalendarDAO.dbConnection == null) {
+            ResultSet eventTrRS = CalendarDAO.getEventTranslations();
+            while(eventTrRS.next()) { eventTranslations.put(eventTrRS.getString("dbid"), eventTrRS.getString("name")); }
+        }
+        for (DbIdStatuses dbids : DbIdStatuses.values()) {
+            String dbKey = "" + dbids.getDbId();
+            if(eventTranslations.get(dbKey) == null) { eventTranslations.put(dbKey, dbids.getName()); }
+        }
+        
         // sunsets and sunrises
         if(inputData.isCalculateSunrisesSunsets()) {
             
         	int nextDate;
         	String coordinates = "" + inputData.getLatitude() + ";" + inputData.getLongitude();
         	String[] driverData = {
-                    Astronomy.Keys.J_RISE, DbIdStatuses.SUNRISE.getName(),
-                    Astronomy.Keys.J_SET, DbIdStatuses.SUNSET.getName()
+                    Astronomy.Keys.J_RISE, eventTranslations.get("" +DbIdStatuses.SUNRISE.getDbId()),
+                    Astronomy.Keys.J_SET, eventTranslations.get("" +DbIdStatuses.SUNSET.getDbId())
             };
         	
         	while(true) {
@@ -183,7 +194,7 @@ public class ICalculator {
 	            while(anniversaries.next())
 	            {
 	              int dbID = anniversaries.getInt("id");
-	              if(dbID == 229 && !isLeapYear) { continue; }
+	              if(dbID == DbIdStatuses.LEAPDAY.getDbId() && !isLeapYear) { continue; }
 	              
 	              ICalEvent event = new ICalEvent();
 	              event.dbID = dbID;
@@ -195,7 +206,7 @@ public class ICalculator {
 	              if(isNotEmptyStr(descr)) {
 	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
 	              }
-	              if(dbID != 229) {
+	              if(dbID != DbIdStatuses.LEAPDAY.getDbId()) {
 	                  event.properties.put(Keys.RECURRENCE_RULE, new ICalProperty("FREQ=YEARLY", null));
 	              }
 	              
