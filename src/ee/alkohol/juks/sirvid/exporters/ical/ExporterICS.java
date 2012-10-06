@@ -20,28 +20,28 @@ public class ExporterICS extends Exporter{
         }
         sb.append(":");
         sb.append(formatOutput(iCalProp));
-        sb.append("\r\n");
+        sb.append("\n");
         return sb.toString();
     }
 
     @Override
     public String beginBody() {
-        return "BEGIN:VCALENDAR\r\n";
+        return "BEGIN:VCALENDAR\n";
     }
 
     @Override
     public String endBody() {
-        return "END:VCALENDAR\r\n";
+        return "END:VCALENDAR\n";
     }
 
     @Override
     public String beginEvent() {
-        return "BEGIN:VEVENT\r\n";
+        return "BEGIN:VEVENT\n";
     }
 
     @Override
     public String endEvent() {
-        return "END:VEVENT\r\n";
+        return "END:VEVENT\n";
     }
 
     @Override

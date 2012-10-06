@@ -96,16 +96,18 @@ public class ICalculator {
         // initialize calendar container
         LinkedHashMap<String,ICalProperty> initData = new LinkedHashMap<String,ICalProperty>();
         initData.put(Keys.CALENDAR_NAME, new ICalProperty("JKalender " + this.timespan, null));
-        initData.put(Keys.CALENDAR_TIMEZONE, new ICalProperty(inputData.getTimezone(), null));       
+        initData.put(Keys.CALENDAR_TIMEZONE, new ICalProperty(inputData.getTimezone(), null));
         iCal = new ICalendar(initData);
         
         // initialize DB connection
         DaoKalenderJDBCSqlite CalendarDAO = new DaoKalenderJDBCSqlite(inputData.jbdcConnect);
         
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
-        if(CalendarDAO.dbConnection == null) {
+        if(CalendarDAO.dbConnection != null) {
             ResultSet eventTrRS = CalendarDAO.getEventTranslations();
-            while(eventTrRS.next()) { eventTranslations.put(eventTrRS.getString("dbid"), eventTrRS.getString("name")); }
+            while(eventTrRS.next()) { 
+            	eventTranslations.put(eventTrRS.getString("dbid"), eventTrRS.getString("name"));
+            }
         }
         for (DbIdStatuses dbids : DbIdStatuses.values()) {
             String dbKey = "" + dbids.getDbId();

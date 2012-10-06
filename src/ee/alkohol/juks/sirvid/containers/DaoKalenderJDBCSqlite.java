@@ -10,13 +10,13 @@ public class DaoKalenderJDBCSqlite {
     
     public Connection dbConnection;
     public String errorMsg;
-    public String jdbcConnect;
+    public String jdbcConnect = "data/kalender.sdb";
     
     public DaoKalenderJDBCSqlite(String jdbcc) {
         
         dbConnection = null;
         errorMsg = null;
-        jdbcConnect = jdbcc;
+        if(jdbcc != null) { jdbcConnect = jdbcc; }
         
         try {
             Class.forName("org.sqlite.JDBC");

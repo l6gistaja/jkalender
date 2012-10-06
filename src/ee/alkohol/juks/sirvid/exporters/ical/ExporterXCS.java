@@ -25,28 +25,28 @@ public class ExporterXCS extends Exporter{
         sb.append("</");
         sb.append(key.toLowerCase());
         sb.append(">");
-        sb.append("\r\n");
+        sb.append("\n");
         return sb.toString();
     }
 
     @Override
     public String beginBody() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<iCalendar>\r\n<vcalendar>\r\n";
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<iCalendar>\n<vcalendar>\n";
     }
 
     @Override
     public String endBody() {
-        return "</vcalendar>\r\n</iCalendar>\r\n";
+        return "</vcalendar>\n</iCalendar>\n";
     }
 
     @Override
     public String beginEvent() {
-        return "<vevent>\r\n";
+        return "<vevent>\n";
     }
 
     @Override
     public String endEvent() {
-        return "</vevent>\r\n";
+        return "</vevent>\n";
     }
 
     @Override

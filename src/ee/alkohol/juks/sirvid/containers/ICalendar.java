@@ -25,6 +25,7 @@ public class ICalendar {
         public static final String EVENT_END  = "dtend";
         public static final String VALUE  = "value";
         public static final String GEOGRAPHIC_COORDINATES  = "geo";
+        public static final String ICAL_VERSION  = "version";
     }
     
     public static final class Values {
@@ -44,6 +45,7 @@ public class ICalendar {
     public ICalendar(LinkedHashMap<String,ICalProperty> initData) {
         iCalBody.put(Keys.CALENDAR_TYPE, new ICalProperty("GREGORIAN",null));
         iCalBody.put(Keys.PRODUCT_ID, new ICalProperty("-//" + ID_SITE + "//NONSGML Java (sirvi)kalender//ET", null));
+        iCalBody.put(Keys.ICAL_VERSION, new ICalProperty("2.0", null));
         if(initData != null) { iCalBody.putAll(initData); }
     }
     
