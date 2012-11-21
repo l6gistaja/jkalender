@@ -5,8 +5,11 @@ import ee.alkohol.juks.sirvid.containers.ICalProperty;
 
 public class ExporterICS extends Exporter{
     
-    private String fileExtension = ".ics";
-    private String mimeType = "text/calendar";
+    public ExporterICS () {
+        super();
+        this.setFileExtension(".ics");
+        this.setMimeType("text/calendar");
+    }
     
     @Override
     public String generateProperty(String key, ICalProperty iCalProp) {
@@ -43,16 +46,5 @@ public class ExporterICS extends Exporter{
     public String endEvent() {
         return "END:VEVENT\n";
     }
-
-    @Override
-    public String getFileExtension() {
-        return fileExtension;
-    }
-
-    @Override
-    public String getMimeType() {
-        return mimeType;
-    }
-    
 
 }

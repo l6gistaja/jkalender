@@ -5,8 +5,11 @@ import ee.alkohol.juks.sirvid.containers.ICalProperty;
 
 public class ExporterXCS extends Exporter{
     
-    private String FILE_EXTENSION = ".xcs";
-    private String mimeType = "text/xml";
+    public ExporterXCS () {
+        super();
+        this.setFileExtension(".xcs");
+        this.setMimeType("text/xml");
+    }
     
     @Override
     public String generateProperty(String key, ICalProperty iCalProp) {
@@ -48,16 +51,5 @@ public class ExporterXCS extends Exporter{
     public String endEvent() {
         return "</vevent>\n";
     }
-
-    @Override
-    public String getFileExtension() {
-        return FILE_EXTENSION;
-    }
-
-    @Override
-    public String getMimeType() {
-        return mimeType;
-    }
-    
 
 }

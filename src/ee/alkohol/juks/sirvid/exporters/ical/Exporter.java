@@ -9,7 +9,12 @@ import ee.alkohol.juks.sirvid.containers.ICalendar;
 public abstract class Exporter {
     
 	public static final String FILENAME_PREFIX = "jkal_";
-    ICalendar iCal;
+    
+	ICalendar iCal;
+    private String fileExtension;
+    private String mimeType;
+
+    public Exporter() {}
     
     public String generate(ICalendar icalendar) {
         
@@ -42,8 +47,6 @@ public abstract class Exporter {
     abstract public String beginEvent();
     abstract public String endEvent();
     abstract public String generateProperty(String key, ICalProperty iCalProp);
-    abstract public String getFileExtension();
-    abstract public String getMimeType();
 
     
     public static String formatOutput(ICalProperty prop) {
@@ -62,6 +65,22 @@ public abstract class Exporter {
             return propVal.toString();
         }
         return "";
+    }
+    
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+    
+    public void setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
     }
     
 }

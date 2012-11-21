@@ -36,8 +36,13 @@ public class ExporterTest {
                 if(output == null || output.trim().equals("")) {
                     fail(outputFormat +" format output is null or empty.");
                 }
+                
+                if(!iCalc.exporter.getFileExtension().equalsIgnoreCase("."+outputFormat)) { 
+                    fail(outputFormat +" fileextension unset."); 
+                }
             }
             catch(Exception e) {
+                e.printStackTrace();
                 fail("Generating "+outputFormat +" format throwed exception: " + e.getMessage());
             }
             
