@@ -33,7 +33,7 @@ public class ICalculator {
         MOON_FULL (15, "\u25ef"),
         MOON_FULL_P2 (16, "\u25ef +2d"),
         MOON_LAST (17, "\u263e"),
-        SOLSTICE (20, "\u2609"),
+        SOLSTICE (20, "\u2295"),
         SUNRISE (30, "\u263c"),
         SUNSET (31, "\u2600"),
         LEAPDAY (229, "");
@@ -124,6 +124,10 @@ public class ICalculator {
                     Astronomy.Keys.J_SET, eventTranslations.get("" +DbIdStatuses.SUNSET.getDbId())
             };
         	
+        	iCal.vVenue = new LinkedHashMap<String,ICalProperty>();
+        	iCal.vVenue.put(Keys.UID, new ICalProperty("lat_" + inputData.getLatitude()+ "-lon_" + inputData.getLongitude() + "@" + iCal.ID_SITE, null));
+        	iCal.vVenue.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
+        	
         	while(true) {
                 
                 HashMap<String,Double> results = Astronomy.gregorianSunrise(
@@ -145,7 +149,8 @@ public class ICalculator {
                     event.properties.put(Keys.UID, 
                             new ICalProperty("date_" + sg[0] + "-" + sg[1] + "-" + sg[2] + "_" + iCal.generateUID(""+event.dbID), null));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                    event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
+                    // use VVENUE component instead
+                    //event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
                     event.allDayEvent = false;
                     iCal.vEvent.add(event);
                 }
@@ -157,26 +162,32 @@ public class ICalculator {
         	
         }
         
-        /*
+        // solstices
         if(inputData.isCalculateSolistices()) {
         	ArrayList<int[]> sol = new ArrayList<int[]>();
         	if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.YEAR)) {
-        		for(int m = 3; m < 13; m+=3) {
-        			sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), (short)m, inputData.isUseDynamicTime())));
+        		for(short m = 3; m < 13; m+=3) {
+        			sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
         		}
-        		ICalEvent event = new ICalEvent();
-                event.dbID = ;
-                event.properties.put(Keys.SUMMARY, new ICalProperty("\u1F728", null));
-                event.properties.put(Keys.UID, 
-                        new ICalProperty("date_" + sg[0] + "-" + sg[1] + "-" + sg[2] + "_" + iCal.generateUID(""+event.dbID), null));
-                event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
+        	} else {
+        	    short m = (short)(1 + cal.get(Calendar.MONTH));
+        	    if(m > 2 && (m % 3 == 0)) {
+        	        sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
+        	    }
+        	}
+        	String solsticeLabel = eventTranslations.get("" +DbIdStatuses.SOLSTICE.getDbId());
+        	for(int[] solistice : sol) {
+        	    GregorianCalendar solCal = new GregorianCalendar();
+                solCal.set(solistice[0], solistice[1]-1, solistice[2], solistice[3], solistice[4], solistice[5]);
+                ICalEvent event = new ICalEvent();
+                event.dbID = DbIdStatuses.SOLSTICE.getDbId();
+                event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, null));
+                event.properties.put(Keys.UID, new ICalProperty("mon_" + solistice[0] + "-" + solistice[1] + "_" + iCal.generateUID(""+event.dbID), null));
+                event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                 event.allDayEvent = false;
                 iCal.vEvent.add(event);
         	}
-        	
         }
-        */
         
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection == null) { return; }
@@ -208,9 +219,8 @@ public class ICalculator {
 	              if(isNotEmptyStr(descr)) {
 	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
 	              }
-	              if(dbID != DbIdStatuses.LEAPDAY.getDbId()) {
-	                  event.properties.put(Keys.RECURRENCE_RULE, new ICalProperty("FREQ=YEARLY", null));
-	              }
+	              // obvious
+	              //if(dbID != DbIdStatuses.LEAPDAY.getDbId()) { event.properties.put("rrule", new ICalProperty("FREQ=YEARLY", null));}
 	              
 	              iCal.vEvent.add(event);
 	            }

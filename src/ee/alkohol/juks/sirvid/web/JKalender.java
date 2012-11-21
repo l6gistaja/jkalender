@@ -33,7 +33,7 @@ public class JKalender extends HttpServlet {
       
       //TODO: Should be autodetected
       //inputData.jbdcConnect = "jdbc:sqlite:C:/Users/pantj/workspace/jkalender/data/kalender.sdb";
-      inputData.jbdcConnect = "jdbc:sqlite:/home/jux/eclipse-workspace/jkalender/data/kalender.sdb";
+      //inputData.jbdcConnect = "jdbc:sqlite:/home/jux/eclipse-workspace/jkalender/data/kalender.sdb";
       
       ICalculator iCalc;
       try {

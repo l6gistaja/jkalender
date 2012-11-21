@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class ICalendar {
     
     // Constants
-    public static final String ID_SITE = "juks.alkohol.ee";
+    public final String ID_SITE = "juks.alkohol.ee";
     
     public static final String SDF_DATE = "yyyyMMdd";
     public static final String SDF_DATETIME = "yyyyMMdd'T'HHmmss'Z'";
@@ -18,7 +18,6 @@ public class ICalendar {
         public static final String CALENDAR_TIMEZONE  = "x-wr-timezone";
         public static final String SUMMARY  = "summary";
         public static final String UID  = "uid";
-        public static final String RECURRENCE_RULE  = "rrule";
         public static final String DESCRIPTION  = "description";
         public static final String LANGUAGE  = "language";
         public static final String EVENT_START  = "dtstart";
@@ -37,6 +36,7 @@ public class ICalendar {
     
     public LinkedHashMap<String,ICalProperty> iCalBody = new LinkedHashMap<String,ICalProperty>();
     public LinkedList<ICalEvent> vEvent = new LinkedList<ICalEvent>();
+    public LinkedHashMap<String,ICalProperty> vVenue;
     
     // etc
     
