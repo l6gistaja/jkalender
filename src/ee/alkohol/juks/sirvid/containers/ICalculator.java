@@ -15,7 +15,6 @@ import ee.alkohol.juks.sirvid.math.Astronomy;
 public class ICalculator {
     
     public final static String[] LANG = {Keys.LANGUAGE, "ET"};
-    public final static String UIDDATE = "%d%02d%02d";
     
     public InputData inputData;
     public ICalendar iCal;
@@ -149,7 +148,7 @@ public class ICalculator {
                     event.properties.put(Keys.SUMMARY, new ICalProperty(driverData[i+1], null));
                     event.properties.put(Keys.UID, 
                             new ICalProperty("d_" + 
-                            		String.format(UIDDATE,
+                            		String.format("%d%02d%02d",
                             					sg[0],
                             					sg[1],
                             					sg[2])
@@ -188,7 +187,7 @@ public class ICalculator {
                 ICalEvent event = new ICalEvent();
                 event.dbID = DbIdStatuses.SOLSTICE.getDbId();
                 event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, null));
-                event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + "-" + solistice[1] + iCal.generateUID(event.dbID), null));
+                event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + iCal.generateUID(event.dbID), null));
                 event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                 event.allDayEvent = false;
                 iCal.vEvent.add(event);
