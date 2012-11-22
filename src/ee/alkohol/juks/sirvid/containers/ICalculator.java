@@ -189,7 +189,7 @@ public class ICalculator {
                 ICalEvent event = new ICalEvent();
                 event.dbID = DbIdStatuses.SOLSTICE.getDbId();
                 event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, null));
-                event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + iCal.generateUID(event.dbID), null));
+                event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID), null));
                 event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                 event.allDayEvent = false;
                 iCal.vEvent.add(event);

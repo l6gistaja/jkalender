@@ -4,6 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
       http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+      
   <servlet>
     <servlet-name>JKalender</servlet-name>
     <servlet-class>ee.alkohol.juks.sirvid.web.JKalender</servlet-class>
@@ -12,4 +13,14 @@
     <servlet-name>JKalender</servlet-name>
     <url-pattern>/jkalender</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>AjaxData</servlet-name>
+    <servlet-class>ee.alkohol.juks.sirvid.web.AjaxData</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AjaxData</servlet-name>
+    <url-pattern>/ajaxdata</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

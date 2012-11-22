@@ -85,10 +85,32 @@ function initialize(){
   });
         
 }
+
+function populateTz(xml)
+{
+  var select = document.getElementById("tz");
+  $(xml).find("z").each(function()
+  {
+    var el = document.createElement("option");
+    el.textContent = $(this).text();
+    el.value = $(this).text();
+    if($(this).text() == "Europe/Tallinn") {
+        el.selected = true;
+    }
+    select.appendChild(el);
+  });
+}
         
 $(document).ready(function() { 
          
   initialize();
+  
+	$.ajax({
+		type: "GET",
+		url: "ajaxdata?type=available_timezones&onlyplaces=1",
+		dataType: "xml",
+		success: populateTz
+	});
                   
   $(function() {
     $("#address").autocomplete({
