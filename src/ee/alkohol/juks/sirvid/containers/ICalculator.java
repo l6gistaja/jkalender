@@ -196,6 +196,20 @@ public class ICalculator {
         	}
         }
         
+        
+        short m0, m1;
+        // moonphases
+        if(inputData.isCalculateMoonphases()) {
+            ArrayList<int[]> moonPhases = new ArrayList<int[]>();
+            if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.YEAR)) {
+                m0 = 1;
+                m1 = 13;
+            } else {
+                m0 = (short)(cal.get(Calendar.MONTH) + 1);
+                m1 = (short)(m0 + 1);
+            }
+        }
+        
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection != null) { 
             
