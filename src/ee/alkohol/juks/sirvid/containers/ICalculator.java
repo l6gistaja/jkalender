@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,6 +62,7 @@ public class ICalculator {
     public ICalculator(InputData inputData) throws SQLException {
         
         this.inputData = inputData;
+        Date t0 = new Date();
         
         // initialize current time
         GregorianCalendar cal = new GregorianCalendar();
@@ -195,43 +197,47 @@ public class ICalculator {
         }
         
         // nothing to do further, if there is no DB connection
-        if(CalendarDAO.dbConnection == null) { return; }
-        
-        // if calendar dates are required
-        if(!inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE)) {
-        	
-	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
-	        	? new String[]{"maausk"}
-	        	: new String[]{"event","maausk"};
-	        String nameDelimiter = "; ";
-	        
-	        // anniversaries
-	        ResultSet anniversaries = CalendarDAO.getAnniversaries(periodStart%10000, periodEnd%10000,
-	        		inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
-	        if(anniversaries != null) {
-	            while(anniversaries.next())
-	            {
-	              int dbID = anniversaries.getInt("id");
-	              if(dbID == DbIdStatuses.LEAPDAY.getDbId() && !isLeapYear) { continue; }
-	              
-	              ICalEvent event = new ICalEvent();
-	              event.dbID = dbID;
-	              
-	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateEstonianDayName(anniversaries, nameFields, nameDelimiter), LANG));
-	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
-	              event.properties.putAll(generateAllDayEvent(cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100));
-	              String descr = anniversaries.getString("more");
-	              if(isNotEmptyStr(descr)) {
-	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
-	              }
-	              // obvious
-	              //if(dbID != DbIdStatuses.LEAPDAY.getDbId()) { event.properties.put("rrule", new ICalProperty("FREQ=YEARLY", null));}
-	              
-	              iCal.vEvent.add(event);
-	            }
-	        }
-        
+        if(CalendarDAO.dbConnection != null) { 
+            
+            // if calendar dates are required
+            if(!inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE)) {
+            	
+    	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
+    	        	? new String[]{"maausk"}
+    	        	: new String[]{"event","maausk"};
+    	        String nameDelimiter = "; ";
+    	        
+    	        // anniversaries
+    	        ResultSet anniversaries = CalendarDAO.getAnniversaries(periodStart%10000, periodEnd%10000,
+    	        		inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+    	        if(anniversaries != null) {
+    	            while(anniversaries.next())
+    	            {
+    	              int dbID = anniversaries.getInt("id");
+    	              if(dbID == DbIdStatuses.LEAPDAY.getDbId() && !isLeapYear) { continue; }
+    	              
+    	              ICalEvent event = new ICalEvent();
+    	              event.dbID = dbID;
+    	              
+    	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateEstonianDayName(anniversaries, nameFields, nameDelimiter), LANG));
+    	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
+    	              event.properties.putAll(generateAllDayEvent(cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100));
+    	              String descr = anniversaries.getString("more");
+    	              if(isNotEmptyStr(descr)) {
+    	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
+    	              }
+    	              // obvious
+    	              //if(dbID != DbIdStatuses.LEAPDAY.getDbId()) { event.properties.put("rrule", new ICalProperty("FREQ=YEARLY", null));}
+    	              
+    	              iCal.vEvent.add(event);
+    	            }
+    	        }
+            
+            }
         }
+        
+        Date t1 = new Date();
+        iCal.iCalBody.put(Keys.GENERATION_TIME, new ICalProperty(t1.getTime() - t0.getTime(), null));
         
     }
     
