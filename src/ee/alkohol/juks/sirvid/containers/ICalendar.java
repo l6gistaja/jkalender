@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class ICalendar {
     
     // Constants
-    public final String ID_SITE = "juks.alkohol.ee";
+    public final String ID_SITE = "k.juks.alkohol.ee";
     
     public static final String SDF_DATE = "yyyyMMdd";
     public static final String SDF_DATETIME = "yyyyMMdd'T'HHmmss'Z'";
@@ -50,7 +50,18 @@ public class ICalendar {
     }
     
     public String generateUID(String id) {
-        return "kdbid_" + id + "@" + ID_SITE;
+    	StringBuilder sb = new StringBuilder();
+    	if(id != null) {
+    		sb.append("k_");
+    		sb.append(id);
+    	}
+    	sb.append("@");
+    	sb.append(ID_SITE);
+        return sb.toString();
+    }
+    
+    public String generateUID(int id) {
+    	return generateUID(Integer.toString(id));
     }
     
 }

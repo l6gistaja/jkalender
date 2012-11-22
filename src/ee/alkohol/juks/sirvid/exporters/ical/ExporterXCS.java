@@ -9,6 +9,11 @@ public class ExporterXCS extends Exporter{
         super();
         this.setFileExtension(".xcs");
         this.setMimeType("text/xml");
+        this.getComponentStrings().put(components.VCALENDAR, new String[]{
+        		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<iCalendar>\n<vcalendar>\n",
+        		"</vcalendar>\n</iCalendar>\n"});
+        this.getComponentStrings().put(components.VEVENT, new String[]{"<vevent>\n","</vevent>\n"});
+        this.getComponentStrings().put(components.VVENUE, new String[]{"<vvenue>\n","</vvenue>\n"});
     }
     
     @Override
@@ -30,26 +35,6 @@ public class ExporterXCS extends Exporter{
         sb.append(">");
         sb.append("\n");
         return sb.toString();
-    }
-
-    @Override
-    public String beginBody() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<iCalendar>\n<vcalendar>\n";
-    }
-
-    @Override
-    public String endBody() {
-        return "</vcalendar>\n</iCalendar>\n";
-    }
-
-    @Override
-    public String beginEvent() {
-        return "<vevent>\n";
-    }
-
-    @Override
-    public String endEvent() {
-        return "</vevent>\n";
     }
 
 }

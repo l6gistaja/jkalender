@@ -9,6 +9,9 @@ public class ExporterICS extends Exporter{
         super();
         this.setFileExtension(".ics");
         this.setMimeType("text/calendar");
+        this.getComponentStrings().put(components.VCALENDAR, new String[]{"BEGIN:VCALENDAR\n","END:VCALENDAR\n"});
+        this.getComponentStrings().put(components.VEVENT, new String[]{"BEGIN:VEVENT\n","END:VEVENT\n"});
+        this.getComponentStrings().put(components.VVENUE, new String[]{"BEGIN:VVENUE\n","END:VVENUE\n"});
     }
     
     @Override
@@ -25,26 +28,6 @@ public class ExporterICS extends Exporter{
         sb.append(formatOutput(iCalProp));
         sb.append("\n");
         return sb.toString();
-    }
-
-    @Override
-    public String beginBody() {
-        return "BEGIN:VCALENDAR\n";
-    }
-
-    @Override
-    public String endBody() {
-        return "END:VCALENDAR\n";
-    }
-
-    @Override
-    public String beginEvent() {
-        return "BEGIN:VEVENT\n";
-    }
-
-    @Override
-    public String endEvent() {
-        return "END:VEVENT\n";
     }
 
 }

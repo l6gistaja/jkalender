@@ -15,6 +15,7 @@ import ee.alkohol.juks.sirvid.math.Astronomy;
 public class ICalculator {
     
     public final static String[] LANG = {Keys.LANGUAGE, "ET"};
+    public final static String UIDDATE = "%d%02d%02d";
     
     public InputData inputData;
     public ICalendar iCal;
@@ -125,7 +126,7 @@ public class ICalculator {
             };
         	
         	iCal.vVenue = new LinkedHashMap<String,ICalProperty>();
-        	iCal.vVenue.put(Keys.UID, new ICalProperty("lat_" + inputData.getLatitude()+ "-lon_" + inputData.getLongitude() + "@" + iCal.ID_SITE, null));
+        	iCal.vVenue.put(Keys.UID, new ICalProperty("a_" + inputData.getLatitude()+ "_o_" + inputData.getLongitude() + iCal.generateUID(null), null));
         	iCal.vVenue.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
         	
         	while(true) {
@@ -147,7 +148,12 @@ public class ICalculator {
                             : DbIdStatuses.SUNSET.getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(driverData[i+1], null));
                     event.properties.put(Keys.UID, 
-                            new ICalProperty("date_" + sg[0] + "-" + sg[1] + "-" + sg[2] + "_" + iCal.generateUID(""+event.dbID), null));
+                            new ICalProperty("d_" + 
+                            		String.format(UIDDATE,
+                            					sg[0],
+                            					sg[1],
+                            					sg[2])
+                            				+ "_" +iCal.generateUID(event.dbID), null));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                     // use VVENUE component instead
                     //event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
@@ -182,7 +188,7 @@ public class ICalculator {
                 ICalEvent event = new ICalEvent();
                 event.dbID = DbIdStatuses.SOLSTICE.getDbId();
                 event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, null));
-                event.properties.put(Keys.UID, new ICalProperty("mon_" + solistice[0] + "-" + solistice[1] + "_" + iCal.generateUID(""+event.dbID), null));
+                event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + "-" + solistice[1] + iCal.generateUID(event.dbID), null));
                 event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                 event.allDayEvent = false;
                 iCal.vEvent.add(event);
@@ -213,7 +219,7 @@ public class ICalculator {
 	              event.dbID = dbID;
 	              
 	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateEstonianDayName(anniversaries, nameFields, nameDelimiter), LANG));
-	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID("" + dbID), null));
+	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
 	              event.properties.putAll(generateAllDayEvent(cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100));
 	              String descr = anniversaries.getString("more");
 	              if(isNotEmptyStr(descr)) {
