@@ -59,6 +59,8 @@ public class ICalculator {
 
     }
     
+    public static final DbIdStatuses[] MOONPHASES = {DbIdStatuses.MOON_NEW, DbIdStatuses.MOON_1ST, DbIdStatuses.MOON_FULL, DbIdStatuses.MOON_LAST};
+    
     public ICalculator(InputData inputData) throws SQLException {
         
         this.inputData = inputData;
@@ -196,17 +198,32 @@ public class ICalculator {
         	}
         }
         
-        
-        short m0, m1;
         // moonphases
+        short month0 = -1;
+        short month1 = -1;
+        ArrayList<int[]> moonPhases = new ArrayList<int[]>();
         if(inputData.isCalculateMoonphases()) {
-            ArrayList<int[]> moonPhases = new ArrayList<int[]>();
             if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.YEAR)) {
-                m0 = 1;
-                m1 = 13;
+                month0 = 1;
+                month1 = 13;
             } else {
-                m0 = (short)(cal.get(Calendar.MONTH) + 1);
-                m1 = (short)(m0 + 1);
+                month0 = (short)(cal.get(Calendar.MONTH) + 1);
+                month1 = (short)(month0 + 1);
+            }
+            for(short m = month0; m < month1; m++) {
+                for(short f = 0; f < 4; f++) {
+                    moonPhases.add(Astronomy.JD2calendarDate(Astronomy.moonPhaseCorrected(cal.get(Calendar.YEAR), m, f, inputData.isUseDynamicTime())));
+                    int[] phase = moonPhases.get(moonPhases.size()-1);
+                    GregorianCalendar moonCal = new GregorianCalendar();
+                    moonCal.set(phase[0], phase[1]-1, phase[2], phase[3], phase[4], phase[5]);
+                    ICalEvent event = new ICalEvent();
+                    event.dbID = MOONPHASES[f].getDbId();
+                    event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
+                    event.properties.put(Keys.UID, new ICalProperty("m_" + cal.get(Calendar.YEAR) + String.format("%02d",m) + "_" + iCal.generateUID(event.dbID), null));
+                    event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                    event.allDayEvent = false;
+                    iCal.vEvent.add(event);
+                }
             }
         }
         
