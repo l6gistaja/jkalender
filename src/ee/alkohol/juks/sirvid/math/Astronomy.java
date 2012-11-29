@@ -266,76 +266,41 @@ public class Astronomy {
         double dT = getDT(JDE, dynamicTime);
         return JDE -dT;
     }
-
+    
     /**
-     * Recalculate moon phase, if you missed right month
+     * Calculate lunation number
      * 
-     * Sometimes {@link #moonPhase(long, short, short)} returns value which is one month earlier or later.
+     * k is the lunation number. partial lunations correspond to partial phases. 
+     * Algorithm is valid only for 1/4 parts of a lunation.
+     * Approximate value for k is (year - 2000) * 12.3685 .
+     * Find the lunation (new moon) closest to date X.
+     * This is often not accurate enough!
      * 
      * @param year
      * @param month
      * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
-     * @param dynamicTime
-     * @return Julian Date of given phase
-     * @see {@link #moonPhase(long, short, short)}
+     * @return k - lunation number
      */
-    
-    public static double moonPhaseCorrected(long year, short month, short phase, boolean dynamicTime) {
-        
-        long desiredMonth = 12*year + month -1;
-        long currentMonth = desiredMonth;
-        short m;
-        int ctl = 2; // cycles to live
-        double moonF = 0;
-        int[] moonFGregorian;
-        long calculatedMonth;
-        
-        while(true) {
-            if(ctl < 1) break;
-            m = (short)(currentMonth%12);
-            moonF = moonPhase((long)((currentMonth-m) / 12), (short)(m+1), phase, dynamicTime);
-            moonFGregorian = Astronomy.JD2calendarDate(moonF);
-            calculatedMonth = 12*moonFGregorian[0] + moonFGregorian[1] -1;
-            if (desiredMonth == calculatedMonth) {
-                break;
-            } else if (desiredMonth <  calculatedMonth) {
-                currentMonth--;
-            } else {
-                currentMonth++;
-            }
-            ctl --;
-        }
-        
-        return moonF;
+    public static double getLunationNumber(long year, short month, short phase) {
+    	return Math.floor(((double)year +yearFrac(month, 0.5) -2000) *12.3685) + 0.25 * phase;
     }
     
     /**
-     * Calculate Moon phases
+     * Calculate Moon phases using lunation number
      * 
      * Meeus, pp. 319-324. 
      * Use it through {@link #moonPhaseCorrected(long, short, short)}
      * 
-     * @param year
-     * @param month
+     * @param lunation number
      * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
      * @param dynamicTime
      * @return nearest requested phase moment in Julian Date
-     * @see <a href="http://www.webmasterworld.com/foo/3999789.htm">Moon Phases calculator in VBScript</a>
      */
-    
-    public static double moonPhase(long year, short month, short phase, boolean dynamicTime) {
+    public static double moonPhaseK(double k, short phase, boolean dynamicTime) {
         
         short cycleLen;
         short i;
         double temp;
-        
-        // k is the lunation number. partial lunations correspond to partial phases. Algorithm is valid only for 1/4 parts of a lunation
-        // approximate value for k is (year - 2000) * 12.3685
-        // find the lunation (new moon) closest to date X
-        // this is often not accurate enough!
-
-        double k = Math.floor(((double)year +yearFrac(month, 0.5) -2000) *12.3685);
-        k = k + 0.25 * phase;
 
         // where k = lunation integer,
         // k+0 - new moon
@@ -477,6 +442,66 @@ public class Astronomy {
         double dT = getDT(JDE +correction +correctionPlanetary +W, dynamicTime);
         return JDE +correction +correctionPlanetary +W -dT;
     }
+    
+    /**
+     * Calculate Moon phases
+     * 
+     * Meeus, pp. 319-324. 
+     * Use it through {@link #moonPhaseCorrected(long, short, short)}
+     * 
+     * @param year
+     * @param month
+     * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
+     * @param dynamicTime
+     * @return nearest requested phase moment in Julian Date
+     * @see <a href="http://www.webmasterworld.com/foo/3999789.htm">Moon Phases calculator in VBScript</a>
+     */
+    
+    public static double moonPhase(long year, short month, short phase, boolean dynamicTime) {
+        return moonPhaseK( getLunationNumber(year, month, phase), phase, dynamicTime);
+    }
+    
+    /**
+     * Recalculate moon phase, if you missed right month
+     * 
+     * Sometimes {@link #moonPhase(long, short, short)} returns value which is one month earlier or later.
+     * 
+     * @param year
+     * @param month
+     * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
+     * @param dynamicTime
+     * @return Julian Date of given phase
+     * @see {@link #moonPhase(long, short, short)}
+     */
+    
+    public static double moonPhaseCorrected(long year, short month, short phase, boolean dynamicTime) {
+        
+        long desiredMonth = 12*year + month -1;
+        long currentMonth = desiredMonth;
+        short m;
+        int ctl = 2; // cycles to live
+        double moonF = 0;
+        int[] moonFGregorian;
+        long calculatedMonth;
+        
+        while(true) {
+            if(ctl < 1) break;
+            m = (short)(currentMonth%12);
+            moonF = moonPhase((long)((currentMonth-m) / 12), (short)(m+1), phase, dynamicTime);
+            moonFGregorian = Astronomy.JD2calendarDate(moonF);
+            calculatedMonth = 12*moonFGregorian[0] + moonFGregorian[1] -1;
+            if (desiredMonth == calculatedMonth) {
+                break;
+            } else if (desiredMonth <  calculatedMonth) {
+                currentMonth--;
+            } else {
+                currentMonth++;
+            }
+            ctl --;
+        }
+        
+        return moonF;
+    }    
     
     /**
      * Convert Julian Date to Gregorian Date

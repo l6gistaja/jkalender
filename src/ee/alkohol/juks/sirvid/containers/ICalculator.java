@@ -204,8 +204,9 @@ public class ICalculator {
         	}
         }
         
-        /*
         // moonphases
+        /*
+        
         short month0 = -1;
         short month1 = -1;
         ArrayList<int[]> moonPhases = new ArrayList<int[]>();
