@@ -69,13 +69,15 @@ public class ICalculator {
         Date t0 = new Date();
         
         // initialize current time
-        GregorianCalendar cal = getCalendar(UTC_TZ_ID);
+        String tzID = this.inputData.getTimezone();
+        GregorianCalendar cal = getCalendar(tzID);
         cal.setTime(inputData.getDate());
+        goodNight(cal);
         boolean isLeapYear = cal.isLeapYear(cal.get(Calendar.YEAR));
         
         // initialize period of calculation
-        GregorianCalendar calendarBegin = getCalendar(UTC_TZ_ID);
-        int periodEnd = cal.get(Calendar.YEAR)*10000;
+        GregorianCalendar calendarBegin = getCalendar(tzID);
+        GregorianCalendar calendarEnd = getCalendar(tzID);
         StringBuilder calName = new StringBuilder();
         calName.append(cal.get(Calendar.YEAR));
         if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.MONTH)
@@ -85,18 +87,18 @@ public class ICalculator {
 		        	if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.DAY)) { // day
 		            	calName.append(String.format("-%02d", cal.get(Calendar.DATE)));
 		            	calendarBegin.setTime(inputData.getDate());
-		            	periodEnd += (cal.get(Calendar.MONTH)+1)*100 + cal.get(Calendar.DATE);
+		            	calendarEnd.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE), 23, 59, 59);
 		            } else { // month
-		            	calendarBegin.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 1, 0, 0, 0);
-		            	periodEnd += (cal.get(Calendar.MONTH)+1)*100  + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		            	calendarBegin.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 1);
+		            	calendarEnd.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
 		            }
 		        	
         } else { // year
-        	calendarBegin.set(cal.get(Calendar.YEAR), 0, 1, 0, 0, 0);
-        	periodEnd += 1231;
+        	calendarBegin.set(cal.get(Calendar.YEAR), 0, 1);
+        	calendarEnd.set(cal.get(Calendar.YEAR), 11, 31, 23, 59, 59);
         }
         
-        int periodStart = calendarDate2int(calendarBegin);
+        goodNight(calendarBegin);
         this.timespan = calName.toString();
         
         // initialize calendar container
@@ -123,7 +125,10 @@ public class ICalculator {
         // sunsets and sunrises
         if(inputData.isCalculateSunrisesSunsets()) {
             
-        	int nextDate;
+        	GregorianCalendar currentDay = getCalendar(tzID);
+        	currentDay.setTime(calendarBegin.getTime());
+        	goodNight(currentDay);
+        	
         	String coordinates = "" + inputData.getLatitude() + ";" + inputData.getLongitude();
         	String[] driverData = {
                     Astronomy.Keys.J_RISE, eventTranslations.get("" +DbIdStatuses.SUNRISE.getDbId()),
@@ -137,7 +142,7 @@ public class ICalculator {
         	while(true) {
                 
                 HashMap<String,Double> results = Astronomy.gregorianSunrise(
-                        Astronomy.gregorian2JDN(calendarBegin.get(Calendar.YEAR), calendarBegin.get(Calendar.MONTH)+1, calendarBegin.get(Calendar.DATE)), 
+                        Astronomy.gregorian2JDN(currentDay.get(Calendar.YEAR), currentDay.get(Calendar.MONTH)+1, currentDay.get(Calendar.DATE)), 
                         -inputData.getLongitude(), inputData.getLatitude()
                 );
                 
@@ -166,9 +171,8 @@ public class ICalculator {
                     iCal.vEvent.add(event);
                 }
                 
-        		calendarBegin.add(Calendar.DATE, 1);
-        		nextDate = calendarDate2int(calendarBegin);
-        		if(nextDate > periodEnd) { break; }
+                currentDay.add(Calendar.DATE, 1);
+                if(currentDay.after(calendarEnd)) { break; }
         	}
         	
         }
@@ -200,6 +204,7 @@ public class ICalculator {
         	}
         }
         
+        /*
         // moonphases
         short month0 = -1;
         short month1 = -1;
@@ -228,6 +233,7 @@ public class ICalculator {
                 }
             }
         }
+        */
         
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection != null) { 
@@ -241,7 +247,9 @@ public class ICalculator {
     	        String nameDelimiter = "; ";
     	        
     	        // anniversaries
-    	        ResultSet anniversaries = CalendarDAO.getAnniversaries(periodStart%10000, periodEnd%10000,
+    	        ResultSet anniversaries = CalendarDAO.getAnniversaries(
+    	                (calendarBegin.get(Calendar.MONTH) + 1)*100 + calendarBegin.get(Calendar.DAY_OF_MONTH), 
+    	                (calendarEnd.get(Calendar.MONTH) + 1)*100 + calendarEnd.get(Calendar.DAY_OF_MONTH),
     	        		inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
     	        if(anniversaries != null) {
     	            while(anniversaries.next())
@@ -281,9 +289,6 @@ public class ICalculator {
     }
     
     // helpers
-    public static int calendarDate2int(GregorianCalendar cal) {
-    	return cal.get(Calendar.YEAR)*10000 + (cal.get(Calendar.MONTH)+1)*100 + cal.get(Calendar.DATE);
-    }
     
     public static LinkedHashMap<String,ICalProperty> generateAllDayEvent(int year, int month, int date) {
         LinkedHashMap<String,ICalProperty> y = new LinkedHashMap<String,ICalProperty>();
@@ -318,6 +323,13 @@ public class ICalculator {
         cal.setGregorianChange(new Date(Long.MIN_VALUE));
         cal.set(Calendar.MILLISECOND, 0);
         return cal;
+    }
+    
+    public void goodNight(GregorianCalendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
     }
     
 }	
