@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.TimeZone;
 import ee.alkohol.juks.sirvid.containers.ICalendar.*;
 import ee.alkohol.juks.sirvid.containers.ICalEvent;
 import ee.alkohol.juks.sirvid.exporters.ical.*;
@@ -16,12 +17,7 @@ import ee.alkohol.juks.sirvid.math.Astronomy;
 public class ICalculator {
     
     public final static String[] LANG = {Keys.LANGUAGE, "ET"};
-    
-    public InputData inputData;
-    public ICalendar iCal;
-    public Exporter exporter;
-    public ArrayList<String> errorMsgs;
-    public String timespan;
+    public final static String UTC_TZ_ID = "GMT";
     
     public static enum DbIdStatuses {
         
@@ -61,18 +57,24 @@ public class ICalculator {
     
     public static final DbIdStatuses[] MOONPHASES = {DbIdStatuses.MOON_NEW, DbIdStatuses.MOON_1ST, DbIdStatuses.MOON_FULL, DbIdStatuses.MOON_LAST};
     
+    public InputData inputData;
+    public ICalendar iCal;
+    public Exporter exporter;
+    public ArrayList<String> errorMsgs;
+    public String timespan;
+    
     public ICalculator(InputData inputData) throws SQLException {
         
         this.inputData = inputData;
         Date t0 = new Date();
         
         // initialize current time
-        GregorianCalendar cal = new GregorianCalendar();
+        GregorianCalendar cal = getCalendar(UTC_TZ_ID);
         cal.setTime(inputData.getDate());
         boolean isLeapYear = cal.isLeapYear(cal.get(Calendar.YEAR));
         
         // initialize period of calculation
-        GregorianCalendar calendarBegin = new GregorianCalendar();
+        GregorianCalendar calendarBegin = getCalendar(UTC_TZ_ID);
         int periodEnd = cal.get(Calendar.YEAR)*10000;
         StringBuilder calName = new StringBuilder();
         calName.append(cal.get(Calendar.YEAR));
@@ -142,7 +144,7 @@ public class ICalculator {
                 for(int i=0; i < driverData.length; i+=2) {
                 	
                     int[] sg = Astronomy.JD2calendarDate(results.get(driverData[i]));
-                    GregorianCalendar sunCal = new GregorianCalendar();
+                    GregorianCalendar sunCal = getCalendar(UTC_TZ_ID);
                     sunCal.set(sg[0], sg[1]-1, sg[2], sg[3], sg[4], sg[5]);
                     
                     ICalEvent event = new ICalEvent();
@@ -186,7 +188,7 @@ public class ICalculator {
         	}
         	String solsticeLabel = eventTranslations.get("" +DbIdStatuses.SOLSTICE.getDbId());
         	for(int[] solistice : sol) {
-        	    GregorianCalendar solCal = new GregorianCalendar();
+        	    GregorianCalendar solCal = getCalendar(UTC_TZ_ID);
                 solCal.set(solistice[0], solistice[1]-1, solistice[2], solistice[3], solistice[4], solistice[5]);
                 ICalEvent event = new ICalEvent();
                 event.dbID = DbIdStatuses.SOLSTICE.getDbId();
@@ -214,7 +216,7 @@ public class ICalculator {
                 for(short f = 0; f < 4; f++) {
                     moonPhases.add(Astronomy.JD2calendarDate(Astronomy.moonPhaseCorrected(cal.get(Calendar.YEAR), m, f, inputData.isUseDynamicTime())));
                     int[] phase = moonPhases.get(moonPhases.size()-1);
-                    GregorianCalendar moonCal = new GregorianCalendar();
+                    GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
                     moonCal.set(phase[0], phase[1]-1, phase[2], phase[3], phase[4], phase[5]);
                     ICalEvent event = new ICalEvent();
                     event.dbID = MOONPHASES[f].getDbId();
@@ -285,7 +287,7 @@ public class ICalculator {
     
     public static LinkedHashMap<String,ICalProperty> generateAllDayEvent(int year, int month, int date) {
         LinkedHashMap<String,ICalProperty> y = new LinkedHashMap<String,ICalProperty>();
-        GregorianCalendar cal = new GregorianCalendar();
+        GregorianCalendar cal = getCalendar(UTC_TZ_ID);
         cal.set(year, month-1, date, 0, 0, 0);
         y.put(Keys.EVENT_START, new ICalProperty(cal.getTime(), new String[]{Keys.VALUE,Values.DATE}));
         cal.add(Calendar.DATE, 1);
@@ -309,6 +311,13 @@ public class ICalculator {
             }
         }
         return y.toString();
+    }
+    
+    public static GregorianCalendar getCalendar(String TzID) {
+        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone(TzID));
+        cal.setGregorianChange(new Date(Long.MIN_VALUE));
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
     }
     
 }	
