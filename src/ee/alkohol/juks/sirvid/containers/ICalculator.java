@@ -2,6 +2,7 @@ package ee.alkohol.juks.sirvid.containers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -205,36 +206,32 @@ public class ICalculator {
         }
         
         // moonphases
-        /*
-        
-        short month0 = -1;
-        short month1 = -1;
-        ArrayList<int[]> moonPhases = new ArrayList<int[]>();
-        if(inputData.isCalculateMoonphases()) {
-            if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.YEAR)) {
-                month0 = 1;
-                month1 = 13;
-            } else {
-                month0 = (short)(cal.get(Calendar.MONTH) + 1);
-                month1 = (short)(month0 + 1);
-            }
-            for(short m = month0; m < month1; m++) {
-                for(short f = 0; f < 4; f++) {
-                    moonPhases.add(Astronomy.JD2calendarDate(Astronomy.moonPhaseCorrected(cal.get(Calendar.YEAR), m, f, inputData.isUseDynamicTime())));
-                    int[] phase = moonPhases.get(moonPhases.size()-1);
-                    GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
-                    moonCal.set(phase[0], phase[1]-1, phase[2], phase[3], phase[4], phase[5]);
-                    ICalEvent event = new ICalEvent();
-                    event.dbID = MOONPHASES[f].getDbId();
-                    event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
-                    event.properties.put(Keys.UID, new ICalProperty("m_" + cal.get(Calendar.YEAR) + String.format("%02d",m) + "_" + iCal.generateUID(event.dbID), null));
-                    event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                    event.allDayEvent = false;
-                    iCal.vEvent.add(event);
-                }
-            }
+
+        long lunStartY = calendarBegin.get(Calendar.YEAR);
+        short lunStartM = (short)(calendarBegin.get(Calendar.MONTH) -1);
+        short lunF = 0;
+        if(lunStartM < 0) {
+            lunStartY --;
+            lunStartM = 11;
         }
-        */
+        
+        double k  = Astronomy.getLunationNumber(lunStartY, (short)(lunStartM +1), lunF);
+        GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
+        goodNight(moonCal);
+        do {
+            int[] mfd = Astronomy.JD2calendarDate(Astronomy.moonPhaseK(k + (0.25 * lunF), (short)(lunF % 4), inputData.isUseDynamicTime()));
+            moonCal.set(mfd[0], mfd[1]-1, mfd[2], mfd[3], mfd[4], mfd[5]);
+            if(!moonCal.before(calendarBegin) && !moonCal.after(calendarEnd)) {
+                ICalEvent event = new ICalEvent();
+                event.dbID = MOONPHASES[lunF % 4].getDbId();
+                event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
+                event.properties.put(Keys.UID, new ICalProperty("k_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                event.allDayEvent = false;
+                iCal.vEvent.add(event);
+            }
+            lunF ++;
+        } while (!moonCal.after(calendarEnd));
         
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection != null) { 
