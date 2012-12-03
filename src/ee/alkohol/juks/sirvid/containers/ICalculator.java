@@ -57,6 +57,7 @@ public class ICalculator {
     }
     
     public static final DbIdStatuses[] MOONPHASES = {DbIdStatuses.MOON_NEW, DbIdStatuses.MOON_1ST, DbIdStatuses.MOON_FULL, DbIdStatuses.MOON_LAST};
+    public static final DbIdStatuses[] MOONPHASES_MV = {DbIdStatuses.MOON_NEW_M2, DbIdStatuses.MOON_NEW_P2, DbIdStatuses.MOON_FULL_M2, DbIdStatuses.MOON_FULL_P2};
     
     public InputData inputData;
     public ICalendar iCal;
@@ -205,33 +206,50 @@ public class ICalculator {
         	}
         }
         
+        
         // moonphases
-
-        long lunStartY = calendarBegin.get(Calendar.YEAR);
-        short lunStartM = (short)(calendarBegin.get(Calendar.MONTH) -1);
-        short lunF = 0;
-        if(lunStartM < 0) {
-            lunStartY --;
-            lunStartM = 11;
+        
+        if(inputData.isCalculateSolistices()) {
+            
+            long lunStartY = calendarBegin.get(Calendar.YEAR);
+            short lunStartM = (short)(calendarBegin.get(Calendar.MONTH) -1);
+            short lunF = 0;
+            if(lunStartM < 0) {
+                lunStartY --;
+                lunStartM = 11;
+            }
+            
+            double k  = Astronomy.getLunationNumber(lunStartY, (short)(lunStartM +1), lunF);
+            
+            GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
+            goodNight(moonCal);
+            do {
+                
+                int[] mfd = Astronomy.JD2calendarDate(Astronomy.moonPhaseK(k + (0.25 * lunF), (short)(lunF % 4), inputData.isUseDynamicTime()));
+                moonCal.set(mfd[0], mfd[1]-1, mfd[2], mfd[3], mfd[4], mfd[5]);
+                if(!moonCal.before(calendarBegin) && !moonCal.after(calendarEnd)) {
+                    ICalEvent event = new ICalEvent();
+                    event.dbID = MOONPHASES[lunF % 4].getDbId();
+                    event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
+                    event.properties.put(Keys.UID, new ICalProperty("k_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                    event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                    event.allDayEvent = false;
+                    iCal.vEvent.add(event);
+                }
+                lunF ++;
+                
+                if(inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) && lunF % 2 == 0) {
+                    cal.add(Calendar.DATE, -2);
+                    for(int i = 0; i < 2; i++) {
+                        //cal.add(Calendar.DATE, -2);
+                        
+                    }
+                }
+                
+            } while (!moonCal.after(calendarEnd));
+            
         }
         
-        double k  = Astronomy.getLunationNumber(lunStartY, (short)(lunStartM +1), lunF);
-        GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
-        goodNight(moonCal);
-        do {
-            int[] mfd = Astronomy.JD2calendarDate(Astronomy.moonPhaseK(k + (0.25 * lunF), (short)(lunF % 4), inputData.isUseDynamicTime()));
-            moonCal.set(mfd[0], mfd[1]-1, mfd[2], mfd[3], mfd[4], mfd[5]);
-            if(!moonCal.before(calendarBegin) && !moonCal.after(calendarEnd)) {
-                ICalEvent event = new ICalEvent();
-                event.dbID = MOONPHASES[lunF % 4].getDbId();
-                event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
-                event.properties.put(Keys.UID, new ICalProperty("k_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
-                event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                event.allDayEvent = false;
-                iCal.vEvent.add(event);
-            }
-            lunF ++;
-        } while (!moonCal.after(calendarEnd));
         
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection != null) { 
