@@ -34,7 +34,8 @@ public class ICalculator {
         SOLSTICE (20, "\u2295"),
         SUNRISE (30, "\u263c"),
         SUNSET (31, "\u2600"),
-        LEAPDAY (229, "");
+        LEAPDAY (229, "+"),
+        EASTER (2000, "*");
 
         private int dbId;
         private String name;
@@ -64,6 +65,7 @@ public class ICalculator {
     public Exporter exporter;
     public ArrayList<String> errorMsgs;
     public String timespan;
+    public GregorianCalendar gregorianEaster;
     
     public ICalculator(InputData inputData) throws SQLException {
         
@@ -230,7 +232,7 @@ public class ICalculator {
                     ICalEvent event = new ICalEvent();
                     event.dbID = MOONPHASES[lunF % 4].getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
-                    event.properties.put(Keys.UID, new ICalProperty("k_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                    event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                     event.allDayEvent = false;
                     iCal.vEvent.add(event);
@@ -244,7 +246,7 @@ public class ICalculator {
                             ICalEvent event = new ICalEvent();
                             event.dbID = MOONPHASES_MV[(lunF%4) + i].getDbId();
                             event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
-                            event.properties.put(Keys.UID, new ICalProperty("k_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                            event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
                             event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                             event.allDayEvent = false;
                             iCal.vEvent.add(event);
@@ -259,6 +261,25 @@ public class ICalculator {
             
         }
         
+        // gregorian easter
+        
+        if(inputData.isCalculateGregorianEaster() || !inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE)) {
+            
+            int year = cal.get(Calendar.YEAR);
+            int[] gE = Astronomy.gregorianEaster(year);
+            gregorianEaster = getCalendar(tzID);
+            gregorianEaster.set(year, gE[0]-1, gE[1]);
+            
+            if(!gregorianEaster.before(calendarBegin) && !gregorianEaster.after(calendarEnd)) {
+                ICalEvent event = new ICalEvent();
+                event.dbID = DbIdStatuses.EASTER.getDbId();
+                event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
+                event.properties.put(Keys.UID, new ICalProperty("y_" + year + "_" + iCal.generateUID(event.dbID), null));
+                event.properties.put(Keys.EVENT_START, new ICalProperty(gregorianEaster.getTime(), new String[]{Keys.VALUE, Values.DATE}));
+                iCal.vEvent.add(event);
+            }
+            
+        }
         
         // nothing to do further, if there is no DB connection
         if(CalendarDAO.dbConnection != null) { 
