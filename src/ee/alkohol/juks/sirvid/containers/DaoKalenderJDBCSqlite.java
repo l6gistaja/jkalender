@@ -28,7 +28,7 @@ public class DaoKalenderJDBCSqlite {
         
     }
     
-    public ResultSet fetchQueryResults(String query) {
+    private ResultSet fetchQueryResults(String query) {
   
         Statement statement;
         try {
@@ -45,7 +45,7 @@ public class DaoKalenderJDBCSqlite {
         
     }
     
-    public ResultSet getAnniversaries(int start, int end, boolean maausk) {
+    public ResultSet getEvents(int start, int end, boolean maausk) {
     	StringBuilder query = new StringBuilder("select * from events where ");
     	if(start == end) {
     		query.append("id = ");
@@ -62,7 +62,7 @@ public class DaoKalenderJDBCSqlite {
         return fetchQueryResults(query.toString());
     }
     
-    public ResultSet getEventTranslations() {
+    public ResultSet getAstronomicalEventTranslations() {
         return fetchQueryResults("select dbid, name from runes where dbid>9 and dbid<32");
     }
 }

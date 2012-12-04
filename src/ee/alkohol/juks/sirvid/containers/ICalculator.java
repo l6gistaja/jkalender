@@ -114,7 +114,7 @@ public class ICalculator {
         
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
         if(CalendarDAO.dbConnection != null) {
-            ResultSet eventTrRS = CalendarDAO.getEventTranslations();
+            ResultSet eventTrRS = CalendarDAO.getAstronomicalEventTranslations();
             while(eventTrRS.next()) { 
             	eventTranslations.put(eventTrRS.getString("dbid"), eventTrRS.getString("name"));
             }
@@ -160,12 +160,9 @@ public class ICalculator {
                             : DbIdStatuses.SUNSET.getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(driverData[i+1], null));
                     event.properties.put(Keys.UID, 
-                            new ICalProperty("d_" + 
-                            		String.format("%d%02d%02d",
-                            					sg[0],
-                            					sg[1],
-                            					sg[2])
-                            				+ "_" +iCal.generateUID(event.dbID), null));
+                            new ICalProperty("d_"
+                            		+ String.format("%d%02d%02d", sg[0], sg[1], sg[2])
+                            		+ "_" +iCal.generateUID(event.dbID), null));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
                     // use VVENUE component instead
                     //event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
@@ -196,20 +193,22 @@ public class ICalculator {
         	for(int[] solistice : sol) {
         	    GregorianCalendar solCal = getCalendar(UTC_TZ_ID);
                 solCal.set(solistice[0], solistice[1]-1, solistice[2], solistice[3], solistice[4], solistice[5]);
-                ICalEvent event = new ICalEvent();
-                event.dbID = DbIdStatuses.SOLSTICE.getDbId();
-                event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, null));
-                event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID), null));
-                event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                event.allDayEvent = false;
-                iCal.vEvent.add(event);
+                if(!solCal.before(calendarBegin) && !solCal.after(calendarEnd)) {
+                    ICalEvent event = new ICalEvent();
+                    event.dbID = DbIdStatuses.SOLSTICE.getDbId();
+                    event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, null));
+                    event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID), null));
+                    event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                    event.allDayEvent = false;
+                    iCal.vEvent.add(event);
+                }
         	}
         }
         
         
         // moonphases
         
-        if(inputData.isCalculateSolistices()) {
+        if(inputData.isCalculateMoonphases()) {
             
             long lunStartY = calendarBegin.get(Calendar.YEAR);
             short lunStartM = (short)(calendarBegin.get(Calendar.MONTH) -1);
@@ -236,15 +235,25 @@ public class ICalculator {
                     event.allDayEvent = false;
                     iCal.vEvent.add(event);
                 }
-                lunF ++;
                 
                 if(inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) && lunF % 2 == 0) {
-                    cal.add(Calendar.DATE, -2);
+                    moonCal.add(Calendar.DATE, -2);
                     for(int i = 0; i < 2; i++) {
-                        //cal.add(Calendar.DATE, -2);
-                        
+                        moonCal.add(Calendar.DATE, i*4);
+                        if(!moonCal.before(calendarBegin) && !moonCal.after(calendarEnd)) {
+                            ICalEvent event = new ICalEvent();
+                            event.dbID = MOONPHASES_MV[(lunF%4) + i].getDbId();
+                            event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
+                            event.properties.put(Keys.UID, new ICalProperty("k_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                            event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                            event.allDayEvent = false;
+                            iCal.vEvent.add(event);
+                        }
                     }
                 }
+                
+
+                lunF ++;
                 
             } while (!moonCal.after(calendarEnd));
             
@@ -263,7 +272,7 @@ public class ICalculator {
     	        String nameDelimiter = "; ";
     	        
     	        // anniversaries
-    	        ResultSet anniversaries = CalendarDAO.getAnniversaries(
+    	        ResultSet anniversaries = CalendarDAO.getEvents(
     	                (calendarBegin.get(Calendar.MONTH) + 1)*100 + calendarBegin.get(Calendar.DAY_OF_MONTH), 
     	                (calendarEnd.get(Calendar.MONTH) + 1)*100 + calendarEnd.get(Calendar.DAY_OF_MONTH),
     	        		inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
