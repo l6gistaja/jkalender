@@ -10,7 +10,7 @@ public class DaoKalenderJDBCSqlite {
     
     public Connection dbConnection;
     public String errorMsg;
-    public String jdbcConnect = "data/kalender.sdb";
+    public String jdbcConnect = "jdbc:sqlite:kalender.sdb";
     
     public DaoKalenderJDBCSqlite(String jdbcc) {
         
