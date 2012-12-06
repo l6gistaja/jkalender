@@ -320,12 +320,12 @@ public class ICalculator {
     	            }
     	        }
     	        
-    	        // Easter related moveable feasts
-    	        ResultSet easterEvents = CalendarDAO.getEvents(1635, 2365, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
-                if(easterEvents != null) {
-                    while(easterEvents.next())
+    	        // Gregorian Easter related moveable feasts
+    	        ResultSet gEasterEvents = CalendarDAO.getEvents(1635, 2365, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+                if(gEasterEvents != null) {
+                    while(gEasterEvents.next())
                     {
-                      int dbID = easterEvents.getInt("id");
+                      int dbID = gEasterEvents.getInt("id");
                       GregorianCalendar easterEventDate = getCalendar(tzID);
                       easterEventDate.setTime(gregorianEaster.getTime());
                       goodNight(easterEventDate);
@@ -334,10 +334,10 @@ public class ICalculator {
                       if(!easterEventDate.before(calendarBegin) && !easterEventDate.after(calendarEnd)) {
                           ICalEvent event = new ICalEvent();
                           event.dbID = dbID;
-                          event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(easterEvents, nameFields, nameDelimiter), LANG));
+                          event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(gEasterEvents, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID), null));
                           event.properties.putAll(generateAllDayEvent(easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE)));
-                          String descr = easterEvents.getString("more");
+                          String descr = gEasterEvents.getString("more");
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                           }
@@ -346,6 +346,38 @@ public class ICalculator {
 
                     }
                 }
+                
+                // moveables
+                ResultSet weekdayNths = CalendarDAO.getEvents(10110, 11256, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+                if(weekdayNths != null) {
+                    while(weekdayNths.next())
+                    {
+                      int dbID = weekdayNths.getInt("id");
+                      int week = (int)(dbID / 10) % 10;
+                      
+                      GregorianCalendar weekdayNthDate = getCalendar(tzID);
+                      goodNight(weekdayNthDate);
+                      weekdayNthDate.set(Calendar.YEAR,cal.get(Calendar.YEAR));
+                      weekdayNthDate.set(Calendar.MONTH, (int)(dbID / 100) % 100 - 1);
+                      weekdayNthDate.set(Calendar.DAY_OF_WEEK, dbID % 10 + 1);
+                      weekdayNthDate.set(Calendar.DAY_OF_WEEK_IN_MONTH, week > 4 ? -1 : week);
+                      
+                      if(!weekdayNthDate.before(calendarBegin) && !weekdayNthDate.after(calendarEnd)) {
+                          ICalEvent event = new ICalEvent();
+                          event.dbID = dbID;
+                          event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(weekdayNths, nameFields, nameDelimiter), LANG));
+                          event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
+                          event.properties.putAll(generateAllDayEvent(weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE)));
+                          String descr = weekdayNths.getString("more");
+                          if(isNotEmptyStr(descr)) {
+                              event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
+                          }
+                          iCal.vEvent.add(event);
+                      }
+
+                    }
+                }
+                
                 
             }
         }
