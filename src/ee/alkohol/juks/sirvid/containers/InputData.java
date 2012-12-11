@@ -23,7 +23,7 @@ public class InputData {
     public static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
     public static final String[] SUPPORTED_TIMESPANS = {FLAGS.PERIOD.DAY,FLAGS.PERIOD.MONTH,FLAGS.PERIOD.YEAR};
     public static final String[] CALENDARDATA = {FLAGS.CALDATA.NONE,FLAGS.CALDATA.ALL_ESTONIAN,FLAGS.CALDATA.MAAVALLA};
-    public static final String[] SUPPORTED_OUTPUT_FORMATS = {"ics","xcs"};
+    public static final String[] SUPPORTED_OUTPUT_FORMATS = {"ics","xcs","svg"};
     
     public static final String LATITUDE_NAME = "Latitude";
     public static final String LONGITUDE_NAME = "Longitude";

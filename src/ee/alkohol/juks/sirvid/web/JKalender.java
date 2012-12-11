@@ -44,7 +44,7 @@ public class JKalender extends HttpServlet {
         			  + iCalc.exporter.getFileExtension());
           }
           PrintWriter out = response.getWriter();
-          out.println(iCalc.exporter.generate(iCalc.iCal));
+          out.println(iCalc.exporter.generate(iCalc));
       } catch(Exception e) {
           response.setContentType("text/plain; charset=UTF-8");
           PrintWriter out = response.getWriter();

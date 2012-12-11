@@ -5,25 +5,23 @@ import java.util.HashMap;
 import java.util.Map;
 import ee.alkohol.juks.sirvid.containers.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ICalProperty;
+import ee.alkohol.juks.sirvid.containers.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ICalendar;
 
-public abstract class ExporterICalendar {
+public abstract class ExporterICalendar extends Exporter {
     
-	public static final String FILENAME_PREFIX = "jkal_";
 	public static enum components {VCALENDAR, VEVENT, VVENUE}
-    
 	ICalendar iCal;
-    private String fileExtension;
-    private String mimeType;
     private HashMap<components,String[]> componentStrings;
 
 	public ExporterICalendar() {
+	    super();
     	componentStrings = new HashMap<components,String[]>();
     }
     
-    public String generate(ICalendar icalendar) {
+    public String generate(ICalculator icalendar) {
         
-        iCal = icalendar;
+        iCal = icalendar.iCal;
         StringBuilder sb = new StringBuilder();
         
         sb.append(getComponentBorder(components.VCALENDAR, 0));
@@ -79,23 +77,7 @@ public abstract class ExporterICalendar {
         }
         return "";
     }
-    
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public String getFileExtension() {
-        return fileExtension;
-    }
-    
-    public void setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
-    
+      
     public HashMap<components, String[]> getComponentStrings() {
 		return componentStrings;
 	}

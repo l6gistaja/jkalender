@@ -1,4 +1,4 @@
-package ee.alkohol.juks.sirvid.exporters.ical;
+package ee.alkohol.juks.sirvid.exporters;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class ExporterTest {
             try {
                 iCalc = new ICalculator(inputData);
                 iCalc.initExport();
-                String output = iCalc.exporter.generate(iCalc.iCal);
+                String output = iCalc.exporter.generate(iCalc);
                 if(output == null || output.trim().equals("")) {
                     fail(outputFormat +" format output is null or empty.");
                 }
