@@ -20,6 +20,12 @@ public class ICalculator {
     public final static String[] LANG = {Keys.LANGUAGE, "ET"};
     public final static String UTC_TZ_ID = "GMT";
     
+    public static final class FIELDS {
+        public static final String ID = "id";
+        public static final String TITLE = "event";
+        public static final String DESCRIPTION = "more";
+    }
+    
     public static enum DbIdStatuses {
         
         UNDEFINED (-1, ""),
@@ -275,7 +281,7 @@ public class ICalculator {
                 event.dbID = DbIdStatuses.EASTER.getDbId();
                 event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
                 event.properties.put(Keys.UID, new ICalProperty("y_" + year + "_e_g_" + iCal.generateUID(event.dbID), null));
-                event.properties.put(Keys.EVENT_START, new ICalProperty(gregorianEaster.getTime(), new String[]{Keys.VALUE, Values.DATE}));
+                event.properties.putAll(generateAllDayEvent(gregorianEaster.get(Calendar.YEAR), gregorianEaster.get(Calendar.MONTH) +1, gregorianEaster.get(Calendar.DATE)));
                 iCal.vEvent.add(event);
             }
             
@@ -289,7 +295,7 @@ public class ICalculator {
             	
     	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
     	        	? new String[]{"maausk"}
-    	        	: new String[]{"event","maausk"};
+    	        	: new String[]{FIELDS.TITLE,"maausk"};
     	        String nameDelimiter = "; ";
     	        
     	        // anniversaries
@@ -300,7 +306,7 @@ public class ICalculator {
     	        if(anniversaries != null) {
     	            while(anniversaries.next())
     	            {
-    	              int dbID = anniversaries.getInt("id");
+    	              int dbID = anniversaries.getInt(FIELDS.ID);
     	              if(dbID == DbIdStatuses.LEAPDAY.getDbId() && !isLeapYear) { continue; }
     	              
     	              ICalEvent event = new ICalEvent();
@@ -309,7 +315,7 @@ public class ICalculator {
     	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(anniversaries, nameFields, nameDelimiter), LANG));
     	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
     	              event.properties.putAll(generateAllDayEvent(cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100));
-    	              String descr = anniversaries.getString("more");
+    	              String descr = anniversaries.getString(FIELDS.DESCRIPTION);
     	              if(isNotEmptyStr(descr)) {
     	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
     	              }
@@ -325,7 +331,7 @@ public class ICalculator {
                 if(gEasterEvents != null) {
                     while(gEasterEvents.next())
                     {
-                      int dbID = gEasterEvents.getInt("id");
+                      int dbID = gEasterEvents.getInt(FIELDS.ID);
                       GregorianCalendar easterEventDate = getCalendar(tzID);
                       easterEventDate.setTime(gregorianEaster.getTime());
                       goodNight(easterEventDate);
@@ -337,7 +343,7 @@ public class ICalculator {
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(gEasterEvents, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID), null));
                           event.properties.putAll(generateAllDayEvent(easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE)));
-                          String descr = gEasterEvents.getString("more");
+                          String descr = gEasterEvents.getString(FIELDS.DESCRIPTION);
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                           }
@@ -352,7 +358,7 @@ public class ICalculator {
                 if(weekdayNths != null) {
                     while(weekdayNths.next())
                     {
-                      int dbID = weekdayNths.getInt("id");
+                      int dbID = weekdayNths.getInt(FIELDS.ID);
                       int week = (int)(dbID / 10) % 10;
                       
                       GregorianCalendar weekdayNthDate = getCalendar(tzID);
@@ -368,7 +374,7 @@ public class ICalculator {
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(weekdayNths, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
                           event.properties.putAll(generateAllDayEvent(weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE)));
-                          String descr = weekdayNths.getString("more");
+                          String descr = weekdayNths.getString(FIELDS.DESCRIPTION);
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                           }
@@ -391,7 +397,7 @@ public class ICalculator {
                     
                     while(advents.next()) {
                         
-                        int dbID = advents.getInt("id");
+                        int dbID = advents.getInt(FIELDS.ID);
                         int wDay = dbID % 10;
                         int scrollback = ( wDay < xwDay ) ? xwDay - wDay : 7;
                         scrollback += 7 * ( ((int)(dbID/10) % 100) -1 ) ;
@@ -409,7 +415,7 @@ public class ICalculator {
                             event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(advents, nameFields, nameDelimiter), LANG));
                             event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
                             event.properties.putAll(generateAllDayEvent(adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE)));
-                            String descr = advents.getString("more");
+                            String descr = advents.getString(FIELDS.DESCRIPTION);
                             if(isNotEmptyStr(descr)) {
                                 event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                             }
