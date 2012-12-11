@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.TimeZone;
 import ee.alkohol.juks.sirvid.containers.ICalendar.*;
 import ee.alkohol.juks.sirvid.containers.ICalEvent;
+import ee.alkohol.juks.sirvid.exporters.ExporterICalendar;
 import ee.alkohol.juks.sirvid.exporters.ical.*;
 import ee.alkohol.juks.sirvid.math.Astronomy;
 
@@ -68,7 +69,7 @@ public class ICalculator {
     
     public InputData inputData;
     public ICalendar iCal;
-    public Exporter exporter;
+    public ExporterICalendar exporter;
     public ArrayList<String> errorMsgs;
     public String timespan;
     public GregorianCalendar gregorianEaster;
@@ -435,8 +436,8 @@ public class ICalculator {
     
     public void initExport() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         @SuppressWarnings("rawtypes")
-        Class clazz = Class.forName("ee.alkohol.juks.sirvid.exporters.ical.Exporter"+inputData.getOutputFormat().toUpperCase());
-        exporter = (Exporter)clazz.newInstance();
+        Class clazz = Class.forName("ee.alkohol.juks.sirvid.exporters.Exporter"+inputData.getOutputFormat().toUpperCase());
+        exporter = (ExporterICalendar)clazz.newInstance();
     }
     
     // helpers

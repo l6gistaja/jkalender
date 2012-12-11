@@ -1,9 +1,9 @@
-package ee.alkohol.juks.sirvid.exporters.ical;
+package ee.alkohol.juks.sirvid.exporters;
 
 import java.util.Map;
 import ee.alkohol.juks.sirvid.containers.ICalProperty;
 
-public class ExporterXCS extends Exporter{
+public class ExporterXCS extends ExporterICalendar{
     
     public ExporterXCS () {
         super();

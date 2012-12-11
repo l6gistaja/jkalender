@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import ee.alkohol.juks.sirvid.containers.ICalculator;
 import ee.alkohol.juks.sirvid.containers.InputData;
-import ee.alkohol.juks.sirvid.exporters.ical.Exporter;
+import ee.alkohol.juks.sirvid.exporters.ExporterICalendar;
 
 public class JKalender extends HttpServlet {
 
@@ -39,7 +39,7 @@ public class JKalender extends HttpServlet {
           response.setContentType(iCalc.exporter.getMimeType() + "; charset=UTF-8");
           if(request.getParameter("dl") != null && request.getParameter("dl").equals("1")) {
         	  response.setHeader("Content-Disposition", "attachment; filename="
-        			  + Exporter.FILENAME_PREFIX
+        			  + ExporterICalendar.FILENAME_PREFIX
         			  + iCalc.timespan
         			  + iCalc.exporter.getFileExtension());
           }

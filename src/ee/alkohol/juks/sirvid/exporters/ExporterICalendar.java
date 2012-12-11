@@ -1,4 +1,4 @@
-package ee.alkohol.juks.sirvid.exporters.ical;
+package ee.alkohol.juks.sirvid.exporters;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import ee.alkohol.juks.sirvid.containers.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ICalProperty;
 import ee.alkohol.juks.sirvid.containers.ICalendar;
 
-public abstract class Exporter {
+public abstract class ExporterICalendar {
     
 	public static final String FILENAME_PREFIX = "jkal_";
 	public static enum components {VCALENDAR, VEVENT, VVENUE}
@@ -17,7 +17,7 @@ public abstract class Exporter {
     private String mimeType;
     private HashMap<components,String[]> componentStrings;
 
-	public Exporter() {
+	public ExporterICalendar() {
     	componentStrings = new HashMap<components,String[]>();
     }
     
