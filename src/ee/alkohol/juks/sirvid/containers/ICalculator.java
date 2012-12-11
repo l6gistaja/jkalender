@@ -378,6 +378,46 @@ public class ICalculator {
                     }
                 }
                 
+                // advents
+                ResultSet advents = CalendarDAO.getEvents(3010, 3536, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+                if(advents != null) {
+                    
+                    GregorianCalendar xmasDay = getCalendar(tzID);
+                    xmasDay.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+                    xmasDay.set(Calendar.MONTH, 11);
+                    xmasDay.set(Calendar.DATE, 25);
+                    goodNight(xmasDay);
+                    int xwDay = xmasDay.get(Calendar.DAY_OF_WEEK) - 1;
+                    
+                    while(advents.next()) {
+                        
+                        int dbID = advents.getInt("id");
+                        int wDay = dbID % 10;
+                        int scrollback = ( wDay < xwDay ) ? xwDay - wDay : 7;
+                        scrollback += 7 * ( ((int)(dbID/10) % 100) -1 ) ;
+                        
+                        GregorianCalendar adventDate = getCalendar(tzID);
+                        adventDate.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+                        adventDate.set(Calendar.MONTH, 11);
+                        adventDate.set(Calendar.DATE, 25);
+                        goodNight(adventDate);
+                        adventDate.add(Calendar.DATE, - scrollback);
+                        
+                        if(!adventDate.before(calendarBegin) && !adventDate.after(calendarEnd)) {
+                            ICalEvent event = new ICalEvent();
+                            event.dbID = dbID;
+                            event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(advents, nameFields, nameDelimiter), LANG));
+                            event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
+                            event.properties.putAll(generateAllDayEvent(adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE)));
+                            String descr = advents.getString("more");
+                            if(isNotEmptyStr(descr)) {
+                                event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
+                            }
+                            iCal.vEvent.add(event);
+                        }
+                    }
+                }
+                
                 
             }
         }
