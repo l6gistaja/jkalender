@@ -3,10 +3,10 @@ package ee.alkohol.juks.sirvid.exporters;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
-import ee.alkohol.juks.sirvid.containers.ICalEvent;
-import ee.alkohol.juks.sirvid.containers.ICalProperty;
-import ee.alkohol.juks.sirvid.containers.ICalculator;
-import ee.alkohol.juks.sirvid.containers.ICalendar;
+import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
+import ee.alkohol.juks.sirvid.containers.ical.ICalProperty;
+import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public abstract class ExporterICalendar extends Exporter {
     

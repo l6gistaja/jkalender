@@ -62,4 +62,8 @@ public class DaoKalenderJDBCSqlite {
         return fetchQueryResults(query.toString());
     }
     
+    public boolean isConnected() {
+        return dbConnection != null;
+    }
+    
 }

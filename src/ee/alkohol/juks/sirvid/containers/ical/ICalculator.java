@@ -1,4 +1,4 @@
-package ee.alkohol.juks.sirvid.containers;
+package ee.alkohol.juks.sirvid.containers.ical;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,8 +9,13 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
-import ee.alkohol.juks.sirvid.containers.ICalendar.*;
-import ee.alkohol.juks.sirvid.containers.ICalEvent;
+import ee.alkohol.juks.sirvid.containers.InputData.FLAGS;
+import ee.alkohol.juks.sirvid.containers.InputData.FLAGS.CALDATA;
+import ee.alkohol.juks.sirvid.containers.InputData.FLAGS.PERIOD;
+import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar.*;
+import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
+import ee.alkohol.juks.sirvid.containers.InputData;
 import ee.alkohol.juks.sirvid.exporters.Exporter;
 import ee.alkohol.juks.sirvid.math.Astronomy;
 
@@ -121,11 +126,10 @@ public class ICalculator {
         CalendarDAO = new DaoKalenderJDBCSqlite(inputData.jbdcConnect);
         
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
-        if(CalendarDAO.dbConnection != null) {
-            ResultSet eventTrRS = CalendarDAO.getEvents(10, 31, false);
+        if(CalendarDAO.isConnected()) {
+            ResultSet eventTrRS = CalendarDAO.getEvents(DbIdStatuses.MOON_NEW_M2.getDbId(), DbIdStatuses.SUNSET.getDbId(), false);
             while(eventTrRS.next()) { 
             	eventTranslations.put(eventTrRS.getString(FIELDS.ID), eventTrRS.getString(FIELDS.TITLE));
-            	System.out.println(eventTrRS.getString(FIELDS.ID) + eventTrRS.getString(FIELDS.TITLE));
             }
         }
         for (DbIdStatuses dbids : DbIdStatuses.values()) {
@@ -288,7 +292,7 @@ public class ICalculator {
         }
         
         // nothing to do further, if there is no DB connection
-        if(CalendarDAO.dbConnection != null) { 
+        if(CalendarDAO.isConnected()) { 
             
             // if calendar dates are required
             if(!inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE)) {
@@ -442,7 +446,7 @@ public class ICalculator {
     // helpers
     
     private String[] getLanguageDescriptor() {
-        return CalendarDAO.dbConnection == null ? null : LANG;
+        return CalendarDAO.isConnected() ? LANG : null;
     }
     
     public static LinkedHashMap<String,ICalProperty> generateAllDayEvent(int year, int month, int date) {

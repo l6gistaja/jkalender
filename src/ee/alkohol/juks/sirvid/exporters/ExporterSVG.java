@@ -1,7 +1,7 @@
 package ee.alkohol.juks.sirvid.exporters;
 
-import ee.alkohol.juks.sirvid.containers.ICalculator;
-import ee.alkohol.juks.sirvid.containers.ICalendar;
+import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public class ExporterSVG extends Exporter {
     

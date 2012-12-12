@@ -1,7 +1,8 @@
-package ee.alkohol.juks.sirvid.containers;
+package ee.alkohol.juks.sirvid.containers.ical;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import ee.alkohol.juks.sirvid.containers.InputData;
 
 public class ICalendar {
     

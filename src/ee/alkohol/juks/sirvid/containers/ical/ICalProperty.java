@@ -1,4 +1,4 @@
-package ee.alkohol.juks.sirvid.containers;
+package ee.alkohol.juks.sirvid.containers.ical;
 
 import java.util.LinkedHashMap;
 

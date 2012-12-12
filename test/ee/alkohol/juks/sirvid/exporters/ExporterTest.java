@@ -2,8 +2,8 @@ package ee.alkohol.juks.sirvid.exporters;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import ee.alkohol.juks.sirvid.containers.ICalculator;
 import ee.alkohol.juks.sirvid.containers.InputData;
+import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 
 public class ExporterTest {
     

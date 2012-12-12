@@ -1,6 +1,6 @@
 package ee.alkohol.juks.sirvid.exporters;
 
-import ee.alkohol.juks.sirvid.containers.ICalculator;
+import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 
 public abstract class Exporter {
     
