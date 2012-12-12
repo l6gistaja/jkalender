@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet href="runes.css" type="text/css"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+	<title>Pudrupäev. Heinaleedo</title>
+
+	<line y1="67" y2="200" x1="90" x2="90" />
+	<line y1="133" y2="133" x1="0" x2="33" />
+	<line y1="133" y2="133" x1="148" x2="181" />
+	
+	<path d="M33,133 A30,69 0 1,1 148,133"  />
+</svg>

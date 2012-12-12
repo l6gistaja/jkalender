@@ -24,12 +24,6 @@ public class ICalculator {
     public final static String[] LANG = {Keys.LANGUAGE, "ET"};
     public final static String UTC_TZ_ID = "GMT";
     
-    public static final class FIELDS {
-        public static final String ID = "id";
-        public static final String TITLE = "event";
-        public static final String DESCRIPTION = "more";
-    }
-    
     public static enum DbIdStatuses {
         
         UNDEFINED (-1, ""),
@@ -128,8 +122,11 @@ public class ICalculator {
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
         if(CalendarDAO.isConnected()) {
             ResultSet eventTrRS = CalendarDAO.getEvents(DbIdStatuses.MOON_NEW_M2.getDbId(), DbIdStatuses.SUNSET.getDbId(), false);
-            while(eventTrRS.next()) { 
-            	eventTranslations.put(eventTrRS.getString(FIELDS.ID), eventTrRS.getString(FIELDS.TITLE));
+            if(eventTrRS != null) {
+                while(eventTrRS.next()) { 
+                    eventTranslations.put(eventTrRS.getString(
+                            DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK()), eventTrRS.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle()));
+                }
             }
         }
         for (DbIdStatuses dbids : DbIdStatuses.values()) {
@@ -299,7 +296,7 @@ public class ICalculator {
             	
     	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
     	        	? new String[]{"maausk"}
-    	        	: new String[]{FIELDS.TITLE,"maausk"};
+    	        	: new String[]{DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle(),"maausk"};
     	        String nameDelimiter = "; ";
     	        
     	        // anniversaries
@@ -310,7 +307,7 @@ public class ICalculator {
     	        if(anniversaries != null) {
     	            while(anniversaries.next())
     	            {
-    	              int dbID = anniversaries.getInt(FIELDS.ID);
+    	              int dbID = anniversaries.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK());
     	              if(dbID == DbIdStatuses.LEAPDAY.getDbId() && !isLeapYear) { continue; }
     	              
     	              ICalEvent event = new ICalEvent();
@@ -319,7 +316,7 @@ public class ICalculator {
     	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(anniversaries, nameFields, nameDelimiter), LANG));
     	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
     	              event.properties.putAll(generateAllDayEvent(cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100));
-    	              String descr = anniversaries.getString(FIELDS.DESCRIPTION);
+    	              String descr = anniversaries.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
     	              if(isNotEmptyStr(descr)) {
     	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
     	              }
@@ -335,7 +332,7 @@ public class ICalculator {
                 if(gEasterEvents != null) {
                     while(gEasterEvents.next())
                     {
-                      int dbID = gEasterEvents.getInt(FIELDS.ID);
+                      int dbID = gEasterEvents.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK());
                       GregorianCalendar easterEventDate = getCalendar(tzID);
                       easterEventDate.setTime(gregorianEaster.getTime());
                       goodNight(easterEventDate);
@@ -347,7 +344,7 @@ public class ICalculator {
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(gEasterEvents, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID), null));
                           event.properties.putAll(generateAllDayEvent(easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE)));
-                          String descr = gEasterEvents.getString(FIELDS.DESCRIPTION);
+                          String descr = gEasterEvents.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                           }
@@ -362,7 +359,7 @@ public class ICalculator {
                 if(weekdayNths != null) {
                     while(weekdayNths.next())
                     {
-                      int dbID = weekdayNths.getInt(FIELDS.ID);
+                      int dbID = weekdayNths.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK());
                       int week = (int)(dbID / 10) % 10;
                       
                       GregorianCalendar weekdayNthDate = getCalendar(tzID);
@@ -378,7 +375,7 @@ public class ICalculator {
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(weekdayNths, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
                           event.properties.putAll(generateAllDayEvent(weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE)));
-                          String descr = weekdayNths.getString(FIELDS.DESCRIPTION);
+                          String descr = weekdayNths.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                           }
@@ -401,7 +398,7 @@ public class ICalculator {
                     
                     while(advents.next()) {
                         
-                        int dbID = advents.getInt(FIELDS.ID);
+                        int dbID = advents.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK());
                         int wDay = dbID % 10;
                         int scrollback = ( wDay < xwDay ) ? xwDay - wDay : 7;
                         scrollback += 7 * ( ((int)(dbID/10) % 100) -1 ) ;
@@ -419,7 +416,7 @@ public class ICalculator {
                             event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(advents, nameFields, nameDelimiter), LANG));
                             event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
                             event.properties.putAll(generateAllDayEvent(adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE)));
-                            String descr = advents.getString(FIELDS.DESCRIPTION);
+                            String descr = advents.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
                             if(isNotEmptyStr(descr)) {
                                 event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
                             }

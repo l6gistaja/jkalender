@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet href="runes.css" type="text/css"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+	<title>Pööripäev</title>
+
+	<line y1="100" y2="200" x1="100" x2="100" />
+	<path d="M0,67 A110,115 0 0,1 199,67"  />
+	<path d="M40,93 A130,375 0 0,1 159,93"  />
+
+</svg>

@@ -1,0 +1,10 @@
+line
+{
+	stroke: black;
+}
+
+polyline, path
+{
+	stroke: black;
+	fill: none;
+}
