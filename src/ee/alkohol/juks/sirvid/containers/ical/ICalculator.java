@@ -71,6 +71,8 @@ public class ICalculator {
     public String timespan;
     public GregorianCalendar gregorianEaster;
     public DaoKalenderJDBCSqlite CalendarDAO;
+    public GregorianCalendar calendarBegin;
+    public GregorianCalendar calendarEnd;
     
     public ICalculator(InputData inputData) throws SQLException {
         
@@ -85,8 +87,8 @@ public class ICalculator {
         boolean isLeapYear = cal.isLeapYear(cal.get(Calendar.YEAR));
         
         // initialize period of calculation
-        GregorianCalendar calendarBegin = getCalendar(tzID);
-        GregorianCalendar calendarEnd = getCalendar(tzID);
+        calendarBegin = getCalendar(tzID);
+        calendarEnd = getCalendar(tzID);
         StringBuilder calName = new StringBuilder();
         calName.append(cal.get(Calendar.YEAR));
         if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.MONTH)
