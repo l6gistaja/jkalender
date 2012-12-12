@@ -122,9 +122,10 @@ public class ICalculator {
         
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
         if(CalendarDAO.dbConnection != null) {
-            ResultSet eventTrRS = CalendarDAO.getAstronomicalEventTranslations();
+            ResultSet eventTrRS = CalendarDAO.getEvents(10, 31, false);
             while(eventTrRS.next()) { 
-            	eventTranslations.put(eventTrRS.getString("dbid"), eventTrRS.getString("name"));
+            	eventTranslations.put(eventTrRS.getString(FIELDS.ID), eventTrRS.getString(FIELDS.TITLE));
+            	System.out.println(eventTrRS.getString(FIELDS.ID) + eventTrRS.getString(FIELDS.TITLE));
             }
         }
         for (DbIdStatuses dbids : DbIdStatuses.values()) {

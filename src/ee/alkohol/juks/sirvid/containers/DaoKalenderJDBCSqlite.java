@@ -62,7 +62,4 @@ public class DaoKalenderJDBCSqlite {
         return fetchQueryResults(query.toString());
     }
     
-    public ResultSet getAstronomicalEventTranslations() {
-        return fetchQueryResults("select dbid, name from runes where dbid>9 and dbid<32");
-    }
 }
