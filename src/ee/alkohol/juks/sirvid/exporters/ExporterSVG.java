@@ -27,12 +27,12 @@ public class ExporterSVG extends Exporter {
         sb.append(" (under construction)</title>\n");
         
         if(sSVG.errorMsgs.size() > 0) {
-            sb.append("<text x=\"10\" y=\"20\" fill=\"red\">\n");
+            sb.append(SirvidSVG.errorTxtTags[0]);
             for(String errMsg : sSVG.errorMsgs) {
                 sb.append(errMsg);
                 sb.append("\n");
             }
-            sb.append("</text>\n");
+            sb.append(SirvidSVG.errorTxtTags[1]);
         } else {
         	String strokes = "stroke: " + sSVG.props.getProperty("strokeColor") + "; stroke-width : " + sSVG.props.getProperty("strokeWidth") + ";";
             sb.append("<style type=\"text/css\">\n");

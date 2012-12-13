@@ -16,14 +16,20 @@ public class SirvidRune {
 	private int width;
 	private String svgContent;
 	
-	public SirvidRune(ResultSet rune) throws SQLException, IOException {
-		setCx(rune.getInt("cx"));
-		setFilename(rune.getString(DaoKalenderJDBCSqlite.DbTables.RUNES.getDescription()));
-		setWidth(rune.getInt("width"));
-		setSvgContent(loadSVGcontent(getFilename()));
-	}
+	public SirvidRune(int cx, String filename, int width) throws SQLException, IOException {
+        setCx(cx);
+        setWidth(width);
+        if(filename != null) {
+            setFilename(filename);
+            setSvgContent(loadSVGcontent(getFilename()));
+        }
+    }
 	
-	/**
+	public SirvidRune(ResultSet rune) throws SQLException, IOException {
+	    this(rune.getInt("cx"), rune.getString(DaoKalenderJDBCSqlite.DbTables.RUNES.getDescription()), rune.getInt("width"));
+	}
+
+    /**
      * Parse graphics instructions from SVG file
      * 
      * As parsing SVG files with org.w3c.dom.* is extremely slow, it was decided to simply read SVGs thru and extract needed content manually.

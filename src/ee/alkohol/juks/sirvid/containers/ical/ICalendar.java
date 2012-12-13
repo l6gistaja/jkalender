@@ -18,6 +18,26 @@ public class ICalendar {
         public static final String CALENDAR_NAME = "x-wr-calname";
         public static final String CALENDAR_TIMEZONE  = "x-wr-timezone";
         public static final String SUMMARY  = "summary";
+        
+        /**
+         * Unique ICalendar ID of event. 
+         * 
+         * Beginning of field contains key-value pairs, which all are delimited by underscores '_'. 
+         * 
+         * Keys:
+         * <pre>
+         * k - event's ID in database
+         * y - year
+         * m - month
+         * d - day (date)
+         * l - lunation number of moonphase from {@link ee.alkohol.juks.sirvid.math.Astronomy#getLunationNumber(long, short, short)}
+         * e - type of Easter (value 'g' means Gregorian)
+         * a - geographical latitude of sunset or sunrise observer
+         * o - geographical longitude of sunset or sunrise observer
+         * </pre>
+         * 
+         * @see ICalendar#generateUID(String)
+         */
         public static final String UID  = "uid";
         public static final String DESCRIPTION  = "description";
         public static final String LANGUAGE  = "language";
@@ -51,6 +71,13 @@ public class ICalendar {
         if(initData != null) { iCalBody.putAll(initData); }
     }
     
+    /**
+     * Generate (end part of) unique ID required by ICalendar standard
+     * 
+     * @param id event's ID in database
+     * @return ICalendar's UID
+     * @see ICalendar.Keys#UID
+     */
     public String generateUID(String id) {
     	StringBuilder sb = new StringBuilder();
     	if(id != null) {

@@ -9,9 +9,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
-import ee.alkohol.juks.sirvid.containers.InputData.FLAGS;
-import ee.alkohol.juks.sirvid.containers.InputData.FLAGS.CALDATA;
-import ee.alkohol.juks.sirvid.containers.InputData.FLAGS.PERIOD;
 import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar.*;
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
@@ -99,14 +96,17 @@ public class ICalculator {
 		            	calName.append(String.format("-%02d", cal.get(Calendar.DATE)));
 		            	calendarBegin.setTime(inputData.getDate());
 		            	calendarEnd.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE), 23, 59, 59);
+		            	calendarEnd.set(Calendar.MILLISECOND, 999);
 		            } else { // month
 		            	calendarBegin.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 1);
 		            	calendarEnd.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+		            	calendarEnd.set(Calendar.MILLISECOND, 999);
 		            }
 		        	
         } else { // year
         	calendarBegin.set(cal.get(Calendar.YEAR), 0, 1);
         	calendarEnd.set(cal.get(Calendar.YEAR), 11, 31, 23, 59, 59);
+        	calendarEnd.set(Calendar.MILLISECOND, 999);
         }
         
         goodNight(calendarBegin);
@@ -489,7 +489,7 @@ public class ICalculator {
         return cal;
     }
     
-    public void goodNight(GregorianCalendar calendar) {
+    public static void goodNight(GregorianCalendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
