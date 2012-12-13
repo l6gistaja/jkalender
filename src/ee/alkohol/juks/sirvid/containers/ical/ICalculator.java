@@ -123,7 +123,11 @@ public class ICalculator {
         
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
         if(CalendarDAO.isConnected()) {
-            ResultSet eventTrRS = CalendarDAO.getEvents(DbIdStatuses.MOON_NEW_M2.getDbId(), DbIdStatuses.SUNSET.getDbId(), false);
+            ResultSet eventTrRS = CalendarDAO.getRange(
+                    DbIdStatuses.MOON_NEW_M2.getDbId(), 
+                    DbIdStatuses.SUNSET.getDbId(), 
+                    DaoKalenderJDBCSqlite.DbTables.EVENTS, 
+                    null);
             if(eventTrRS != null) {
                 while(eventTrRS.next()) { 
                     eventTranslations.put(eventTrRS.getString(
@@ -296,16 +300,18 @@ public class ICalculator {
             // if calendar dates are required
             if(!inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE)) {
             	
+                String nameDelimiter = "; ";
     	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
     	        	? new String[]{"maausk"}
     	        	: new String[]{DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle(),"maausk"};
-    	        String nameDelimiter = "; ";
+    	        String whereClause  = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) ? " and maausk is not null and trim(maausk) <> ''" : null;
     	        
     	        // anniversaries
-    	        ResultSet anniversaries = CalendarDAO.getEvents(
+    	        ResultSet anniversaries = CalendarDAO.getRange(
     	                (calendarBegin.get(Calendar.MONTH) + 1)*100 + calendarBegin.get(Calendar.DAY_OF_MONTH), 
-    	                (calendarEnd.get(Calendar.MONTH) + 1)*100 + calendarEnd.get(Calendar.DAY_OF_MONTH),
-    	        		inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+                        (calendarEnd.get(Calendar.MONTH) + 1)*100 + calendarEnd.get(Calendar.DAY_OF_MONTH), 
+                        DaoKalenderJDBCSqlite.DbTables.EVENTS, 
+                        whereClause);
     	        if(anniversaries != null) {
     	            while(anniversaries.next())
     	            {
@@ -330,7 +336,7 @@ public class ICalculator {
     	        }
     	        
     	        // Gregorian Easter related moveable feasts
-    	        ResultSet gEasterEvents = CalendarDAO.getEvents(1635, 2365, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+    	        ResultSet gEasterEvents = CalendarDAO.getRange(1635, 2365, DaoKalenderJDBCSqlite.DbTables.EVENTS, whereClause);
                 if(gEasterEvents != null) {
                     while(gEasterEvents.next())
                     {
@@ -357,7 +363,7 @@ public class ICalculator {
                 }
                 
                 // moveables
-                ResultSet weekdayNths = CalendarDAO.getEvents(10110, 11256, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+                ResultSet weekdayNths = CalendarDAO.getRange(10110, 11256, DaoKalenderJDBCSqlite.DbTables.EVENTS, whereClause);
                 if(weekdayNths != null) {
                     while(weekdayNths.next())
                     {
@@ -388,7 +394,7 @@ public class ICalculator {
                 }
                 
                 // advents
-                ResultSet advents = CalendarDAO.getEvents(3010, 3536, inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA));
+                ResultSet advents = CalendarDAO.getRange(3010, 3536, DaoKalenderJDBCSqlite.DbTables.EVENTS, whereClause);
                 if(advents != null) {
                     
                     GregorianCalendar xmasDay = getCalendar(tzID);

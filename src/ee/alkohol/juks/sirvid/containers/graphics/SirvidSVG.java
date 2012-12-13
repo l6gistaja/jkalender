@@ -41,7 +41,7 @@ public class SirvidSVG {
         if(CalendarDAO.isConnected()) {
             
         	if(weekDays[0].equals("P")) {
-        		ResultSet wd = CalendarDAO.getEvents(0, 6, false);
+        		ResultSet wd = CalendarDAO.getRange(0, 6, DaoKalenderJDBCSqlite.DbTables.EVENTS, null);
                 if(wd != null) {
                     try {
                         while(wd.next()) {
@@ -50,14 +50,14 @@ public class SirvidSVG {
                         }
                     }
                     catch(Exception e) {
-                        errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
+                        //errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
                     }
                 }
         		
             }
             
         	if(runes.isEmpty()) {
-        		ResultSet commonRunes = CalendarDAO.getRunes(0, ICalculator.DbIdStatuses.MOON_LAST.getDbId());
+        		ResultSet commonRunes = CalendarDAO.getRange(0, ICalculator.DbIdStatuses.MOON_LAST.getDbId(), DaoKalenderJDBCSqlite.DbTables.RUNES, null);
                 if(commonRunes != null) {
                     try {
                         while(commonRunes.next()) { 
@@ -65,7 +65,7 @@ public class SirvidSVG {
                                     new SirvidRune(commonRunes));
                         }
                     }
-                    catch(SQLException e) {
+                    catch(Exception e) {
                         errorMsgs.add("SVG runes init failed : " + e.getMessage());
                     }
                 }

@@ -65,7 +65,6 @@ public class DaoKalenderJDBCSqlite {
             return rs;
         }
         catch(SQLException e) {
-            // TODO Auto-generated catch block
             errorMsg = e.getMessage();
         }
         return null;
@@ -76,7 +75,7 @@ public class DaoKalenderJDBCSqlite {
         StringBuilder query = new StringBuilder("select * from ");
         query.append(table.getTable());
         query.append(" where ");
-        if(start == end) {
+        if(start >= end) {
             query.append(table.getPK());
             query.append(" = ");
             query.append(start);
@@ -92,16 +91,9 @@ public class DaoKalenderJDBCSqlite {
         return query;
     }
     
-    public ResultSet getEvents(int start, int end, boolean maausk) {
-    	StringBuilder query = generateSimpleQuery(start, end, DbTables.EVENTS);
-    	if(maausk) {
-    		query.append(" and maausk is not null and trim(maausk) <> ''");
-    	}
-        return fetchQueryResults(query.toString());
-    }
-    
-    public ResultSet getRunes(int start, int end) {
-        StringBuilder query = generateSimpleQuery(start, end, DbTables.RUNES);
+    public ResultSet getRange(int start, int end, DbTables table, String where) {
+        StringBuilder query = generateSimpleQuery(start, end, table);
+        if(where != null) { query.append(where); }
         return fetchQueryResults(query.toString());
     }
     

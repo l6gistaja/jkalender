@@ -1,7 +1,9 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -14,7 +16,7 @@ public class SirvidRune {
 	private int width;
 	private String svgContent;
 	
-	public SirvidRune(ResultSet rune) throws SQLException {
+	public SirvidRune(ResultSet rune) throws SQLException, IOException {
 		setCx(rune.getInt("cx"));
 		setFilename(rune.getString(DaoKalenderJDBCSqlite.DbTables.RUNES.getDescription()));
 		setWidth(rune.getInt("width"));
@@ -29,30 +31,28 @@ public class SirvidRune {
      * 
      * @param filename
      * @return content of svg tag without leading title tag
+	 * @throws IOException 
      */
 	
-    public String loadSVGcontent(String filename) {
+    public String loadSVGcontent(String filename) throws IOException {
         
         filename = SirvidSVG.dataPath + "svg/" + filename;
         StringBuilder svgContent =  new StringBuilder();
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(filename), "UTF-8"));
-            String strLine;
-            boolean beginOfGrafix = false; 
-            while ((strLine = br.readLine()) != null)   {
-                if(beginOfGrafix) {
-                    if(strLine.indexOf("</svg>") != -1) { break; }
-                    svgContent.append(strLine);
-                    svgContent.append("\n");
-                } else {
-                    if(strLine.indexOf("</title>") != -1) { beginOfGrafix = true; }
-                }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(filename), "UTF-8"));
+        String strLine;
+        boolean beginOfGrafix = false; 
+        while ((strLine = br.readLine()) != null)   {
+            if(beginOfGrafix) {
+                if(strLine.indexOf("</svg>") != -1) { break; }
+                svgContent.append(strLine);
+                svgContent.append("\n");
+            } else {
+                if(strLine.indexOf("</title>") != -1) { beginOfGrafix = true; }
             }
-            br.close();
         }
-        catch(Exception e) {
-            return null;
-        }
+        br.close();
+
         return svgContent.toString();
     }
     
