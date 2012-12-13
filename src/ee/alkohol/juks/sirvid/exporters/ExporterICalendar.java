@@ -8,6 +8,9 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalProperty;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
+/**
+ * Generic ICalendar related exports
+ */
 public abstract class ExporterICalendar extends Exporter {
     
 	public static enum components {VCALENDAR, VEVENT, VVENUE}

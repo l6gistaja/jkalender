@@ -3,7 +3,7 @@ package ee.alkohol.juks.sirvid.math;
 import java.util.HashMap;
 
 /**
- * Astronomical and calendar calculations
+ * Generic astronomical and calendar calculations
  * 
  * Most math taken from:
  * Meeus, Jean

@@ -1,13 +1,10 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
-import java.io.IOException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Properties;
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.PropertiesT;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
@@ -45,8 +42,7 @@ public class SirvidSVG {
         
         DaoKalenderJDBCSqlite CalendarDAO = new DaoKalenderJDBCSqlite(iCalc.inputData.jbdcConnect);
         
-        if(CalendarDAO.isConnected()) {
-            
+        if(CalendarDAO.isConnected()) {   
         	if(runes.isEmpty()) {
         		ResultSet commonRunes = CalendarDAO.getRange(0, ICalculator.DbIdStatuses.MOON_LAST.getDbId(), DaoKalenderJDBCSqlite.DbTables.RUNES, null);
                 if(commonRunes != null) {
@@ -61,28 +57,30 @@ public class SirvidSVG {
                     }
                 }
         	}
-            
-        	// dummy runes for testing or if anything goes wrong
-        	if(runes.isEmpty()) {
-        	    int[] dummys = {0, 7, ICalculator.DbIdStatuses.MOON_NEW_M2.getDbId(), ICalculator.DbIdStatuses.MOON_LAST.getDbId()+1};
-        	    ICalculator.DbIdStatuses[] dbIDs = ICalculator.DbIdStatuses.values();
-        	    for(int i = 0; i < dummys.length; i+=2){
-        	        for(int j = dummys[i];  j < dummys[i+1]; j++) {
-        	            String rTxt = (i == 0) ? weekDays[j] : dbIDs[j - 9].getName();
-                        try {
-                            SirvidRune sR = new SirvidRune(0, null, 100);
-                            sR.setFilename("dummy" + j + ".svg");
-                            sR.setSvgContent(errorTxtTags[0] + rTxt + errorTxtTags[1]);
-                            runes.put(new Integer(j), sR);
-                        }
-                        catch(Exception e) {
-                            errorMsgs.add("SVG dummy runes init failed : " + e.getMessage());
-                        }
-        	            
-        	        }
-        	    }
-        	}
+        }
+        
+    	// dummy runes for testing or if anything goes wrong
+    	if(runes.isEmpty()) {
+    	    int[] dummys = {0, 7, ICalculator.DbIdStatuses.MOON_NEW_M2.getDbId(), ICalculator.DbIdStatuses.MOON_LAST.getDbId()+1};
+    	    ICalculator.DbIdStatuses[] dbIDs = ICalculator.DbIdStatuses.values();
+    	    for(int i = 0; i < dummys.length; i+=2){
+    	        for(int j = dummys[i];  j < dummys[i+1]; j++) {
+    	            String rTxt = (i == 0) ? weekDays[j] : dbIDs[j - 9].getName();
+                    try {
+                        SirvidRune sR = new SirvidRune(0, null, 100);
+                        sR.setFilename("dummy" + j + ".svg");
+                        sR.setSvgContent(errorTxtTags[0] + rTxt + errorTxtTags[1]);
+                        runes.put(new Integer(j), sR);
+                    }
+                    catch(Exception e) {
+                        errorMsgs.add("SVG dummy runes init failed : " + e.getMessage());
+                    }
+    	            
+    	        }
+    	    }
+    	}
         	
+        if(CalendarDAO.isConnected()) {
             if(weekDays[0].equals("P")) {
                 ResultSet wd = CalendarDAO.getRange(0, 6, DaoKalenderJDBCSqlite.DbTables.EVENTS, null);
                 if(wd != null) {
