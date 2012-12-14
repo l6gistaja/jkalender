@@ -13,11 +13,22 @@ public class SirvidSVG {
     
     public static final String dataPath = "sirvid/";
     public static final String[] errorTxtTags = { "<text x=\"10\" y=\"10\" fill=\"red\">", "</text>" };
-    public static final class PropKeys {
-        public static final String WEEKDAYPADDING = "weekdayPaddingX";
+    public static enum  W {
+        X_MARGIN,
+        X_WEEKDAYPADDING,
+        
+        Y_MARGIN,
+        Y_FEASTSHEIGHT,
+        Y_MONTHLINEHEIGHT,
+        Y_WEEKDAYSHEIGHT,
+        Y_MOONPHASESHEIGHT,
+        
+        Y_MONTHLINEHEIGHT2,
+        Y_TOTAL              
     }
     
     public static PropertiesT props = new PropertiesT();
+    public static HashMap<W,Integer> widths = new HashMap<W,Integer>();
     public static HashMap<Integer,SirvidRune> runes = new HashMap<Integer,SirvidRune>();
     public static String[] weekDays = {"P","E","T","K","N","R","L"};
     public ArrayList<SirvidMonth> months = new ArrayList<SirvidMonth>();
@@ -34,6 +45,10 @@ public class SirvidSVG {
         if(props.isEmpty()) {
         	try {
                 props.load(this.getClass().getClassLoader().getResourceAsStream(dataPath + "svg_export.properties"));
+                for (W w : W.values()) {
+                    if(w.equals(W.Y_TOTAL) || w.equals(W.Y_MONTHLINEHEIGHT2)) { continue; }
+                    widths.put(w, props.getPropertyInt(w.toString()));
+                }
             }
             catch(Exception e) {
                 errorMsgs.add("Failed to open svg_export.properties : " + e.getMessage());

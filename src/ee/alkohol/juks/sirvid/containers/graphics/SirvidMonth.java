@@ -21,14 +21,13 @@ public class SirvidMonth {
         
         int beginX;
         int index = 0;
-        int wdPadding = SirvidSVG.props.getPropertyInt(SirvidSVG.PropKeys.WEEKDAYPADDING);
         do {
-            beginX = 0;
+            beginX = SirvidSVG.widths.get(SirvidSVG.W.X_MARGIN);
             if(index > 0) {
                 SirvidDay previousDay = days.get(index -1);
                 beginX = previousDay.beginX 
                         + SirvidSVG.runes.get(new Integer(previousDay.weekDay)).getWidth() 
-                        + wdPadding;
+                        + SirvidSVG.widths.get(SirvidSVG.W.X_WEEKDAYPADDING);
             }
             days.add(new SirvidDay(m, beginX));
             index ++;

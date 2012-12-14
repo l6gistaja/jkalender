@@ -68,7 +68,9 @@ public class ExporterSVG extends Exporter {
             sb.append("</defs>\n\n");
             
             // scaling
-            //sb.append("<g transform=\"scale(0.5)\">\n");
+            sb.append("<g transform=\"scale(");
+            sb.append(sSVG.props.getProperty("zoom"));
+            sb.append(")\">\n");
             
             for(SirvidMonth sM : sSVG.months) {
             	for(SirvidDay sD : sM.days){
@@ -93,9 +95,9 @@ public class ExporterSVG extends Exporter {
         }
         
         // scaling
-        //sb.append("\n</g>\n");
+        sb.append("\n</g>");
         
-        sb.append("</svg>");
+        sb.append("\n</svg>");
         return sb.toString();
     }
     
