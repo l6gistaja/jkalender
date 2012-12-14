@@ -2,6 +2,7 @@ package ee.alkohol.juks.sirvid.containers.graphics;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 
@@ -9,6 +10,7 @@ public class SirvidMonth {
     
     public GregorianCalendar first;
     public ArrayList<SirvidDay> days = new ArrayList<SirvidDay>();
+    public Date month;
     
     /**
      * Init and populate month container
@@ -18,16 +20,17 @@ public class SirvidMonth {
         
         first = m;
         GregorianCalendar monthEnd = getEndOfMonth(m);
+        month = m.getTime();
         
         int beginX;
         int index = 0;
         do {
-            beginX = SirvidSVG.widths.get(SirvidSVG.W.X_MARGIN);
+            beginX = SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN);
             if(index > 0) {
                 SirvidDay previousDay = days.get(index -1);
                 beginX = previousDay.beginX 
                         + SirvidSVG.runes.get(new Integer(previousDay.weekDay)).getWidth() 
-                        + SirvidSVG.widths.get(SirvidSVG.W.X_WEEKDAYPADDING);
+                        + SirvidSVG.widths.get(SirvidSVG.DIM.X_WEEKDAYPADDING);
             }
             days.add(new SirvidDay(m, beginX));
             index ++;

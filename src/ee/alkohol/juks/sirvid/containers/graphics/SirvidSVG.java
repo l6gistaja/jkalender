@@ -13,7 +13,7 @@ public class SirvidSVG {
     
     public static final String dataPath = "sirvid/";
     public static final String[] errorTxtTags = { "<text x=\"10\" y=\"10\" fill=\"red\">", "</text>" };
-    public static enum  W {
+    public static enum  DIM {
         X_MARGIN,
         X_WEEKDAYPADDING,
         
@@ -28,7 +28,7 @@ public class SirvidSVG {
     }
     
     public static PropertiesT props = new PropertiesT();
-    public static HashMap<W,Integer> widths = new HashMap<W,Integer>();
+    public static HashMap<DIM,Integer> widths = new HashMap<DIM,Integer>();
     public static HashMap<Integer,SirvidRune> runes = new HashMap<Integer,SirvidRune>();
     public static String[] weekDays = {"P","E","T","K","N","R","L"};
     public ArrayList<SirvidMonth> months = new ArrayList<SirvidMonth>();
@@ -45,8 +45,8 @@ public class SirvidSVG {
         if(props.isEmpty()) {
         	try {
                 props.load(this.getClass().getClassLoader().getResourceAsStream(dataPath + "svg_export.properties"));
-                for (W w : W.values()) {
-                    if(w.equals(W.Y_TOTAL) || w.equals(W.Y_MONTHLINEHEIGHT2)) { continue; }
+                for (DIM w : DIM.values()) {
+                    if(w.equals(DIM.Y_TOTAL) || w.equals(DIM.Y_MONTHLINEHEIGHT2)) { continue; }
                     widths.put(w, props.getPropertyInt(w.toString()));
                 }
             }
@@ -137,6 +137,20 @@ public class SirvidSVG {
     
     private static int generateMonthIndex(GregorianCalendar month) {
         return 12*month.get(Calendar.YEAR) + month.get(Calendar.MONTH);
+    }
+    
+    public int calculateY(DIM atPlace) {
+        int y = 0;
+        switch(atPlace) {
+            case Y_TOTAL : y += widths.get(DIM.Y_MOONPHASESHEIGHT);
+            case Y_MOONPHASESHEIGHT : y += widths.get(DIM.Y_MONTHLINEHEIGHT);
+            case Y_MONTHLINEHEIGHT2 : y += widths.get(DIM.Y_WEEKDAYSHEIGHT);
+            case Y_WEEKDAYSHEIGHT : y += widths.get(DIM.Y_MONTHLINEHEIGHT);
+            case Y_MONTHLINEHEIGHT : y += widths.get(DIM.Y_FEASTSHEIGHT);
+            case Y_FEASTSHEIGHT : y += widths.get(DIM.Y_MARGIN); break;
+            default : ;
+        }
+        return y;
     }
     
 }

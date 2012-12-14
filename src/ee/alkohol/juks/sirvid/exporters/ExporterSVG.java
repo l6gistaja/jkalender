@@ -42,6 +42,7 @@ public class ExporterSVG extends Exporter {
         } else {
         	
         	SimpleDateFormat dateFormat = new SimpleDateFormat(sSVG.props.getProperty("sdfDate"));
+        	SimpleDateFormat monthFormat = new SimpleDateFormat(sSVG.props.getProperty("sdfMonth"));
         	
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
@@ -72,13 +73,52 @@ public class ExporterSVG extends Exporter {
             sb.append(sSVG.props.getProperty("zoom"));
             sb.append(")\">\n");
             
+            int m = -1;
             for(SirvidMonth sM : sSVG.months) {
+                
+                m++;
+                int yBefore = m * sSVG.calculateY(SirvidSVG.DIM.Y_TOTAL);
+                int wdHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
+                
+                // month lines
+                SirvidDay lastDay = sM.days.get(sM.days.size()-1);
+                int maxX = lastDay.beginX + sSVG.runes.get(lastDay.weekDay).getWidth();
+                sb.append("\n<g>\n<title>");
+                sb.append(monthFormat.format(sM.month));
+                sb.append("</title>\n");
+                
+                int y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT);
+                sb.append("<line y1=\"");
+                sb.append(y);
+                sb.append("\" y2=\"");
+                sb.append(y);
+                sb.append("\" x1=\"");
+                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN));
+                sb.append("\" x2=\"");
+                sb.append(maxX);
+                sb.append("\"/>");
+                
+                y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT2);
+                sb.append("<line y1=\"");
+                sb.append(y);
+                sb.append("\" y2=\"");
+                sb.append(y);
+                sb.append("\" x1=\"");
+                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN));
+                sb.append("\" x2=\"");
+                sb.append(maxX);
+                sb.append("\"/>");
+                
+                sb.append("</g>\n");
+                
             	for(SirvidDay sD : sM.days){
             		
             		//weekdays
             		sb.append("\n<g transform=\"translate(");
             		sb.append(sD.beginX);
-            		sb.append(" 20)\">\n");
+            		sb.append(" ");
+            		sb.append(wdHeight);
+            		sb.append(")\">\n");
             		sb.append("<title content=\"structured text\">");
             		sb.append(dateFormat.format(sD.date));
             		sb.append("\n");
