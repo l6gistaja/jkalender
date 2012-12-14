@@ -11,8 +11,6 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public class ExporterSVG extends Exporter {
 	
-	public static final String SDF_DATE = "dd.MM";
-	
     public ExporterSVG () {
         super();
         this.setFileExtension(".svg");
@@ -23,8 +21,6 @@ public class ExporterSVG extends Exporter {
     public String generate(ICalculator iC) {
         
         SirvidSVG sSVG = new SirvidSVG(iC);
-        
-        SimpleDateFormat dateFormat = new SimpleDateFormat(SDF_DATE);
         StringBuilder sb = new StringBuilder();
         
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
@@ -45,16 +41,17 @@ public class ExporterSVG extends Exporter {
             
         } else {
         	
+        	SimpleDateFormat dateFormat = new SimpleDateFormat(sSVG.props.getProperty("sdfDate"));
+        	
         	// stylesheet 
-        	String strokes = "stroke: " + sSVG.props.getProperty("strokeColor") + "; stroke-width : " + sSVG.props.getProperty("strokeWidth") + ";";
             sb.append("\n<style type=\"text/css\">\n");
             sb.append("<![CDATA[\n");
             sb.append("line {");
-            sb.append(strokes);
+            sb.append(sSVG.props.getProperty("strokeCss"));
             sb.append(" }\n");
             sb.append("polyline, path { ");
-            sb.append(strokes);
-            sb.append(" fill: none; }\n");
+            sb.append(sSVG.props.getProperty("strokeCss"));
+            sb.append(" fill:none; }\n");
             sb.append("]]>\n");
             sb.append("</style>\n");
             
