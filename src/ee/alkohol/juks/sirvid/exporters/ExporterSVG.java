@@ -81,7 +81,7 @@ public class ExporterSVG extends Exporter {
             		sb.append(sD.beginX);
             		sb.append(" 20)\">\n");
             		sb.append("<title content=\"structured text\">");
-            		sb.append(dateFormat.format(sD.day.getTime())+sD.day.getTime().toString());
+            		sb.append(dateFormat.format(sD.date));
             		sb.append("\n");
             		sb.append(sSVG.weekDays[sD.weekDay]);
             		sb.append("</title>\n");

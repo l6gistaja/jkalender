@@ -1,18 +1,19 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class SirvidDay {
 	
-	public GregorianCalendar day;
+	public Date date;
 	public int weekDay;
 	public int beginX;
 	
 	public SirvidDay(GregorianCalendar day, int beginX) {
-		this.day = day;
+		this.date = day.getTime();
 		this.beginX = beginX;
-		this.weekDay = this.day.get(Calendar.DAY_OF_WEEK) - 1;
+		this.weekDay = day.get(Calendar.DAY_OF_WEEK) - 1;
 	}
 	
 }
