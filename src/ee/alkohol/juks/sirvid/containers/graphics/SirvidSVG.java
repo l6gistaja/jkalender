@@ -16,6 +16,7 @@ public class SirvidSVG {
     public static enum  DIM {
         X_MARGIN,
         X_WEEKDAYPADDING,
+        X_MONTHLINESEXTENSION,
         
         Y_MARGIN,
         Y_FEASTSHEIGHT,

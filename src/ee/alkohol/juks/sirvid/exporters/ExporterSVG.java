@@ -60,8 +60,8 @@ public class ExporterSVG extends Exporter {
             sb.append("\n<defs>\n");
             for(Integer sRdbID : sSVG.runes.keySet()) {
             	SirvidRune sR = sSVG.runes.get(sRdbID);
-            	sb.append("<g id=\"");
-            	sb.append(sR.getFilename());
+            	sb.append("<g id=\"r");
+            	sb.append(sRdbID);
             	sb.append("\">\n");
             	sb.append(sR.getSvgContent());
             	sb.append("</g>\n");
@@ -83,9 +83,9 @@ public class ExporterSVG extends Exporter {
                 // month lines
                 SirvidDay lastDay = sM.days.get(sM.days.size()-1);
                 int maxX = lastDay.beginX + sSVG.runes.get(lastDay.weekDay).getWidth();
-                sb.append("\n<g>\n<title>");
+                sb.append("\n<g><title>");
                 sb.append(monthFormat.format(sM.month));
-                sb.append("</title>\n");
+                sb.append("</title>");
                 
                 int y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT);
                 sb.append("<line y1=\"");
@@ -93,9 +93,9 @@ public class ExporterSVG extends Exporter {
                 sb.append("\" y2=\"");
                 sb.append(y);
                 sb.append("\" x1=\"");
-                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN));
+                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN) - SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
                 sb.append("\" x2=\"");
-                sb.append(maxX);
+                sb.append(maxX + SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
                 sb.append("\"/>");
                 
                 y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT2);
@@ -104,9 +104,9 @@ public class ExporterSVG extends Exporter {
                 sb.append("\" y2=\"");
                 sb.append(y);
                 sb.append("\" x1=\"");
-                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN));
+                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN) - SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
                 sb.append("\" x2=\"");
-                sb.append(maxX);
+                sb.append(maxX + SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
                 sb.append("\"/>");
                 
                 sb.append("</g>\n");
@@ -124,8 +124,8 @@ public class ExporterSVG extends Exporter {
             		sb.append("\n");
             		sb.append(sSVG.weekDays[sD.weekDay]);
             		sb.append("</title>\n");
-            		sb.append("<use xlink:href=\"#");
-            		sb.append(sSVG.runes.get(new Integer(sD.weekDay)).getFilename());
+            		sb.append("<use xlink:href=\"#r");
+            		sb.append(sD.weekDay);
             		sb.append("\"/>\n</g>\n");
             	}
 
