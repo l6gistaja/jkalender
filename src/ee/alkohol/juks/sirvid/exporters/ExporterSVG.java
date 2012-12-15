@@ -50,16 +50,26 @@ public class ExporterSVG extends Exporter {
         	monthFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	SimpleDateFormat timeFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfTime"));
         	timeFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        	double mfZoomRatio = SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
         	
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
             sb.append("<![CDATA[\n");
+            
             sb.append("line {");
             sb.append(SirvidSVG.props.getProperty("strokeCss"));
             sb.append(" }\n");
             sb.append("polyline, path { ");
             sb.append(SirvidSVG.props.getProperty("strokeCss"));
-            sb.append(" fill:none; }\n");
+            sb.append(" fill:none; } }\n");
+            
+            sb.append(".mf {\n line {");
+            sb.append("stroke:black; stroke-width:15;");
+            sb.append(" }\n");
+            sb.append("polyline, path { ");
+            sb.append("stroke:black; stroke-width:15;");
+            sb.append(" fill:none; } \n}\n");
+            
             sb.append("]]>\n");
             sb.append("</style>\n");
             
@@ -76,7 +86,7 @@ public class ExporterSVG extends Exporter {
             sb.append("</defs>\n\n");
             
             // scaling
-            sb.append("<g transform=\"scale(");
+            sb.append("<g class=\"m\" transform=\"scale(");
             sb.append(SirvidSVG.props.getProperty("zoom"));
             sb.append(")\">\n");
             
@@ -148,16 +158,13 @@ public class ExporterSVG extends Exporter {
             		sb.append("\"/>\n</g>\n");
             		
             		// moonphases
-            		if(SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT) > 0 && sD.moonphase != null ) {
-            			double zoomRatio = 1;
-            				//SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT) / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT);
+            		if(mfZoomRatio > 0 && sD.moonphase != null ) {
             			sb.append("\n<g transform=\"translate(");
-                		sb.append(sD.beginX + 
-                				((SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(sD.moonphaseID).getCx()) / zoomRatio));
+                		sb.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(sD.moonphaseID).getCx() * mfZoomRatio);
                 		sb.append(" ");
                 		sb.append(mfHeight);
-                		sb.append(") scale(");
-            			sb.append(zoomRatio);
+                		sb.append(")\"><g class=\"mf\" transform=\"scale(");
+            			sb.append(mfZoomRatio);
             			sb.append(")\">\n");
                 		sb.append("<title content=\"structured text\">");
                 		sb.append(dateFormat.format(new Date(sD.moonphase.getTimeInMillis())));
@@ -172,7 +179,7 @@ public class ExporterSVG extends Exporter {
                 		sb.append("</title>\n");
                 		sb.append("<use xlink:href=\"#r");
                 		sb.append(sD.moonphaseID);
-                		sb.append("\"/>\n</g>\n");
+                		sb.append("\"/>\n</g></g>\n");
             		}
             	}
 
