@@ -23,8 +23,11 @@ import ee.alkohol.juks.sirvid.math.Astronomy;
  */
 public class ICalculator {
     
-    public final static String[] LANG = {Keys.LANGUAGE, "ET"};
     public final static String UTC_TZ_ID = "GMT";
+    
+    public final static String[] LANG = {Keys.LANGUAGE, "ET"};
+    public final static String MV_TITLE = "maausk";
+    public final static String MV_WHERECLAUSE = " and maausk is not null and trim(maausk) <> ''";
     
     public static enum DbIdStatuses {
         
@@ -301,9 +304,9 @@ public class ICalculator {
             	
                 String nameDelimiter = "; ";
     	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
-    	        	? new String[]{"maausk"}
-    	        	: new String[]{DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle(),"maausk"};
-    	        String whereClause  = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) ? " and maausk is not null and trim(maausk) <> ''" : null;
+    	        	? new String[]{MV_TITLE}
+    	        	: new String[]{DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle(),MV_TITLE};
+    	        String whereClause  = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) ? MV_WHERECLAUSE : null;
     	        
     	        // anniversaries
     	        ResultSet anniversaries = CalendarDAO.getRange(

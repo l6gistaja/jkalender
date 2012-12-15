@@ -1,6 +1,8 @@
 package ee.alkohol.juks.sirvid.exporters;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidDay;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidMonth;
@@ -41,8 +43,10 @@ public class ExporterSVG extends Exporter {
             
         } else {
         	
-        	SimpleDateFormat dateFormat = new SimpleDateFormat(sSVG.props.getProperty("sdfDate"));
-        	SimpleDateFormat monthFormat = new SimpleDateFormat(sSVG.props.getProperty("sdfMonth"));
+        	SimpleDateFormat dateFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfDate"));
+        	dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        	SimpleDateFormat monthFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfMonth"));
+        	monthFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
@@ -81,10 +85,9 @@ public class ExporterSVG extends Exporter {
                 int wdHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
                 
                 // month lines
-                SirvidDay lastDay = sM.days.get(sM.days.size()-1);
-                int maxX = lastDay.beginX + sSVG.runes.get(lastDay.weekDay).getWidth();
+                int maxX = sM.getMaxX();
                 sb.append("\n<g><title>");
-                sb.append(monthFormat.format(sM.month));
+                sb.append(monthFormat.format(new Date(sM.month.getTimeInMillis())));
                 sb.append("</title>");
                 
                 int y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT);
@@ -120,9 +123,10 @@ public class ExporterSVG extends Exporter {
             		sb.append(wdHeight);
             		sb.append(")\">\n");
             		sb.append("<title content=\"structured text\">");
-            		sb.append(dateFormat.format(sD.date));
+            		//TODO: decide the TZ format!
+            		sb.append(dateFormat.format(new Date(sD.date.getTimeInMillis())));
             		sb.append("\n");
-            		sb.append(sSVG.weekDays[sD.weekDay]);
+            		sb.append(SirvidSVG.commonLabels.get(sD.weekDay)[0]);
             		sb.append("</title>\n");
             		sb.append("<use xlink:href=\"#r");
             		sb.append(sD.weekDay);

@@ -8,9 +8,8 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 
 public class SirvidMonth {
     
-    public GregorianCalendar first;
+    public GregorianCalendar month;
     public ArrayList<SirvidDay> days = new ArrayList<SirvidDay>();
-    public Date month;
     
     /**
      * Init and populate month container
@@ -18,9 +17,8 @@ public class SirvidMonth {
      */
     public SirvidMonth(GregorianCalendar m) {
         
-        first = m;
+        month = (GregorianCalendar) m.clone();
         GregorianCalendar monthEnd = getEndOfMonth(m);
-        month = m.getTime();
         
         int beginX;
         int index = 0;
@@ -49,5 +47,10 @@ public class SirvidMonth {
         monthEnd.set(Calendar.SECOND, 59);
         monthEnd.set(Calendar.MILLISECOND, 999);
         return monthEnd;
+    }
+    
+    public int getMaxX() {
+    	SirvidDay lastDay = days.get(days.size()-1);
+    	return lastDay.beginX + SirvidSVG.runes.get(lastDay.weekDay).getWidth();
     }
 }

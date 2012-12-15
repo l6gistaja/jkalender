@@ -6,12 +6,12 @@ import java.util.GregorianCalendar;
 
 public class SirvidDay {
 	
-	public Date date;
+	public GregorianCalendar date;
 	public int weekDay;
 	public int beginX;
 	
 	public SirvidDay(GregorianCalendar day, int beginX) {
-		this.date = day.getTime();
+		this.date = (GregorianCalendar) day.clone();
 		this.beginX = beginX;
 		this.weekDay = day.get(Calendar.DAY_OF_WEEK) - 1;
 	}
