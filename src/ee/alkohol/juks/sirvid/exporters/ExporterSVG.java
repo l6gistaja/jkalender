@@ -8,6 +8,7 @@ import ee.alkohol.juks.sirvid.containers.graphics.SirvidDay;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidMonth;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidRune;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG;
+import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG.DIM;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
@@ -54,18 +55,18 @@ public class ExporterSVG extends Exporter {
             sb.append("\n<style type=\"text/css\">\n");
             sb.append("<![CDATA[\n");
             sb.append("line {");
-            sb.append(sSVG.props.getProperty("strokeCss"));
+            sb.append(SirvidSVG.props.getProperty("strokeCss"));
             sb.append(" }\n");
             sb.append("polyline, path { ");
-            sb.append(sSVG.props.getProperty("strokeCss"));
+            sb.append(SirvidSVG.props.getProperty("strokeCss"));
             sb.append(" fill:none; }\n");
             sb.append("]]>\n");
             sb.append("</style>\n");
             
             // define runes
             sb.append("\n<defs>\n");
-            for(Integer sRdbID : sSVG.runes.keySet()) {
-            	SirvidRune sR = sSVG.runes.get(sRdbID);
+            for(Integer sRdbID : SirvidSVG.runes.keySet()) {
+            	SirvidRune sR = SirvidSVG.runes.get(sRdbID);
             	sb.append("<g id=\"r");
             	sb.append(sRdbID);
             	sb.append("\">\n");
@@ -76,7 +77,7 @@ public class ExporterSVG extends Exporter {
             
             // scaling
             sb.append("<g transform=\"scale(");
-            sb.append(sSVG.props.getProperty("zoom"));
+            sb.append(SirvidSVG.props.getProperty("zoom"));
             sb.append(")\">\n");
             
             int m = -1;
@@ -85,6 +86,7 @@ public class ExporterSVG extends Exporter {
                 m++;
                 int yBefore = m * sSVG.calculateY(SirvidSVG.DIM.Y_TOTAL);
                 int wdHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
+                int mfHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MOONPHASESHEIGHT);
                 
                 // month lines
                 int maxX = sM.getMaxX();
@@ -144,6 +146,34 @@ public class ExporterSVG extends Exporter {
             		sb.append("<use xlink:href=\"#r");
             		sb.append(sD.weekDay);
             		sb.append("\"/>\n</g>\n");
+            		
+            		// moonphases
+            		if(SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT) > 0 && sD.moonphase != null ) {
+            			double zoomRatio = 1;
+            				//SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT) / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT);
+            			sb.append("\n<g transform=\"translate(");
+                		sb.append(sD.beginX + 
+                				((SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(sD.moonphaseID).getCx()) / zoomRatio));
+                		sb.append(" ");
+                		sb.append(mfHeight);
+                		sb.append(") scale(");
+            			sb.append(zoomRatio);
+            			sb.append(")\">\n");
+                		sb.append("<title content=\"structured text\">");
+                		sb.append(dateFormat.format(new Date(sD.moonphase.getTimeInMillis())));
+                		sb.append(" ");
+                		sb.append(timeFormat.format(new Date(sD.moonphase.getTimeInMillis())));
+                		sb.append("\n");
+                		sb.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[0]);
+                		if(ICalculator.isNotEmptyStr(SirvidSVG.commonLabels.get(sD.moonphaseID)[1])){
+                			sb.append("\n");
+                			sb.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[1]);
+                		}
+                		sb.append("</title>\n");
+                		sb.append("<use xlink:href=\"#r");
+                		sb.append(sD.moonphaseID);
+                		sb.append("\"/>\n</g>\n");
+            		}
             	}
 
             }
