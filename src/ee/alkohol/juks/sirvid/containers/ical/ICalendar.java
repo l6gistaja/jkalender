@@ -10,7 +10,7 @@ public class ICalendar {
     public final String ID_SITE = "k.juks.alkohol.ee";
     
     public static final String SDF_DATE = "yyyyMMdd";
-    public static final String SDF_DATETIME = "yyyyMMdd'T'HHmmss'Z'";
+    public static final String SDF_DATETIME_UTC = "yyyyMMdd'T'HHmmss'Z'";
     
     public static final class Keys {
         public static final String CALENDAR_TYPE = "calscale";

@@ -1,8 +1,13 @@
 package ee.alkohol.juks.sirvid.exporters;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
+
 import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalProperty;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
@@ -68,19 +73,20 @@ public abstract class ExporterICalendar extends Exporter {
         Object propVal = prop.value;
         if(propVal != null) {
             
-            if(propVal instanceof java.util.Date) {
-                String type = prop.parameters.get(ICalendar.Keys.VALUE);
-                if(type != null) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat( type.equals(ICalendar.Values.DATE) ? ICalendar.SDF_DATE : ICalendar.SDF_DATETIME );
-                    return dateFormat.format(propVal);
-                }
+            if(propVal instanceof java.util.GregorianCalendar) {
+            	String type = prop.parameters.get(ICalendar.Keys.VALUE);
+            	SimpleDateFormat dateFormat = new SimpleDateFormat(
+            			type != null && type.equals(ICalendar.Values.DATE) 
+            				? ICalendar.SDF_DATE : ICalendar.SDF_DATETIME_UTC);
+            	dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+                return dateFormat.format(new Date(((java.util.GregorianCalendar) propVal).getTimeInMillis()));
             }
             
             return propVal.toString();
         }
         return "";
     }
-      
+	
     public HashMap<components, String[]> getComponentStrings() {
 		return componentStrings;
 	}

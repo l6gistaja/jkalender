@@ -19,7 +19,7 @@ import ee.alkohol.juks.sirvid.math.Astronomy;
 /**
  * Events calculator
  * 
- * NB! All calculated times are only in UTC/GMT!
+ * NB! All calculated dates and times are only GregorianCalendars in UTC/GMT!
  */
 public class ICalculator {
     
@@ -149,8 +149,7 @@ public class ICalculator {
         if(inputData.isCalculateSunrisesSunsets()) {
             
         	GregorianCalendar currentDay = getCalendar(tzID);
-        	currentDay.setTime(calendarBegin.getTime());
-        	goodNight(currentDay);
+        	currentDay.setTimeInMillis(calendarBegin.getTimeInMillis());
         	
         	String coordinates = "" + inputData.getLatitude() + ";" + inputData.getLongitude();
         	String[] driverData = {
@@ -184,10 +183,9 @@ public class ICalculator {
                             new ICalProperty("d_"
                             		+ String.format("%d%02d%02d", sg[0], sg[1], sg[2])
                             		+ "_" +iCal.generateUID(event.dbID), null));
-                    event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
+                    event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                     // use VVENUE component instead
                     //event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
-                    event.allDayEvent = false;
                     iCal.vEvent.add(event);
                 }
                 
@@ -219,8 +217,7 @@ public class ICalculator {
                     event.dbID = DbIdStatuses.SOLSTICE.getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, getLanguageDescriptor()));
                     event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID), null));
-                    event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                    event.allDayEvent = false;
+                    event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                     iCal.vEvent.add(event);
                 }
         	}
@@ -241,7 +238,6 @@ public class ICalculator {
             double k  = Astronomy.getLunationNumber(lunStartY, (short)(lunStartM +1), lunF);
             
             GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
-            goodNight(moonCal);
             do {
                 
                 int[] mfd = Astronomy.JD2calendarDate(Astronomy.moonPhaseK(k + (0.25 * lunF), (short)(lunF % 4), inputData.isUseDynamicTime()));
@@ -251,8 +247,7 @@ public class ICalculator {
                     event.dbID = MOONPHASES[lunF % 4].getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), getLanguageDescriptor()));
                     event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
-                    event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                    event.allDayEvent = false;
+                    event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                     iCal.vEvent.add(event);
                 }
                 
@@ -265,8 +260,7 @@ public class ICalculator {
                             event.dbID = MOONPHASES_MV[(lunF%4) + i].getDbId();
                             event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), getLanguageDescriptor()));
                             event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
-                            event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.getTime(), new String[]{Keys.VALUE, Values.DATETIME}));
-                            event.allDayEvent = false;
+                            event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                             iCal.vEvent.add(event);
                         }
                     }
@@ -293,7 +287,7 @@ public class ICalculator {
                 event.dbID = DbIdStatuses.EASTER.getDbId();
                 event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
                 event.properties.put(Keys.UID, new ICalProperty("y_" + year + "_e_g_" + iCal.generateUID(event.dbID), null));
-                event.properties.putAll(generateAllDayEvent(gregorianEaster.get(Calendar.YEAR), gregorianEaster.get(Calendar.MONTH) +1, gregorianEaster.get(Calendar.DATE)));
+                generateAllDayEvent(event, gregorianEaster.get(Calendar.YEAR), gregorianEaster.get(Calendar.MONTH) +1, gregorianEaster.get(Calendar.DATE));
                 iCal.vEvent.add(event);
             }
             
@@ -328,7 +322,7 @@ public class ICalculator {
     	              
     	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(anniversaries, nameFields, nameDelimiter), LANG));
     	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
-    	              event.properties.putAll(generateAllDayEvent(cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100));
+    	              generateAllDayEvent(event, cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100);
     	              String descr = anniversaries.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
     	              if(isNotEmptyStr(descr)) {
     	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
@@ -356,7 +350,7 @@ public class ICalculator {
                           event.dbID = dbID;
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(gEasterEvents, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID), null));
-                          event.properties.putAll(generateAllDayEvent(easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE)));
+                          generateAllDayEvent(event, easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE));
                           String descr = gEasterEvents.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
@@ -387,7 +381,7 @@ public class ICalculator {
                           event.dbID = dbID;
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(weekdayNths, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
-                          event.properties.putAll(generateAllDayEvent(weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE)));
+                          generateAllDayEvent(event, weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE));
                           String descr = weekdayNths.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
                           if(isNotEmptyStr(descr)) {
                               event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
@@ -428,7 +422,7 @@ public class ICalculator {
                             event.dbID = dbID;
                             event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(advents, nameFields, nameDelimiter), LANG));
                             event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
-                            event.properties.putAll(generateAllDayEvent(adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE)));
+                            generateAllDayEvent(event, adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE));
                             String descr = advents.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
                             if(isNotEmptyStr(descr)) {
                                 event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
@@ -459,14 +453,19 @@ public class ICalculator {
         return CalendarDAO.isConnected() ? LANG : null;
     }
     
+    public void generateAllDayEvent(ICalEvent event, int year, int month, int date) {
+    	event.properties.putAll(generateAllDayEvent(year, month, date));
+    	event.allDayEvent = true;
+    }
+    
     public static LinkedHashMap<String,ICalProperty> generateAllDayEvent(int year, int month, int date) {
         LinkedHashMap<String,ICalProperty> y = new LinkedHashMap<String,ICalProperty>();
         GregorianCalendar cal = getCalendar(UTC_TZ_ID);
         cal.set(year, month-1, date, 0, 0, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        y.put(Keys.EVENT_START, new ICalProperty(new Date(cal.getTimeInMillis()), new String[]{Keys.VALUE,Values.DATE}));
+        y.put(Keys.EVENT_START, new ICalProperty(cal.clone(), new String[]{Keys.VALUE,Values.DATE}));
         cal.add(Calendar.DATE, 1);
-        y.put(Keys.EVENT_END, new ICalProperty(new Date(cal.getTimeInMillis()), new String[]{Keys.VALUE,Values.DATE}));
+        y.put(Keys.EVENT_END, new ICalProperty(cal.clone(), new String[]{Keys.VALUE,Values.DATE}));
         return y;
     }
     
@@ -491,7 +490,7 @@ public class ICalculator {
     public static GregorianCalendar getCalendar(String TzID) {
         GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone(TzID));
         cal.setGregorianChange(new Date(Long.MIN_VALUE));
-        cal.set(Calendar.MILLISECOND, 0);
+        goodNight(cal);
         return cal;
     }
     

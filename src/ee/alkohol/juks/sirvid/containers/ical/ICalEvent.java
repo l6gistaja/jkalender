@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 public class ICalEvent {
     
     public int dbID = ICalculator.DbIdStatuses.UNDEFINED.getDbId();
-    public boolean allDayEvent = true;
+    public boolean allDayEvent = false;
     public LinkedHashMap<String,ICalProperty> properties = new LinkedHashMap<String,ICalProperty>();
     
 }
