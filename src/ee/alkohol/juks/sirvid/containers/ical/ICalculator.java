@@ -16,6 +16,11 @@ import ee.alkohol.juks.sirvid.containers.InputData;
 import ee.alkohol.juks.sirvid.exporters.Exporter;
 import ee.alkohol.juks.sirvid.math.Astronomy;
 
+/**
+ * Events calculator
+ * 
+ * NB! All calculated times are only in UTC/GMT!
+ */
 public class ICalculator {
     
     public final static String[] LANG = {Keys.LANGUAGE, "ET"};
@@ -458,9 +463,10 @@ public class ICalculator {
         LinkedHashMap<String,ICalProperty> y = new LinkedHashMap<String,ICalProperty>();
         GregorianCalendar cal = getCalendar(UTC_TZ_ID);
         cal.set(year, month-1, date, 0, 0, 0);
-        y.put(Keys.EVENT_START, new ICalProperty(cal.getTime(), new String[]{Keys.VALUE,Values.DATE}));
+        cal.set(Calendar.MILLISECOND, 0);
+        y.put(Keys.EVENT_START, new ICalProperty(new Date(cal.getTimeInMillis()), new String[]{Keys.VALUE,Values.DATE}));
         cal.add(Calendar.DATE, 1);
-        y.put(Keys.EVENT_END, new ICalProperty(cal.getTime(), new String[]{Keys.VALUE,Values.DATE}));
+        y.put(Keys.EVENT_END, new ICalProperty(new Date(cal.getTimeInMillis()), new String[]{Keys.VALUE,Values.DATE}));
         return y;
     }
     
