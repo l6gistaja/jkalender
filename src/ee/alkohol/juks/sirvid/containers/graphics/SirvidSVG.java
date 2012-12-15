@@ -11,6 +11,7 @@ import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.PropertiesT;
+import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
@@ -138,6 +139,8 @@ public class SirvidSVG {
             date0.add(Calendar.MONTH, 1);
         } while (date0.before(date1));
         
+        populateEvents();
+        
     }
     
     private static int generateMonthIndex(GregorianCalendar month) {
@@ -183,7 +186,30 @@ public class SirvidSVG {
     }
     
     private void populateEvents() {
-    	
+    	for(ICalEvent event : iCalc.iCal.vEvent) {
+    		if(event.allDayEvent) {
+    			
+    		} else { // NOT allDayEvent
+    			
+    			GregorianCalendar timeZoned = fromUTCtoTz(
+    					(GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value, 
+    					iCalc.inputData.getTimezone());
+    			int monthIndex = generateMonthIndex(timeZoned);
+    			SirvidMonth sM = months.get(monthIndex-beginMonth);
+    			if(sM == null) { continue; }
+    			SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
+    			if(sD == null) { continue; }
+    			
+    			GregorianCalendar tzdAsUTC = calendarAsUTCCalendar(timeZoned);
+    			if(ICalculator.DbIdStatuses.SOLSTICE.getDbId() == event.dbID) { }
+    			else if(ICalculator.DbIdStatuses.SUNRISE.getDbId() == event.dbID) { sD.sunrise = tzdAsUTC; }
+				else if(ICalculator.DbIdStatuses.SUNSET.getDbId() == event.dbID) { sD.sunset = tzdAsUTC; } 
+				else { 
+					sD.moonphase = tzdAsUTC;
+					sD.moonphaseID = event.dbID;
+				}
+    		}
+    	}
     }
     
 }

@@ -47,6 +47,8 @@ public class ExporterSVG extends Exporter {
         	dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	SimpleDateFormat monthFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfMonth"));
         	monthFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        	SimpleDateFormat timeFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfTime"));
+        	timeFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
@@ -123,10 +125,21 @@ public class ExporterSVG extends Exporter {
             		sb.append(wdHeight);
             		sb.append(")\">\n");
             		sb.append("<title content=\"structured text\">");
-            		//TODO: decide the TZ format!
             		sb.append(dateFormat.format(new Date(sD.date.getTimeInMillis())));
             		sb.append("\n");
             		sb.append(SirvidSVG.commonLabels.get(sD.weekDay)[0]);
+            		if(sD.sunrise != null) {
+            			sb.append("\n");
+            			sb.append(timeFormat.format(new Date(sD.sunrise.getTimeInMillis())));
+            			sb.append(" ");
+            			sb.append(SirvidSVG.commonLabels.get(ICalculator.DbIdStatuses.SUNRISE.getDbId())[0]);
+            		}
+            		if(sD.sunset != null) {
+            			sb.append("\n");
+            			sb.append(timeFormat.format(new Date(sD.sunset.getTimeInMillis())));
+            			sb.append(" ");
+            			sb.append(SirvidSVG.commonLabels.get(ICalculator.DbIdStatuses.SUNSET.getDbId())[0]);
+            		}
             		sb.append("</title>\n");
             		sb.append("<use xlink:href=\"#r");
             		sb.append(sD.weekDay);
