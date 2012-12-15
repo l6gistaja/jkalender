@@ -31,7 +31,7 @@ public class ExporterSVG extends Exporter {
         sb.append("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n");
         sb.append("<title>");
         sb.append(iC.iCal.iCalBody.get(ICalendar.Keys.CALENDAR_NAME).value);
-        sb.append(" (under construction)</title>\n");
+        sb.append("</title>\n");
         
         if(sSVG.errorMsgs.size() > 0) {
         	
@@ -55,23 +55,13 @@ public class ExporterSVG extends Exporter {
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
             sb.append("<![CDATA[\n");
-            
-            sb.append("line {");
-            sb.append(SirvidSVG.props.getProperty("strokeCss"));
-            sb.append(" }\n");
-            sb.append("polyline, path { ");
-            sb.append(SirvidSVG.props.getProperty("strokeCss"));
-            sb.append(" fill:none; } }\n");
-            
-            sb.append(".mf {\n line {");
-            sb.append("stroke:black; stroke-width:15;");
-            sb.append(" }\n");
-            sb.append("polyline, path { ");
-            sb.append("stroke:black; stroke-width:15;");
-            sb.append(" fill:none; } \n}\n");
-            
+            sb.append(".global ");
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")));
+            sb.append(".mf ");
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/mfZoomRatio));
             sb.append("]]>\n");
             sb.append("</style>\n");
+            
             
             // define runes
             sb.append("\n<defs>\n");
@@ -86,7 +76,7 @@ public class ExporterSVG extends Exporter {
             sb.append("</defs>\n\n");
             
             // scaling
-            sb.append("<g class=\"m\" transform=\"scale(");
+            sb.append("<g class=\"global\" transform=\"scale(");
             sb.append(SirvidSVG.props.getProperty("zoom"));
             sb.append(")\">\n");
             
@@ -163,7 +153,7 @@ public class ExporterSVG extends Exporter {
                 		sb.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(sD.moonphaseID).getCx() * mfZoomRatio);
                 		sb.append(" ");
                 		sb.append(mfHeight);
-                		sb.append(")\"><g class=\"mf\" transform=\"scale(");
+                		sb.append(")\"><g transform=\"scale(");
             			sb.append(mfZoomRatio);
             			sb.append(")\">\n");
                 		sb.append("<title content=\"structured text\">");
@@ -179,7 +169,8 @@ public class ExporterSVG extends Exporter {
                 		sb.append("</title>\n");
                 		sb.append("<use xlink:href=\"#r");
                 		sb.append(sD.moonphaseID);
-                		sb.append("\"/>\n</g></g>\n");
+                		sb.append("\" class=\"mf\"/>");
+                		sb.append("\n</g></g>\n");
             		}
             	}
 
@@ -193,6 +184,16 @@ public class ExporterSVG extends Exporter {
         
         sb.append("\n</svg>");
         return sb.toString();
+    }
+    
+    private String generateCssClass(double strokeZoom) {
+    	StringBuilder sb = new StringBuilder();
+    	sb.append("{ ");
+    	sb.append(SirvidSVG.props.getProperty("commonCss"));
+    	sb.append(" stroke-width:");
+    	sb.append(strokeZoom);
+    	sb.append("; }\n");
+		return sb.toString();
     }
     
 }

@@ -197,6 +197,7 @@ public class SirvidSVG {
     			int monthIndex = generateMonthIndex(timeZoned);
     			SirvidMonth sM = months.get(monthIndex-beginMonth);
     			if(sM == null) { continue; }
+    			System.out.println(timeZoned.getTime().toString() + " /// " + timeZoned.get(Calendar.DATE) + " /// " +sM.days.size());
     			SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
     			if(sD == null) { continue; }
     			
