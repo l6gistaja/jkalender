@@ -19,7 +19,7 @@ public class SirvidSVG {
     
     public static final String dataPath = "sirvid/";
     public static final String[] errorTxtTags = { "<text x=\"10\" y=\"10\" fill=\"red\">", "</text>" };
-    //public static final String[] weekDays = {"P","E","T","K","N","R","L"};
+    public static final String[] weekDays = {"P","E","T","K","N","R","L"};
     public static enum  DIM {
         X_MARGIN,
         X_WEEKDAYPADDING,
@@ -83,29 +83,6 @@ public class SirvidSVG {
         	}
         }
         
-        /*
-    	// dummy runes for testing or if anything goes wrong
-    	if(runes.isEmpty()) {
-    	    int[] dummys = {0, 7, ICalculator.DbIdStatuses.MOON_NEW_M2.getDbId(), ICalculator.DbIdStatuses.MOON_LAST.getDbId()+1};
-    	    ICalculator.DbIdStatuses[] dbIDs = ICalculator.DbIdStatuses.values();
-    	    for(int i = 0; i < dummys.length; i+=2){
-    	        for(int j = dummys[i];  j < dummys[i+1]; j++) {
-    	            String rTxt = (i == 0) ? weekDays[j] : dbIDs[j - 9].getName();
-                    try {
-                        SirvidRune sR = new SirvidRune(0, null, 100);
-                        sR.setFilename("dummy" + j + ".svg");
-                        sR.setSvgContent(errorTxtTags[0] + rTxt + errorTxtTags[1]);
-                        runes.put(new Integer(j), sR);
-                    }
-                    catch(Exception e) {
-                        errorMsgs.add("SVG dummy runes init failed : " + e.getMessage());
-                    }
-    	            
-    	        }
-    	    }
-    	}
-        */
-        
         if(CalendarDAO.isConnected()) {
                 ResultSet wd = CalendarDAO.getRange(0, ICalculator.DbIdStatuses.SUNSET.getDbId(), DaoKalenderJDBCSqlite.DbTables.EVENTS, null);
                 if(wd != null) {
@@ -121,8 +98,9 @@ public class SirvidSVG {
                         //errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
                     }
                 }
-            
-        } 
+        }
+        
+        dummyRunes();
         
         // first day of beginning month
         GregorianCalendar date0 = calendarAsUTCCalendar(iC.calendarBegin);
@@ -136,9 +114,9 @@ public class SirvidSVG {
         // init and populate sirvi-containers
         do {
             months.add(new SirvidMonth(date0));
-            date0.add(Calendar.MONTH, 1);
         } while (date0.before(date1));
         
+        dummyRunes();
         populateEvents();
         
     }
@@ -197,7 +175,6 @@ public class SirvidSVG {
     			int monthIndex = generateMonthIndex(timeZoned);
     			SirvidMonth sM = months.get(monthIndex-beginMonth);
     			if(sM == null) { continue; }
-    			System.out.println(timeZoned.getTime().toString() + " /// " + timeZoned.get(Calendar.DATE) + " /// " +sM.days.size());
     			SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
     			if(sD == null) { continue; }
     			
@@ -211,6 +188,43 @@ public class SirvidSVG {
 				}
     		}
     	}
+    }
+    
+    // dummy runes for testing or if anything goes wrong
+    private void dummyRunes() {
+        
+        boolean emptyRunes = runes.isEmpty();
+        boolean emptyCommonLabels = commonLabels.isEmpty();
+        
+        if(emptyRunes || emptyCommonLabels) {
+            int[] dummys = {0, 7, ICalculator.DbIdStatuses.MOON_NEW_M2.getDbId(), ICalculator.DbIdStatuses.MOON_LAST.getDbId()+1};
+            ICalculator.DbIdStatuses[] dbIDs = ICalculator.DbIdStatuses.values();
+            for(int i = 0; i < dummys.length; i+=2){
+                for(int j = dummys[i];  j < dummys[i+1]; j++) {
+                    String rTxt = (i == 0) ? weekDays[j] : dbIDs[j - 9].getName();
+                    try {
+                        if(emptyRunes) {
+                            SirvidRune sR = new SirvidRune(0, null, 100);
+                            sR.setFilename("dummy" + j + ".svg");
+                            sR.setSvgContent(errorTxtTags[0] + rTxt + errorTxtTags[1]);
+                            runes.put(new Integer(j), sR);
+                        }
+                        if(emptyCommonLabels) {
+                            commonLabels.put(new Integer(j), new String[] {rTxt, null } );
+                        }
+                    }
+                    catch(Exception e) {
+                        errorMsgs.add("SVG dummy runes init failed : " + e.getMessage());
+                    }
+                    
+                }
+            }
+        }
+        
+        if(emptyCommonLabels) {
+            ICalculator.DbIdStatuses[] other = {ICalculator.DbIdStatuses.SUNRISE, ICalculator.DbIdStatuses.SUNSET};
+            for(ICalculator.DbIdStatuses dbID : other) { commonLabels.put(new Integer(dbID.getDbId()), new String[] {dbID.getName(), null } ); }
+        }
     }
     
 }
