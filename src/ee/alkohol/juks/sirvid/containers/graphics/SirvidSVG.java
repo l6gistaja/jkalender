@@ -35,10 +35,10 @@ public class SirvidSVG {
         Y_TOTAL              
     }
     
-    public static PropertiesT props = new PropertiesT();
-    public static HashMap<DIM,Integer> widths = new HashMap<DIM,Integer>();
-    public static HashMap<Integer,SirvidRune> runes = new HashMap<Integer,SirvidRune>();
-    public static HashMap<Integer,String[]> commonLabels = new HashMap<Integer,String[]>();
+    public static PropertiesT props = null;
+    public static HashMap<DIM,Integer> widths = null;
+    public static HashMap<Integer,SirvidRune> runes = null;
+    public static HashMap<Integer,String[]> commonLabels = null;
     public ArrayList<SirvidMonth> months = new ArrayList<SirvidMonth>();
     
     private ICalculator iCalc;
@@ -50,9 +50,11 @@ public class SirvidSVG {
         
         iCalc = iC;
         
-        if(props.isEmpty()) {
+        if(props == null) {
+            props = new PropertiesT();
         	try {
                 props.load(this.getClass().getClassLoader().getResourceAsStream(dataPath + "svg_export.properties"));
+                if(widths == null) { widths = new HashMap<DIM,Integer>(); }
                 for (DIM w : DIM.values()) {
                     if(w.equals(DIM.Y_TOTAL) || w.equals(DIM.Y_MONTHLINEHEIGHT2)) { continue; }
                     widths.put(w, props.getPropertyInt(w.toString()));
@@ -63,41 +65,43 @@ public class SirvidSVG {
             }
         }
         
-        DaoKalenderJDBCSqlite CalendarDAO = new DaoKalenderJDBCSqlite(iCalc.inputData.jbdcConnect);
+        DaoKalenderJDBCSqlite CalendarDAO = iCalc.CalendarDAO;
         
-        
-        if(CalendarDAO.isConnected()) {   
-        	if(runes.isEmpty()) {
+        if(runes == null) {
+            runes = new HashMap<Integer,SirvidRune>();
+            if(CalendarDAO.isConnected()) {
         		ResultSet commonRunes = CalendarDAO.getRange(0, ICalculator.DbIdStatuses.MOON_LAST.getDbId(), DaoKalenderJDBCSqlite.DbTables.RUNES, null);
                 if(commonRunes != null) {
                     try {
                         while(commonRunes.next()) { 
-                            runes.put(new Integer(commonRunes.getInt(DaoKalenderJDBCSqlite.DbTables.RUNES.getPK())),
-                                    new SirvidRune(commonRunes));
+                            runes.put(new Integer(commonRunes.getInt(DaoKalenderJDBCSqlite.DbTables.RUNES.getPK())), new SirvidRune(commonRunes));
                         }
                     }
                     catch(Exception e) {
                         errorMsgs.add("SVG runes init failed : " + e.getMessage());
                     }
                 }
-        	}
+            }
         }
         
-        if(CalendarDAO.isConnected()) {
-                ResultSet wd = CalendarDAO.getRange(0, ICalculator.DbIdStatuses.SUNSET.getDbId(), DaoKalenderJDBCSqlite.DbTables.EVENTS, null);
-                if(wd != null) {
-                    try {
-                        while(wd.next()) {
-                        	commonLabels.put(new Integer(wd.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK())), new String[] {
-                        		wd.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle()),
-                        		wd.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription())
-                        	});
+        if(commonLabels == null) {
+            commonLabels = new HashMap<Integer,String[]>();
+            if(CalendarDAO.isConnected()) {
+                    ResultSet wd = CalendarDAO.getRange(0, ICalculator.DbIdStatuses.SUNSET.getDbId(), DaoKalenderJDBCSqlite.DbTables.EVENTS, null);
+                    if(wd != null) {
+                        try {
+                            while(wd.next()) {
+                            	commonLabels.put(new Integer(wd.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK())), new String[] {
+                            		wd.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle()),
+                            		wd.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription())
+                            	});
+                            }
+                        }
+                        catch(Exception e) {
+                            //errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
                         }
                     }
-                    catch(Exception e) {
-                        //errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
-                    }
-                }
+            }
         }
         
         dummyRunes();
@@ -165,21 +169,27 @@ public class SirvidSVG {
     
     private void populateEvents() {
     	for(ICalEvent event : iCalc.iCal.vEvent) {
+    	    
+    	    GregorianCalendar timeZoned = event.allDayEvent 
+    	            ? (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value
+    	            :  fromUTCtoTz( (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value, iCalc.inputData.getTimezone());
+            int monthIndex = generateMonthIndex(timeZoned);
+            SirvidMonth sM = months.get(monthIndex-beginMonth);
+            if(sM == null) { continue; }
+            SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
+            if(sD == null) { continue; }
+    	    
     		if(event.allDayEvent) {
-    			
-    		} else { // NOT allDayEvent
-    			
-    			GregorianCalendar timeZoned = fromUTCtoTz(
-    					(GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value, 
-    					iCalc.inputData.getTimezone());
-    			int monthIndex = generateMonthIndex(timeZoned);
-    			SirvidMonth sM = months.get(monthIndex-beginMonth);
-    			if(sM == null) { continue; }
-    			SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
-    			if(sD == null) { continue; }
-    			
+    		    
+    		    initFeastRune(event, sD);
+    		    
+    		} else {
+    		    
     			GregorianCalendar tzdAsUTC = calendarAsUTCCalendar(timeZoned);
-    			if(ICalculator.DbIdStatuses.SOLSTICE.getDbId() == event.dbID) { }
+    			if(ICalculator.DbIdStatuses.SOLSTICE.getDbId() == event.dbID) {
+    			    initFeastRune(event, sD);
+    			    sD.solstice = tzdAsUTC;
+    			}
     			else if(ICalculator.DbIdStatuses.SUNRISE.getDbId() == event.dbID) { sD.sunrise = tzdAsUTC; }
 				else if(ICalculator.DbIdStatuses.SUNSET.getDbId() == event.dbID) { sD.sunset = tzdAsUTC; } 
 				else { 
@@ -190,7 +200,33 @@ public class SirvidSVG {
     	}
     }
     
-    // dummy runes for testing or if anything goes wrong
+    private void initFeastRune(ICalEvent event, SirvidDay sirvidDay) {
+        
+        SirvidRune sR = SirvidSVG.runes.get(new Integer(event.dbID));
+        boolean runeExists = false;
+        if(sR != null) {
+            runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
+        } else {
+            ResultSet feastRune = iCalc.CalendarDAO.getRange(event.dbID, event.dbID, DaoKalenderJDBCSqlite.DbTables.RUNES, null);
+            if(feastRune != null) {
+                try {
+                    while(feastRune.next()) {
+                        sR = new SirvidRune(feastRune);
+                        runes.put(new Integer(event.dbID), (SirvidRune) sR);
+                        runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
+                    }
+                }
+                catch(Exception e) {
+                    errorMsgs.add("SVG feastrune init failed : " + e.getMessage());
+                }
+            }
+        }
+        if(runeExists) { sirvidDay.feasts.add(event); }
+    }
+    
+    /**
+     * Dummy runes for testing or if anything goes wrong
+     */
     private void dummyRunes() {
         
         boolean emptyRunes = runes.isEmpty();

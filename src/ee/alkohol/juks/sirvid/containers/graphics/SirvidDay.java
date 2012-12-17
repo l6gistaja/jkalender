@@ -1,8 +1,10 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 
 public class SirvidDay {
 	
@@ -11,8 +13,10 @@ public class SirvidDay {
 	public int beginX;
 	public GregorianCalendar sunrise;
 	public GregorianCalendar sunset;
+	public GregorianCalendar solstice;
 	public GregorianCalendar moonphase;
 	public int moonphaseID = 0;
+	public ArrayList<ICalEvent> feasts = new ArrayList<ICalEvent>();
 	
 	public SirvidDay(GregorianCalendar day, int beginX) {
 		this.date = (GregorianCalendar) day.clone();

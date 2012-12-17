@@ -2,6 +2,7 @@ package ee.alkohol.juks.sirvid.exporters;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidDay;
@@ -9,8 +10,10 @@ import ee.alkohol.juks.sirvid.containers.graphics.SirvidMonth;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidRune;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG.DIM;
+import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar.Keys;
 
 public class ExporterSVG extends Exporter {
 	
@@ -51,6 +54,7 @@ public class ExporterSVG extends Exporter {
         	SimpleDateFormat timeFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfTime"));
         	timeFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	double mfZoomRatio = SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
+        	double feastsZoomRatio = SirvidSVG.widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
         	
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
@@ -59,6 +63,8 @@ public class ExporterSVG extends Exporter {
             sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")));
             sb.append(".mf ");
             sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/mfZoomRatio));
+            sb.append(".f ");
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/feastsZoomRatio));
             sb.append("]]>\n");
             sb.append("</style>\n");
             
@@ -87,6 +93,7 @@ public class ExporterSVG extends Exporter {
                 int yBefore = m * sSVG.calculateY(SirvidSVG.DIM.Y_TOTAL);
                 int wdHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
                 int mfHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MOONPHASESHEIGHT);
+                int feastsHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_FEASTSHEIGHT);
                 
                 // month lines
                 int maxX = sM.getMaxX();
@@ -149,29 +156,36 @@ public class ExporterSVG extends Exporter {
             		
             		// moonphases
             		if(mfZoomRatio > 0 && sD.moonphase != null ) {
-            			sb.append("\n<g transform=\"translate(");
-                		sb.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(sD.moonphaseID).getCx() * mfZoomRatio);
-                		sb.append(" ");
-                		sb.append(mfHeight);
-                		sb.append(")\"><g transform=\"scale(");
-            			sb.append(mfZoomRatio);
-            			sb.append(")\">\n");
-                		sb.append("<title content=\"structured text\">");
-                		sb.append(dateFormat.format(new Date(sD.moonphase.getTimeInMillis())));
-                		sb.append(" ");
-                		sb.append(timeFormat.format(new Date(sD.moonphase.getTimeInMillis())));
-                		sb.append("\n");
-                		sb.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[0]);
-                		if(ICalculator.isNotEmptyStr(SirvidSVG.commonLabels.get(sD.moonphaseID)[1])){
-                			sb.append("\n");
-                			sb.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[1]);
-                		}
-                		sb.append("</title>\n");
-                		sb.append("<use xlink:href=\"#r");
-                		sb.append(sD.moonphaseID);
-                		sb.append("\" class=\"mf\"/>");
-                		sb.append("\n</g></g>\n");
+            		    
+            		    StringBuilder sbWtitle = new StringBuilder();
+            		    sbWtitle.append(dateFormat.format(new Date(sD.moonphase.getTimeInMillis())));
+            		    sbWtitle.append(" ");
+            		    sbWtitle.append(timeFormat.format(new Date(sD.moonphase.getTimeInMillis())));
+            		    sbWtitle.append("\n");
+            		    sbWtitle.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[0]);
+                        if(ICalculator.isNotEmptyStr(SirvidSVG.commonLabels.get(sD.moonphaseID)[1])){
+                            sbWtitle.append("\n");
+                            sbWtitle.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[1]);
+                        }
+                        sb.append(generateMoveable(sD, sD.moonphaseID, mfZoomRatio, mfHeight, sbWtitle.toString(), "mf"));
             		}
+            		
+            		// feasts
+            		if(feastsZoomRatio > 0 && !sD.feasts.isEmpty()) {
+            		    
+            		    ICalEvent feast = sD.feasts.get(0);
+            		    StringBuilder fTitle = new StringBuilder();
+            		    fTitle.append(dateFormat.format(new Date( ((GregorianCalendar)feast.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
+            		    if(feast.dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()) {
+            		        fTitle.append(" ");
+            		        fTitle.append(timeFormat.format(new Date( ((GregorianCalendar)feast.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
+            		    }
+            		    fTitle.append("\n");
+                        fTitle.append(feast.properties.get(ICalendar.Keys.SUMMARY).value);
+                        sb.append(generateMoveable(sD, feast.dbID, feastsZoomRatio, feastsHeight, fTitle.toString(), "f"));
+                        
+            		}
+            		
             	}
 
             }
@@ -194,6 +208,27 @@ public class ExporterSVG extends Exporter {
     	sb.append(strokeZoom);
     	sb.append("; }\n");
 		return sb.toString();
+    }
+    
+    private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n<g transform=\"translate(");
+        sb.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
+        sb.append(" ");
+        sb.append(y0);
+        sb.append(")\"><g transform=\"scale(");
+        sb.append(zoomRatio);
+        sb.append(")\">\n");
+        sb.append("<title content=\"structured text\">");
+        sb.append(title);
+        sb.append("</title>\n");
+        sb.append("<use xlink:href=\"#r");
+        sb.append(dbID);
+        sb.append("\" class=\"");
+        sb.append(cssClass);
+        sb.append("\"/>");
+        sb.append("\n</g></g>\n");
+        return sb.toString();
     }
     
 }
