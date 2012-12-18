@@ -13,7 +13,6 @@ public class SirvidDay {
 	public int beginX;
 	public GregorianCalendar sunrise;
 	public GregorianCalendar sunset;
-	public GregorianCalendar solstice;
 	public GregorianCalendar moonphase;
 	public int moonphaseID = 0;
 	public ArrayList<ICalEvent> feasts = new ArrayList<ICalEvent>();

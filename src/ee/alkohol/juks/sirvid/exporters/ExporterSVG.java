@@ -176,7 +176,6 @@ public class ExporterSVG extends Exporter {
 
             }
             
-            
         }
         
         // scaling

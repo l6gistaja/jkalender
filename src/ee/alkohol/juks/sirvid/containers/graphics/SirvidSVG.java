@@ -219,7 +219,7 @@ public class SirvidSVG {
     			GregorianCalendar tzdAsUTC = calendarAsUTCCalendar(timeZoned);
     			if(ICalculator.DbIdStatuses.SOLSTICE.getDbId() == event.dbID) {
     			    initFeastRune(event, sD);
-    			    sD.solstice = tzdAsUTC;
+    			    sM.solstice = tzdAsUTC;
     			}
     			else if(ICalculator.DbIdStatuses.SUNRISE.getDbId() == event.dbID) { sD.sunrise = tzdAsUTC; }
 				else if(ICalculator.DbIdStatuses.SUNSET.getDbId() == event.dbID) { sD.sunset = tzdAsUTC; } 

@@ -10,6 +10,7 @@ public class SirvidMonth {
     
     public GregorianCalendar month;
     public ArrayList<SirvidDay> days = new ArrayList<SirvidDay>();
+    public GregorianCalendar solstice;
     
     /**
      * Init and populate month container
