@@ -59,12 +59,9 @@ public class ExporterSVG extends Exporter {
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
             sb.append("<![CDATA[\n");
-            sb.append(".global ");
-            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")));
-            sb.append(".mf ");
-            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/mfZoomRatio));
-            sb.append(".f ");
-            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/feastsZoomRatio));
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth"), "g"));
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/mfZoomRatio, "m"));
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/feastsZoomRatio, "f"));
             sb.append("]]>\n");
             sb.append("</style>\n");
             
@@ -82,7 +79,7 @@ public class ExporterSVG extends Exporter {
             sb.append("</defs>\n\n");
             
             // scaling
-            sb.append("<g class=\"global\" transform=\"scale(");
+            sb.append("<g transform=\"scale(");
             sb.append(SirvidSVG.props.getProperty("zoom"));
             sb.append(")\">\n");
             
@@ -97,7 +94,7 @@ public class ExporterSVG extends Exporter {
                 
                 // month lines
                 int maxX = sM.getMaxX();
-                sb.append("\n<g><title>");
+                sb.append("\n<g class=\"g\"><title>");
                 sb.append(monthFormat.format(new Date(sM.month.getTimeInMillis())));
                 sb.append("</title>");
                 
@@ -128,7 +125,7 @@ public class ExporterSVG extends Exporter {
             	for(SirvidDay sD : sM.days){
             		
             		//weekdays
-            		sb.append("\n<g transform=\"translate(");
+            		sb.append("\n<g class=\"g\" transform=\"translate(");
             		sb.append(sD.beginX);
             		sb.append(" ");
             		sb.append(wdHeight);
@@ -167,7 +164,7 @@ public class ExporterSVG extends Exporter {
                             sbWtitle.append("\n");
                             sbWtitle.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[1]);
                         }
-                        sb.append(generateMoveable(sD, sD.moonphaseID, mfZoomRatio, mfHeight, sbWtitle.toString(), "mf"));
+                        sb.append(generateMoveable(sD, sD.moonphaseID, mfZoomRatio, mfHeight, sbWtitle.toString(), "m"));
             		}
             		
             		// feasts
@@ -210,24 +207,69 @@ public class ExporterSVG extends Exporter {
 		return sb.toString();
     }
     
-    private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass) {
+    private String generateCssClass(double strokeZoom, String className) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n<g transform=\"translate(");
-        sb.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
+        sb.append(".");
+        sb.append(className);
+        sb.append(", .");
+        sb.append(className);
         sb.append(" ");
-        sb.append(y0);
-        sb.append(")\"><g transform=\"scale(");
-        sb.append(zoomRatio);
-        sb.append(")\">\n");
-        sb.append("<title content=\"structured text\">");
+        sb.append(generateCssClass(strokeZoom));
+        sb.append(".");
+        sb.append(className);
+        sb.append(":hover ");
+        sb.append(SirvidSVG.props.getProperty("hoverCss"));
+        sb.append("\n");
+        return sb.toString();
+    }
+    
+    private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass) {
+        /*
+        StringBuilder transform = new StringBuilder();
+        transform.append("\n<g class=\"");
+        transform.append(cssClass);
+        transform.append("\" transform=\"translate(");
+        transform.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
+        transform.append(" ");
+        transform.append(y0);
+        transform.append(") scale(");
+        transform.append(zoomRatio);
+        transform.append(")\">\n");
+        transform.append("<title content=\"structured text\">");
+        transform.append(title);
+        transform.append("</title>\n");
+        transform.append("<use xlink:href=\"#r");
+        transform.append(dbID);
+        transform.append("\"/>\n</g>\n");
+        return transform.toString();
+        */
+        StringBuilder transform = new StringBuilder();
+        transform.append("translate(");
+        transform.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
+        transform.append(" ");
+        transform.append(y0);
+        transform.append(") scale(");
+        transform.append(zoomRatio);
+        transform.append(")");
+        return generateRune(dbID, title, cssClass, transform.toString());
+    }
+    
+    private String generateRune(int dbID, String title, String cssClass, String transform) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n<g class=\"");
+        sb.append(cssClass);
+        sb.append("\"");
+        if(transform != null && !transform.trim().equals("")) {
+            sb.append("  transform=\"");
+            sb.append(transform);
+            sb.append("\"");
+        }
+        sb.append(">\n<title content=\"structured text\">");
         sb.append(title);
         sb.append("</title>\n");
         sb.append("<use xlink:href=\"#r");
         sb.append(dbID);
-        sb.append("\" class=\"");
-        sb.append(cssClass);
-        sb.append("\"/>");
-        sb.append("\n</g></g>\n");
+        sb.append("\"/>\n</g>\n");
         return sb.toString();
     }
     
