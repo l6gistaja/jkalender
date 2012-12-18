@@ -3,3 +3,4 @@ https://github.com/downloads/KentBeck/junit/junit-4.10.jar
 
 http://www.xerial.org/trac/Xerial/wiki/SQLiteJDBC#Download
 http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.7.2/sqlite-jdbc-3.7.2.jar
+
