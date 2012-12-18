@@ -102,11 +102,6 @@ public class SirvidSVG {
             }
         }
         
-        if(eventsVsRunes == null) {
-            eventsVsRunes = new HashMap <Integer, Integer>();
-            for(Integer runeID : runes.keySet()) { eventsVsRunes.put(runeID, runeID); }
-        }
-        
         if(commonLabels == null) {
             commonLabels = new HashMap<Integer,String[]>();
             if(CalendarDAO.isConnected()) {
@@ -128,6 +123,11 @@ public class SirvidSVG {
         }
         
         dummyRunes();
+        
+        if(eventsVsRunes == null) {
+            eventsVsRunes = new HashMap <Integer, Integer>();
+            for(Integer runeID : runes.keySet()) { eventsVsRunes.put(runeID, runeID); }
+        }
         
         // first day of beginning month
         GregorianCalendar date0 = calendarAsUTCCalendar(iC.calendarBegin);
