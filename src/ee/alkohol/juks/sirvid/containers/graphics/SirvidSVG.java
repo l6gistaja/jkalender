@@ -18,7 +18,7 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 public class SirvidSVG {
     
     public static final String dataPath = "sirvid/";
-    public static final String[] errorTxtTags = { "<text x=\"10\" y=\"10\" fill=\"red\">", "</text>" };
+    public static final String[] errorTxtTags = { "<text x=\"20\" y=\"20\" fill=\"black\" font-size=\"40\">", "</text>" };
     public static final String[] weekDays = {"P","E","T","K","N","R","L"};
     public static enum  DIM {
         X_MARGIN,
