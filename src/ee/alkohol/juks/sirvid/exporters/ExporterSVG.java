@@ -53,8 +53,11 @@ public class ExporterSVG extends Exporter {
         	monthFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	SimpleDateFormat timeFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfTime"));
         	timeFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        	
         	double mfZoomRatio = SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
         	double feastsZoomRatio = SirvidSVG.widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
+        	
+        	SirvidSVG.DIM[] monthLines = {SirvidSVG.DIM.Y_MONTHLINEHEIGHT, SirvidSVG.DIM.Y_MONTHLINEHEIGHT2};
         	
         	// stylesheet 
             sb.append("\n<style type=\"text/css\">\n");
@@ -98,58 +101,44 @@ public class ExporterSVG extends Exporter {
                 sb.append(monthFormat.format(new Date(sM.month.getTimeInMillis())));
                 sb.append("</title>");
                 
-                int y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT);
-                sb.append("<line y1=\"");
-                sb.append(y);
-                sb.append("\" y2=\"");
-                sb.append(y);
-                sb.append("\" x1=\"");
-                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN) - SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
-                sb.append("\" x2=\"");
-                sb.append(maxX + SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
-                sb.append("\"/>");
-                
-                y = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MONTHLINEHEIGHT2);
-                sb.append("<line y1=\"");
-                sb.append(y);
-                sb.append("\" y2=\"");
-                sb.append(y);
-                sb.append("\" x1=\"");
-                sb.append(SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN) - SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
-                sb.append("\" x2=\"");
-                sb.append(maxX + SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION));
-                sb.append("\"/>");
+                for(SirvidSVG.DIM monthLine : monthLines) {
+                    int y = yBefore + sSVG.calculateY(monthLine);
+                    sb.append(generateLine(
+                            SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN) - SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION), 
+                            y, 
+                            maxX + SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION), 
+                            y));
+                }
                 
                 sb.append("</g>\n");
                 
             	for(SirvidDay sD : sM.days){
-            		
-            		//weekdays
-            		sb.append("\n<g class=\"g\" transform=\"translate(");
-            		sb.append(sD.beginX);
-            		sb.append(" ");
-            		sb.append(wdHeight);
-            		sb.append(")\">\n");
-            		sb.append("<title content=\"structured text\">");
-            		sb.append(dateFormat.format(new Date(sD.date.getTimeInMillis())));
-            		sb.append("\n");
-            		sb.append(SirvidSVG.commonLabels.get(sD.weekDay)[0]);
-            		if(sD.sunrise != null) {
-            			sb.append("\n");
-            			sb.append(timeFormat.format(new Date(sD.sunrise.getTimeInMillis())));
-            			sb.append(" ");
-            			sb.append(SirvidSVG.commonLabels.get(ICalculator.DbIdStatuses.SUNRISE.getDbId())[0]);
-            		}
-            		if(sD.sunset != null) {
-            			sb.append("\n");
-            			sb.append(timeFormat.format(new Date(sD.sunset.getTimeInMillis())));
-            			sb.append(" ");
-            			sb.append(SirvidSVG.commonLabels.get(ICalculator.DbIdStatuses.SUNSET.getDbId())[0]);
-            		}
-            		sb.append("</title>\n");
-            		sb.append("<use xlink:href=\"#r");
-            		sb.append(sD.weekDay);
-            		sb.append("\"/>\n</g>\n");
+            	    
+            	    StringBuilder transformSB = new StringBuilder();
+            	    transformSB.append("translate(");
+            	    transformSB.append(sD.beginX);
+            	    transformSB.append(" ");
+            	    transformSB.append(wdHeight);
+            	    transformSB.append(")");
+            	    
+            	    StringBuilder titleSB = new StringBuilder();
+            	    titleSB.append(dateFormat.format(new Date(sD.date.getTimeInMillis())));
+            	    titleSB.append("\n");
+            	    titleSB.append(SirvidSVG.commonLabels.get(sD.weekDay)[0]);
+                    if(sD.sunrise != null) {
+                        titleSB.append("\n");
+                        titleSB.append(timeFormat.format(new Date(sD.sunrise.getTimeInMillis())));
+                        titleSB.append(" ");
+                        titleSB.append(SirvidSVG.commonLabels.get(ICalculator.DbIdStatuses.SUNRISE.getDbId())[0]);
+                    }
+                    if(sD.sunset != null) {
+                        titleSB.append("\n");
+                        titleSB.append(timeFormat.format(new Date(sD.sunset.getTimeInMillis())));
+                        titleSB.append(" ");
+                        titleSB.append(SirvidSVG.commonLabels.get(ICalculator.DbIdStatuses.SUNSET.getDbId())[0]);
+                    }
+                    
+                    sb.append(generateRune(sD.weekDay, titleSB.toString(), "g", transformSB.toString()));
             		
             		// moonphases
             		if(mfZoomRatio > 0 && sD.moonphase != null ) {
@@ -224,25 +213,6 @@ public class ExporterSVG extends Exporter {
     }
     
     private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass) {
-        /*
-        StringBuilder transform = new StringBuilder();
-        transform.append("\n<g class=\"");
-        transform.append(cssClass);
-        transform.append("\" transform=\"translate(");
-        transform.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
-        transform.append(" ");
-        transform.append(y0);
-        transform.append(") scale(");
-        transform.append(zoomRatio);
-        transform.append(")\">\n");
-        transform.append("<title content=\"structured text\">");
-        transform.append(title);
-        transform.append("</title>\n");
-        transform.append("<use xlink:href=\"#r");
-        transform.append(dbID);
-        transform.append("\"/>\n</g>\n");
-        return transform.toString();
-        */
         StringBuilder transform = new StringBuilder();
         transform.append("translate(");
         transform.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
@@ -260,7 +230,7 @@ public class ExporterSVG extends Exporter {
         sb.append(cssClass);
         sb.append("\"");
         if(transform != null && !transform.trim().equals("")) {
-            sb.append("  transform=\"");
+            sb.append(" transform=\"");
             sb.append(transform);
             sb.append("\"");
         }
@@ -270,6 +240,20 @@ public class ExporterSVG extends Exporter {
         sb.append("<use xlink:href=\"#r");
         sb.append(dbID);
         sb.append("\"/>\n</g>\n");
+        return sb.toString();
+    }
+    
+    private String generateLine(double x1, double y1, double x2, double y2) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<line x1=\"");
+        sb.append(x1);
+        sb.append("\" y1=\"");
+        sb.append(y1);
+        sb.append("\" x2=\"");
+        sb.append(x2);
+        sb.append("\" y2=\"");
+        sb.append(y2);
+        sb.append("\"/>");
         return sb.toString();
     }
     
