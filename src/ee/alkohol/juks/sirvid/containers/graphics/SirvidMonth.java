@@ -27,7 +27,7 @@ public class SirvidMonth {
             if(index > 0) {
                 SirvidDay previousDay = days.get(index -1);
                 beginX = previousDay.beginX 
-                        + SirvidSVG.runes.get(new Integer(previousDay.weekDay)).getWidth() 
+                        + SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(previousDay.weekDay)).getWidth() 
                         + SirvidSVG.widths.get(SirvidSVG.DIM.X_WEEKDAYPADDING);
             }
             days.add(new SirvidDay(m, beginX));

@@ -215,7 +215,9 @@ public class ExporterSVG extends Exporter {
     private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass) {
         StringBuilder transform = new StringBuilder();
         transform.append("translate(");
-        transform.append(sD.beginX + SirvidSVG.runes.get(sD.weekDay).getCx() - SirvidSVG.runes.get(dbID).getCx() * zoomRatio);
+        transform.append(sD.beginX 
+                + SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(sD.weekDay)).getCx() 
+                - SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(dbID)).getCx() * zoomRatio);
         transform.append(" ");
         transform.append(y0);
         transform.append(") scale(");
@@ -238,7 +240,7 @@ public class ExporterSVG extends Exporter {
         sb.append(title);
         sb.append("</title>\n");
         sb.append("<use xlink:href=\"#r");
-        sb.append(dbID);
+        sb.append(SirvidSVG.eventsVsRunes.get(dbID));
         sb.append("\"/>\n</g>\n");
         return sb.toString();
     }

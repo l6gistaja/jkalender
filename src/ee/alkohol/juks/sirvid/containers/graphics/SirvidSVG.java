@@ -36,13 +36,30 @@ public class SirvidSVG {
     }
     
     public static PropertiesT props = null;
+    /**
+     * Different measurements/dimensions from svg_export.properties file
+     */
     public static HashMap<DIM,Integer> widths = null;
     public static HashMap<Integer,SirvidRune> runes = null;
+    /**
+     * Maps DB event IDs to DB rune IDs if available
+     */
+    public static HashMap<Integer,Integer> eventsVsRunes = null;
+    /**
+     * Most common events mapping from DB event ID to event's title ([0]) and description ([1])
+     */
     public static HashMap<Integer,String[]> commonLabels = null;
+    /**
+     * Months in (I)calculation's timespan
+     * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
+     */
     public ArrayList<SirvidMonth> months = new ArrayList<SirvidMonth>();
     
     private ICalculator iCalc;
     public ArrayList<String> errorMsgs = new ArrayList<String>();
+    /**
+     * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
+     */
     public int beginMonth;
     
     
@@ -74,7 +91,8 @@ public class SirvidSVG {
                 if(commonRunes != null) {
                     try {
                         while(commonRunes.next()) { 
-                            runes.put(new Integer(commonRunes.getInt(DaoKalenderJDBCSqlite.DbTables.RUNES.getPK())), new SirvidRune(commonRunes));
+                            Integer runeID = new Integer(commonRunes.getInt(DaoKalenderJDBCSqlite.DbTables.RUNES.getPK()));
+                            runes.put(runeID, new SirvidRune(commonRunes));
                         }
                     }
                     catch(Exception e) {
@@ -82,6 +100,11 @@ public class SirvidSVG {
                     }
                 }
             }
+        }
+        
+        if(eventsVsRunes == null) {
+            eventsVsRunes = new HashMap <Integer, Integer>();
+            for(Integer runeID : runes.keySet()) { eventsVsRunes.put(runeID, runeID); }
         }
         
         if(commonLabels == null) {
@@ -125,6 +148,14 @@ public class SirvidSVG {
         
     }
     
+    /**
+     * Converts GregorianCalendar months to continuos, gapless sequence of integers. 
+     *
+     * generateMonthIndex(X) - {@link #beginMonth} is index of month X in months array {@link #months}
+     * 
+     * @param month as UTC GregorianCalendar
+     * @return Month's sequence number
+     */
     private static int generateMonthIndex(GregorianCalendar month) {
         return 12*month.get(Calendar.YEAR) + month.get(Calendar.MONTH);
     }
@@ -202,26 +233,42 @@ public class SirvidSVG {
     
     private void initFeastRune(ICalEvent event, SirvidDay sirvidDay) {
         
-        SirvidRune sR = SirvidSVG.runes.get(new Integer(event.dbID));
         boolean runeExists = false;
-        if(sR != null) {
-            runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
-        } else {
-            ResultSet feastRune = iCalc.CalendarDAO.getRange(event.dbID, event.dbID, DaoKalenderJDBCSqlite.DbTables.RUNES, null);
-            if(feastRune != null) {
-                try {
-                    while(feastRune.next()) {
-                        sR = new SirvidRune(feastRune);
-                        runes.put(new Integer(event.dbID), (SirvidRune) sR);
+        int runeID = ICalculator.DbIdStatuses.UNDEFINED.getDbId();
+        
+        try {
+            ResultSet eventR = iCalc.CalendarDAO.getRange(event.dbID, event.dbID, DaoKalenderJDBCSqlite.DbTables.EVENTS, null);
+            if(eventR != null) {
+                while(eventR.next()) {
+                    runeID = eventR.getInt("rune_id");
+                    if(runeID == 0) { break; }
+                    SirvidRune sR = SirvidSVG.runes.get(new Integer(runeID));
+                    if(sR != null) {
                         runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
+                    } else {
+                        ResultSet feastRune = iCalc.CalendarDAO.getRange(runeID, runeID, DaoKalenderJDBCSqlite.DbTables.RUNES, null);
+                        if(feastRune != null) {
+                            while(feastRune.next()) {
+                                sR = new SirvidRune(feastRune);
+                                runes.put(new Integer(runeID), (SirvidRune) sR);
+                                runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
+                                eventsVsRunes.put(event.dbID, runeID);
+                                break;
+                            }
+                        }
                     }
-                }
-                catch(Exception e) {
-                    errorMsgs.add("SVG feastrune init failed : " + e.getMessage());
+                    break;
                 }
             }
         }
-        if(runeExists) { sirvidDay.feasts.add(event); }
+        catch(Exception e) {
+            errorMsgs.add("SVG feastrune init failed : " + e.getMessage());
+        }
+        
+        if(runeExists) { 
+            sirvidDay.feasts.add(event); 
+            eventsVsRunes.put(event.dbID, runeID);
+        }
     }
     
     /**

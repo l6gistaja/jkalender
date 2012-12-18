@@ -1,15 +1,10 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-<style type="text/css">
-<![CDATA[
-line { stroke:black; fill:none; stroke-width:3; }
-]]>
 </style>
 <title>Tegemata ruunid</title>
 <text x="13" y="33" font-family="Verdana" font-size="40" fill="black">T</text>
-<text x="10" y="73" font-family="Verdana" font-size="40" fill="black">O</text>
-<text x="10" y="113" font-family="Verdana" font-size="40" fill="black">D</text>
-<text x="10" y="153" font-family="Verdana" font-size="40" fill="black">O</text>
-<!-- line x1="25" y1="160" x2="25" y2="200"/ -->
+<text x="10" y="83" font-family="Verdana" font-size="40" fill="black">O</text>
+<text x="10" y="133" font-family="Verdana" font-size="40" fill="black">D</text>
+<text x="10" y="183" font-family="Verdana" font-size="40" fill="black">O</text>
 </svg>
