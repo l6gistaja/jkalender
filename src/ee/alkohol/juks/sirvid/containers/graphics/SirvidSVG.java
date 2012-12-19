@@ -1,6 +1,8 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
+import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -130,21 +132,21 @@ public class SirvidSVG {
         }
         
         // first day of beginning month
-        GregorianCalendar date0 = calendarAsUTCCalendar(iC.calendarBegin);
-        date0.set(Calendar.DAY_OF_MONTH, 1);
+        GregorianCalendar date0 = getSirvBeginning(iCalc.calendarBegin);
         
         beginMonth = generateMonthIndex(date0);
         
         // last day of ending month
-        GregorianCalendar date1 = SirvidMonth.getEndOfMonth(calendarAsUTCCalendar(iC.calendarEnd));
+        GregorianCalendar date1 = SirvidMonth.getEndOfMonth(calendarAsUTCCalendar(iCalc.calendarEnd));
                 
         // init and populate sirvi-containers
         do {
             months.add(new SirvidMonth(date0));
         } while (date0.before(date1));
         
-        dummyRunes();
         populateEvents();
+        
+        prepareEvents();
         
     }
     
@@ -199,12 +201,13 @@ public class SirvidSVG {
     }
     
     private void populateEvents() {
+        int monthIndex;
     	for(ICalEvent event : iCalc.iCal.vEvent) {
     	    
     	    GregorianCalendar timeZoned = event.allDayEvent 
     	            ? (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value
     	            :  fromUTCtoTz( (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value, iCalc.inputData.getTimezone());
-            int monthIndex = generateMonthIndex(timeZoned);
+            monthIndex = generateMonthIndex(timeZoned);
             SirvidMonth sM = months.get(monthIndex-beginMonth);
             if(sM == null) { continue; }
             SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
@@ -271,6 +274,100 @@ public class SirvidSVG {
         }
     }
     
+    private void prepareEvents() {
+        GregorianCalendar date0 = getSirvBeginning(iCalc.calendarBegin);
+        GregorianCalendar date1 = SirvidMonth.getEndOfMonth(calendarAsUTCCalendar(iCalc.calendarEnd));
+        boolean proceed = true;
+        int monthIndex;
+        do {
+            proceed = true;
+            monthIndex = generateMonthIndex(date0);
+            SirvidMonth sM = months.get(monthIndex-beginMonth);
+            if(sM == null) { proceed = false; }
+            
+            if(proceed) {
+                SirvidDay sD = sM.days.get(date0.get(Calendar.DATE)-1);
+                if(sD == null) { proceed = false; }
+                
+                if(proceed) {
+                    if(date0.get(Calendar.MONTH) == Calendar.DECEMBER && date0.get(Calendar.DATE) == 21) {
+                        
+                        // delete December's solstice
+                        if(sM.solstice != null) {
+                            SirvidDay solsticeDay = sM.days.get(sM.solstice.get(Calendar.DATE)-1);
+                            if(solsticeDay != null) {
+                                for (int i = 0; i < solsticeDay.feasts.size(); i++) {
+                                    if(solsticeDay.feasts.get(i).dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()) {
+                                        SimpleDateFormat dateFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfDate") + " " + SirvidSVG.props.getProperty("sdfTime"));
+                                        dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+                                        StringBuilder winterSolstice = new StringBuilder();
+                                        winterSolstice.append("\n");
+                                        winterSolstice.append(dateFormat.format(new Date(sM.solstice.getTimeInMillis())));
+                                        winterSolstice.append(" ");
+                                        winterSolstice.append(solsticeDay.feasts.get(i).properties.get(ICalendar.Keys.SUMMARY).value);
+                                        sD.moreFeasts = winterSolstice.toString();
+                                        solsticeDay.feasts.remove(i);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // create Yule rune
+                        StringBuilder yuleRune = new StringBuilder();
+                        int paddingX = (getRoot(sM.days, 25) - getRoot(sM.days, 24)) >> 1;
+                        int beginX1221 = sD.beginX;
+                        double zoomRatio = widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
+                        int x = Integer.MIN_VALUE;
+                        int x1221 = Integer.MIN_VALUE;
+                        for(int d = 21; d < 25; d++) {
+                            x = (int)((paddingX - beginX1221 + getRoot(sM.days, d)) / zoomRatio);
+                            yuleRune.append("\n");
+                            yuleRune.append(ee.alkohol.juks.sirvid.exporters.ExporterSVG.generateLine(x, 100, x, 200));
+                            if(x1221 == Integer.MIN_VALUE) { x1221 = x; }
+                        }
+                        int endX = x + (int)(paddingX/zoomRatio);
+                        int yRadius = 150;
+                        yuleRune.append("\n<path d=\"M0 ");
+                        yuleRune.append(yRadius);
+                        yuleRune.append(" L");
+                        yuleRune.append(endX);
+                        yuleRune.append(" ");
+                        yuleRune.append(yRadius);
+                        yuleRune.append(" A");
+                        yuleRune.append(endX >> 1);
+                        yuleRune.append(",");
+                        yuleRune.append(yRadius);
+                        yuleRune.append(" 0 0,0 0,");
+                        yuleRune.append(yRadius);
+                        yuleRune.append("\"/>\n");
+                        SirvidRune sR;
+                        try {
+                            sR = new SirvidRune(x1221, null, endX);
+                            sR.setSvgContent(yuleRune.toString());
+                            runes.put(1221, sR);
+                            eventsVsRunes.put(1221, 1221);
+                        } catch(Exception e) { }
+                        
+                    } else {
+                        //TODO: 2 days at once
+                    }
+                }
+            }
+            
+            date0.add(Calendar.DATE, 1);
+        } while (date0.before(date1));
+    }
+    
+    private int getRoot(ArrayList<SirvidDay> monthDays, int dayNo) {
+        return monthDays.get(dayNo-1).beginX + runes.get(monthDays.get(dayNo-1).weekDay).getCx();
+    }
+    
+    private GregorianCalendar getSirvBeginning(GregorianCalendar x) {
+        GregorianCalendar y = calendarAsUTCCalendar(x);
+        y.set(Calendar.DAY_OF_MONTH, 1);
+        return y;
+    }
     /**
      * Dummy runes for testing or if anything goes wrong
      */

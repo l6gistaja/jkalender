@@ -244,7 +244,7 @@ public class ExporterSVG extends Exporter {
         return sb.toString();
     }
     
-    private String generateLine(double x1, double y1, double x2, double y2) {
+    public static String generateLine(double x1, double y1, double x2, double y2) {
         StringBuilder sb = new StringBuilder();
         sb.append("<line x1=\"");
         sb.append(x1);
