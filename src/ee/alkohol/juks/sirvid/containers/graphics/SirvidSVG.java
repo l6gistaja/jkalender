@@ -316,7 +316,8 @@ public class SirvidSVG {
                         // create Yule rune
                         StringBuilder yuleRune = new StringBuilder();
                         int paddingX = (getRoot(sM.days, 25) - getRoot(sM.days, 24)) >> 1;
-                        int beginX1221 = sD.beginX;
+                        if(paddingX < widths.get(DIM.X_WEEKDAYPADDING) -1) { paddingX = widths.get(DIM.X_WEEKDAYPADDING) -1; }
+                        int beginX1221 = getRoot(sM.days, 21);
                         double zoomRatio = widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
                         int x = Integer.MIN_VALUE;
                         int x1221 = Integer.MIN_VALUE;
