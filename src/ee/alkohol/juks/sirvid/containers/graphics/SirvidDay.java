@@ -16,7 +16,10 @@ public class SirvidDay {
 	public GregorianCalendar moonphase;
 	public int moonphaseID = 0;
 	public ArrayList<ICalEvent> feasts = new ArrayList<ICalEvent>();
-	public String moreFeasts = "";
+	public ArrayList<StringBuilder> feastLabels = new ArrayList<StringBuilder>();
+	public StringBuilder weekdayLabel = new StringBuilder();
+	public StringBuilder moonphaseLabel = new StringBuilder();
+	public int rotationOrder = 0;
 	
 	public SirvidDay(GregorianCalendar day, int beginX) {
 		this.date = (GregorianCalendar) day.clone();

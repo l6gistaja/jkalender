@@ -15,10 +15,12 @@ public class SirvidRune {
 	private String filename;
 	private int width;
 	private String svgContent;
-	
-	public SirvidRune(int cx, String filename, int width) throws SQLException, IOException {
+	private double rightness;
+
+    public SirvidRune(int cx, String filename, int width) throws SQLException, IOException {
         setCx(cx);
         setWidth(width);
+        setRightness(cx/width);
         if(filename != null) {
             setFilename(filename);
             setSvgContent(loadSVGcontent(getFilename()));
@@ -94,6 +96,12 @@ public class SirvidRune {
 		this.svgContent = svgContent;
 	}
 	
-	
+    public double getRightness() {
+        return rightness;
+    }
+
+    public void setRightness(double rightness) {
+        this.rightness = rightness;
+    }
 
 }

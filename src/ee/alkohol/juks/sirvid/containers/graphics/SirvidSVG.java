@@ -1,8 +1,6 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
-import java.io.IOException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,6 +19,7 @@ public class SirvidSVG {
     
     public static final String dataPath = "sirvid/";
     public static final String[] errorTxtTags = { "<text x=\"50\" y=\"60\" fill=\"black\" font-size=\"100\">", "</text>" };
+    public static final int J6ULUD = 1221;
     public static final String[] weekDays = {"P","E","T","K","N","R","L"};
     public static enum  DIM {
         X_MARGIN,
@@ -275,10 +274,21 @@ public class SirvidSVG {
     }
     
     private void prepareEvents() {
+        
         GregorianCalendar date0 = getSirvBeginning(iCalc.calendarBegin);
         GregorianCalendar date1 = SirvidMonth.getEndOfMonth(calendarAsUTCCalendar(iCalc.calendarEnd));
         boolean proceed = true;
         int monthIndex;
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfDate"));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        SimpleDateFormat monthFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfMonth"));
+        monthFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        SimpleDateFormat timeFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfTime"));
+        timeFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        SimpleDateFormat datetimeFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfDate") + " " + SirvidSVG.props.getProperty("sdfTime"));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
+        
         do {
             proceed = true;
             monthIndex = generateMonthIndex(date0);
@@ -290,28 +300,39 @@ public class SirvidSVG {
                 if(sD == null) { proceed = false; }
                 
                 if(proceed) {
+                    
+                    // feasts
                     if(date0.get(Calendar.MONTH) == Calendar.DECEMBER && date0.get(Calendar.DATE) == 21) {
                         
+                        StringBuilder yuleTitle = new StringBuilder();
+                        yuleTitle.append(dateFormat.format(new Date(date0.getTimeInMillis())));
+                        yuleTitle.append(" - ");
+                        yuleTitle.append(dateFormat.format(new Date(sM.days.get(23).date.getTimeInMillis())));
+                        yuleTitle.append("\n");
+                        for(ICalEvent yulEvent : sD.feasts ) {
+                            if(yulEvent.dbID == J6ULUD) {
+                                yuleTitle.append(yulEvent.properties.get(ICalendar.Keys.SUMMARY).value);
+                                break;
+                            }
+                        }
                         // delete December's solstice
                         if(sM.solstice != null) {
                             SirvidDay solsticeDay = sM.days.get(sM.solstice.get(Calendar.DATE)-1);
                             if(solsticeDay != null) {
                                 for (int i = 0; i < solsticeDay.feasts.size(); i++) {
                                     if(solsticeDay.feasts.get(i).dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()) {
-                                        SimpleDateFormat dateFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfDate") + " " + SirvidSVG.props.getProperty("sdfTime"));
-                                        dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
-                                        StringBuilder winterSolstice = new StringBuilder();
-                                        winterSolstice.append("\n");
-                                        winterSolstice.append(dateFormat.format(new Date(sM.solstice.getTimeInMillis())));
-                                        winterSolstice.append(" ");
-                                        winterSolstice.append(solsticeDay.feasts.get(i).properties.get(ICalendar.Keys.SUMMARY).value);
-                                        sD.moreFeasts = winterSolstice.toString();
+                                        yuleTitle.append("\n");
+                                        yuleTitle.append(datetimeFormat.format(new Date(sM.solstice.getTimeInMillis())));
+                                        yuleTitle.append(" ");
+                                        yuleTitle.append(solsticeDay.feasts.get(i).properties.get(ICalendar.Keys.SUMMARY).value);
                                         solsticeDay.feasts.remove(i);
                                         break;
                                     }
                                 }
                             }
                         }
+                        
+                        sD.feastLabels.add(yuleTitle);
                         
                         // create Yule rune
                         StringBuilder yuleRune = new StringBuilder();
@@ -324,7 +345,7 @@ public class SirvidSVG {
                         for(int d = 21; d < 25; d++) {
                             x = (int)((paddingX - beginX1221 + getRoot(sM.days, d)) / zoomRatio);
                             yuleRune.append("\n");
-                            yuleRune.append(ee.alkohol.juks.sirvid.exporters.ExporterSVG.generateLine(x, 100, x, 200));
+                            yuleRune.append(generateLine(x, 100, x, 200));
                             if(x1221 == Integer.MIN_VALUE) { x1221 = x; }
                         }
                         int endX = x + (int)(paddingX/zoomRatio);
@@ -346,12 +367,59 @@ public class SirvidSVG {
                         try {
                             sR = new SirvidRune(x1221, null, endX);
                             sR.setSvgContent(yuleRune.toString());
-                            runes.put(1221, sR);
-                            eventsVsRunes.put(1221, 1221);
+                            runes.put(J6ULUD, sR);
+                            eventsVsRunes.put(J6ULUD, J6ULUD);
                         } catch(Exception e) { }
                         
-                    } else {
-                        //TODO: 2 days at once
+                    } else { // non-yules
+                        
+                        for(ICalEvent feast : sD.feasts ) {
+                            StringBuilder fTitle = new StringBuilder();
+                            fTitle.append(dateFormat.format(new Date( ((GregorianCalendar)feast.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
+                            if(!feast.allDayEvent) {
+                                fTitle.append(" ");
+                                fTitle.append(timeFormat.format(new Date( ((GregorianCalendar)feast.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
+                            }
+                            fTitle.append("\n");
+                            fTitle.append(feast.properties.get(ICalendar.Keys.SUMMARY).value);
+                            sD.feastLabels.add(fTitle);
+                        }
+                        
+                    }
+                    
+                    // weekday labels
+                    sD.weekdayLabel.append(dateFormat.format(new Date(sD.date.getTimeInMillis())));
+                    sD.weekdayLabel.append("\n");
+                    sD.weekdayLabel.append(commonLabels.get(sD.weekDay)[0]);
+                    if(sD.sunrise != null) {
+                        sD.weekdayLabel.append("\n");
+                        sD.weekdayLabel.append(timeFormat.format(new Date(sD.sunrise.getTimeInMillis())));
+                        sD.weekdayLabel.append(" ");
+                        sD.weekdayLabel.append(commonLabels.get(ICalculator.DbIdStatuses.SUNRISE.getDbId())[0]);
+                    }
+                    if(sD.sunset != null) {
+                        sD.weekdayLabel.append("\n");
+                        sD.weekdayLabel.append(timeFormat.format(new Date(sD.sunset.getTimeInMillis())));
+                        sD.weekdayLabel.append(" ");
+                        sD.weekdayLabel.append(commonLabels.get(ICalculator.DbIdStatuses.SUNSET.getDbId())[0]);
+                    }
+                    
+                    // moonphase labels
+                    if(sD.moonphase != null ) {
+                        sD.moonphaseLabel.append(dateFormat.format(new Date(sD.moonphase.getTimeInMillis())));
+                        sD.moonphaseLabel.append(" ");
+                        sD.moonphaseLabel.append(timeFormat.format(new Date(sD.moonphase.getTimeInMillis())));
+                        sD.moonphaseLabel.append("\n");
+                        sD.moonphaseLabel.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[0]);
+                        if(ICalculator.isNotEmptyStr(SirvidSVG.commonLabels.get(sD.moonphaseID)[1])){
+                            sD.moonphaseLabel.append("\n");
+                            sD.moonphaseLabel.append(SirvidSVG.commonLabels.get(sD.moonphaseID)[1]);
+                        }
+                    }
+                    
+                    // determine rotation order
+                    if(sD.feasts.size() == 2) {
+                        sD.rotationOrder = getRuneByDbID(sD.feasts.get(0).dbID).getRightness() > getRuneByDbID(sD.feasts.get(1).dbID).getRightness() ? 0 : 1;
                     }
                 }
             }
@@ -362,6 +430,10 @@ public class SirvidSVG {
     
     private int getRoot(ArrayList<SirvidDay> monthDays, int dayNo) {
         return monthDays.get(dayNo-1).beginX + runes.get(monthDays.get(dayNo-1).weekDay).getCx();
+    }
+    
+    public SirvidRune getRuneByDbID(int dbID) {
+        return runes.get(eventsVsRunes.get(dbID));
     }
     
     private GregorianCalendar getSirvBeginning(GregorianCalendar x) {
@@ -408,4 +480,17 @@ public class SirvidSVG {
         }
     }
     
+    public static String generateLine(double x1, double y1, double x2, double y2) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<line x1=\"");
+        sb.append(x1);
+        sb.append("\" y1=\"");
+        sb.append(y1);
+        sb.append("\" x2=\"");
+        sb.append(x2);
+        sb.append("\" y2=\"");
+        sb.append(y2);
+        sb.append("\"/>");
+        return sb.toString();
+    }
 }
