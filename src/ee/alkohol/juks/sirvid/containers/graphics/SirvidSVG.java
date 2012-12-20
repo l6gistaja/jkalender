@@ -219,7 +219,7 @@ public class SirvidSVG {
     		} else {
     		    
     			GregorianCalendar tzdAsUTC = calendarAsUTCCalendar(timeZoned);
-    			if(ICalculator.DbIdStatuses.SOLSTICE.getDbId() == event.dbID) {
+    			if(isSolstice(event.dbID)) {
     			    initFeastRune(event, sD);
     			    sM.solstice = tzdAsUTC;
     			}
@@ -231,6 +231,14 @@ public class SirvidSVG {
 				}
     		}
     	}
+    }
+    
+    public static boolean isSolstice(int dbID) {
+        return dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE1.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE2.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE3.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE4.getDbId();
     }
     
     private void initFeastRune(ICalEvent event, SirvidDay sirvidDay) {
@@ -320,7 +328,7 @@ public class SirvidSVG {
                             SirvidDay solsticeDay = sM.days.get(sM.solstice.get(Calendar.DATE)-1);
                             if(solsticeDay != null) {
                                 for (int i = 0; i < solsticeDay.feasts.size(); i++) {
-                                    if(solsticeDay.feasts.get(i).dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()) {
+                                    if(isSolstice(solsticeDay.feasts.get(i).dbID)) {
                                         yuleTitle.append("\n");
                                         yuleTitle.append(datetimeFormat.format(new Date(sM.solstice.getTimeInMillis())));
                                         yuleTitle.append(" ");
