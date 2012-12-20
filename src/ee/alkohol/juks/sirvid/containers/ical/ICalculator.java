@@ -41,6 +41,10 @@ public class ICalculator {
         MOON_FULL_P2 (16, "\u25ef +2d"),
         MOON_LAST (17, "\u263e"),
         SOLSTICE (20, "\u2295"),
+        SOLSTICE1 (21, "\u2295 1"),
+        SOLSTICE2 (22, "\u2295 2"),
+        SOLSTICE3 (23, "\u2295 3"),
+        SOLSTICE4 (24, "\u2295 4"),
         SUNRISE (30, "\u263c"),
         SUNSET (31, "\u2600"),
         LEAPDAY (229, "+"),
@@ -129,17 +133,22 @@ public class ICalculator {
         // initialize DB connection
         CalendarDAO = new DaoKalenderJDBCSqlite(inputData.jbdcConnect);
         
+        String nameDelimiter = "; ";
+        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
+            ? new String[]{MV_TITLE}
+            : new String[]{DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle(),MV_TITLE};
+        String whereClause  = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) ? MV_WHERECLAUSE : null;
+        
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
         if(CalendarDAO.isConnected()) {
             ResultSet eventTrRS = CalendarDAO.getRange(
                     DbIdStatuses.MOON_NEW_M2.getDbId(), 
-                    DbIdStatuses.SUNSET.getDbId(), 
+                    DbIdStatuses.EASTER.getDbId(), 
                     DaoKalenderJDBCSqlite.DbTables.EVENTS, 
                     null);
             if(eventTrRS != null) {
                 while(eventTrRS.next()) { 
-                    eventTranslations.put(eventTrRS.getString(
-                            DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK()), eventTrRS.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle()));
+                    eventTranslations.put(eventTrRS.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK()), generateDayName(eventTrRS, nameFields, nameDelimiter));
                 }
             }
         }
@@ -211,13 +220,15 @@ public class ICalculator {
         	        sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
         	    }
         	}
-        	String solsticeLabel = eventTranslations.get("" +DbIdStatuses.SOLSTICE.getDbId());
+        	
         	for(int[] solistice : sol) {
         	    GregorianCalendar solCal = getCalendar(UTC_TZ_ID);
                 solCal.set(solistice[0], solistice[1]-1, solistice[2], solistice[3], solistice[4], solistice[5]);
                 if(!solCal.before(calendarBegin) && !solCal.after(calendarEnd)) {
                     ICalEvent event = new ICalEvent();
-                    event.dbID = DbIdStatuses.SOLSTICE.getDbId();
+                    event.dbID = DbIdStatuses.SOLSTICE.getDbId() + (int)Math.ceil(solistice[1]/3);
+                    if(event.dbID < DbIdStatuses.SOLSTICE.getDbId() || event.dbID > DbIdStatuses.SOLSTICE4.getDbId()) { event.dbID = DbIdStatuses.SOLSTICE.getDbId(); }
+                    String solsticeLabel = eventTranslations.get("" +event.dbID);
                     event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, getLanguageDescriptor()));
                     event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID), null));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
@@ -301,12 +312,6 @@ public class ICalculator {
             
             // if calendar dates are required
             if(!inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE)) {
-            	
-                String nameDelimiter = "; ";
-    	        String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
-    	        	? new String[]{MV_TITLE}
-    	        	: new String[]{DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle(),MV_TITLE};
-    	        String whereClause  = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) ? MV_WHERECLAUSE : null;
     	        
     	        // anniversaries
     	        ResultSet anniversaries = CalendarDAO.getRange(
@@ -478,14 +483,17 @@ public class ICalculator {
     
     public static String generateDayName(ResultSet eventRow, String[] nameFields, String nameDelimiter) {
         StringBuilder y = new StringBuilder();
+        ArrayList<String> mem = new ArrayList<String>();
         String value = null;
         for(String name: nameFields) {
-            try { value = eventRow.getString(name); }
-                catch(SQLException e) { e.printStackTrace(); }
-            if(isNotEmptyStr(value)) {
-                if(y.length()>0) { y.append(nameDelimiter); }
-                y.append(value);
-            }
+            try {
+                value = eventRow.getString(name);
+                if(isNotEmptyStr(value) && !mem.contains(value)) {
+                    if(y.length()>0) { y.append(nameDelimiter); }
+                    y.append(value);
+                    mem.add(value);
+                }
+            } catch(SQLException e) { e.printStackTrace(); }
         }
         return y.toString();
     }
