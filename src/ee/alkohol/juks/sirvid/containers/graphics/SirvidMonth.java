@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG.DIM;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 
 public class SirvidMonth {
@@ -11,14 +12,17 @@ public class SirvidMonth {
     public GregorianCalendar month;
     public ArrayList<SirvidDay> days = new ArrayList<SirvidDay>();
     public GregorianCalendar solstice;
+    public boolean needsExtraSpace4Feasts = false;
+    public double feastsZoomRatio;
     
     /**
      * Init and populate month container
      * @param month should be first date of month
      */
-    public SirvidMonth(GregorianCalendar m) {
+    public SirvidMonth(GregorianCalendar m, double feastsZoom) {
         
         month = (GregorianCalendar) m.clone();
+        feastsZoomRatio = feastsZoom;
         GregorianCalendar monthEnd = getEndOfMonth(m);
         
         int beginX;
@@ -53,5 +57,23 @@ public class SirvidMonth {
     public int getMaxX() {
     	SirvidDay lastDay = days.get(days.size()-1);
     	return lastDay.beginX + SirvidSVG.runes.get(lastDay.weekDay).getWidth();
+    }
+    
+    public int calculateY(DIM atPlace) {
+        int y = 0;
+        switch(atPlace) {
+            case Y_TOTAL : y += SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT);
+            case Y_MOONPHASESHEIGHT : y += SirvidSVG.widths.get(DIM.Y_MONTHLINEHEIGHT);
+            case Y_MONTHLINEHEIGHT2 : y += SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT);
+            case Y_WEEKDAYSHEIGHT : y += SirvidSVG.widths.get(DIM.Y_MONTHLINEHEIGHT);
+            case Y_MONTHLINEHEIGHT : y += SirvidSVG.widths.get(DIM.Y_FEASTSHEIGHT) + getXtraY();
+            case Y_FEASTSHEIGHT : y += SirvidSVG.widths.get(DIM.Y_MARGIN); break;
+            default : ;
+        }
+        return y;
+    }
+    
+    public int getXtraY() {
+        return needsExtraSpace4Feasts ? (int)(SirvidSVG.widths.get(DIM.Y_FEASTSEXTRA)*feastsZoomRatio) : 0;
     }
 }

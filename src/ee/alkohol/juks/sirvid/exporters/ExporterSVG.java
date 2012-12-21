@@ -50,8 +50,6 @@ public class ExporterSVG extends Exporter {
             
             SimpleDateFormat monthFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfMonth"));
             monthFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
-        	double mfZoomRatio = SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
-        	double feastsZoomRatio = SirvidSVG.widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
         	
         	SirvidSVG.DIM[] monthLines = {SirvidSVG.DIM.Y_MONTHLINEHEIGHT, SirvidSVG.DIM.Y_MONTHLINEHEIGHT2};
         	
@@ -59,8 +57,8 @@ public class ExporterSVG extends Exporter {
             sb.append("\n<style type=\"text/css\">\n");
             sb.append("<![CDATA[\n");
             sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth"), "g"));
-            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/mfZoomRatio, "m"));
-            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/feastsZoomRatio, "f"));
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/sSVG.mfZoomRatio, "m"));
+            sb.append(generateCssClass(SirvidSVG.props.getPropertyInt("strokeWidth")/sSVG.feastsZoomRatio, "f"));
             sb.append("]]>\n");
             sb.append("</style>\n");
             
@@ -83,13 +81,13 @@ public class ExporterSVG extends Exporter {
             sb.append(")\">\n");
             
             int m = -1;
+            int yBefore = 0;
             for(SirvidMonth sM : sSVG.months) {
                 
                 m++;
-                int yBefore = m * sSVG.calculateY(SirvidSVG.DIM.Y_TOTAL);
-                int wdHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
-                int mfHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_MOONPHASESHEIGHT);
-                int feastsHeight = yBefore + sSVG.calculateY(SirvidSVG.DIM.Y_FEASTSHEIGHT);
+                int wdHeight = yBefore + sM.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
+                int mfHeight = yBefore + sM.calculateY(SirvidSVG.DIM.Y_MOONPHASESHEIGHT);
+                int feastsHeight = yBefore + sM.calculateY(SirvidSVG.DIM.Y_FEASTSHEIGHT);
                 
                 // month lines
                 int maxX = sM.getMaxX();
@@ -98,7 +96,7 @@ public class ExporterSVG extends Exporter {
                 sb.append("</title>");
                 
                 for(SirvidSVG.DIM monthLine : monthLines) {
-                    int y = yBefore + sSVG.calculateY(monthLine);
+                    int y = yBefore + sM.calculateY(monthLine);
                     sb.append(SirvidSVG.generateLine(
                             SirvidSVG.widths.get(SirvidSVG.DIM.X_MARGIN) - SirvidSVG.widths.get(SirvidSVG.DIM.X_MONTHLINESEXTENSION), 
                             y, 
@@ -117,33 +115,40 @@ public class ExporterSVG extends Exporter {
             	    transformSB.append(wdHeight);
             	    transformSB.append(")");
             	                        
-                    sb.append(generateRune(sD.weekDay, sD.weekdayLabel.toString(), "g", transformSB.toString()));
+                    sb.append(generateRune(sD.weekDay, sD.weekdayLabel.toString(), "g", transformSB.toString(), ""));
             		
             		// moonphases
-            		if(mfZoomRatio > 0 && sD.moonphase != null ) {
-            		    sb.append(generateMoveable(sD, sD.moonphaseID, mfZoomRatio, mfHeight, sD.moonphaseLabel.toString(), "m", ""));
+            		if(sSVG.mfZoomRatio > 0 && sD.moonphase != null ) {
+            		    sb.append(generateMoveable(sD, sD.moonphaseID, sSVG.mfZoomRatio, mfHeight, sD.moonphaseLabel.toString(), "m", "", ""));
             		}
             		
             		// feasts
-            		if(feastsZoomRatio > 0 && !sD.feasts.isEmpty()) {
+            		int xtraY;
+            		if(sSVG.feastsZoomRatio > 0 && !sD.feasts.isEmpty()) {
             		    for(int i = 0; i < sD.feasts.size(); i++) {
             		        
             		        StringBuilder addToTransform = new StringBuilder();
             		        SirvidFeast feast = sD.feasts.get(i);
+            		        xtraY = sM.getXtraY();
+            		        
         		            if(feast.rotate != 0) {
         		                addToTransform.append(" rotate(");
                                 addToTransform.append(feast.rotate);
                                 addToTransform.append(" ");
                                 addToTransform.append(sSVG.getRuneByDbID(feast.event.dbID).getCx());
-                                addToTransform.append(" 200)");
+                                addToTransform.append(" ");
+                                addToTransform.append(SirvidSVG.widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + SirvidSVG.widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
+                                addToTransform.append(")");
+                                xtraY = 0;
         		            }
             		            
-                            sb.append(generateMoveable(sD, feast.event.dbID, feastsZoomRatio, feastsHeight, feast.label.toString(), "f", addToTransform.toString()));
+                            sb.append(generateMoveable(sD, feast.event.dbID, sSVG.feastsZoomRatio, feastsHeight + xtraY, feast.label.toString(), "f", addToTransform.toString(), feast.xtraSVG.toString()));
             		    }
             		}
             		
             	}
-
+            	
+            	yBefore += sM.calculateY(SirvidSVG.DIM.Y_TOTAL);
             }
             
         }
@@ -181,7 +186,7 @@ public class ExporterSVG extends Exporter {
         return sb.toString();
     }
     
-    private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass, String addToTransform) {
+    private String generateMoveable(SirvidDay sD, int dbID, double zoomRatio, int y0, String title, String cssClass, String addToTransform, String xtraSVG) {
         StringBuilder transform = new StringBuilder();
         transform.append("translate(");
         transform.append(sD.beginX 
@@ -193,10 +198,10 @@ public class ExporterSVG extends Exporter {
         transform.append(zoomRatio);
         transform.append(")");
         transform.append(addToTransform);
-        return generateRune(dbID, title, cssClass, transform.toString());
+        return generateRune(dbID, title, cssClass, transform.toString(), xtraSVG);
     }
     
-    private String generateRune(int dbID, String title, String cssClass, String transform) {
+    private String generateRune(int dbID, String title, String cssClass, String transform, String xtraSVG) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n<g class=\"");
         sb.append(cssClass);
@@ -211,7 +216,9 @@ public class ExporterSVG extends Exporter {
         sb.append("</title>\n");
         sb.append("<use xlink:href=\"#r");
         sb.append(SirvidSVG.eventsVsRunes.get(dbID));
-        sb.append("\"/>\n</g>\n");
+        sb.append("\"/>\n");
+        sb.append(xtraSVG);
+        sb.append("\n</g>\n");
         return sb.toString();
     }
     

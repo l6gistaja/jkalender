@@ -28,6 +28,8 @@ public class SirvidSVG {
         X_WEEKDAYPADDING,
         X_MONTHLINESEXTENSION,
         
+        Y_FEASTSEXTRA,
+        
         Y_MARGIN,
         Y_FEASTSHEIGHT,
         Y_MONTHLINEHEIGHT,
@@ -65,6 +67,9 @@ public class SirvidSVG {
      */
     public int beginMonth;
     
+    public double mfZoomRatio;
+    public double feastsZoomRatio;
+    
     
     public SirvidSVG(ICalculator iC) {
         
@@ -84,6 +89,9 @@ public class SirvidSVG {
                 errorMsgs.add("Failed to open svg_export.properties : " + e.getMessage());
             }
         }
+        
+        mfZoomRatio = SirvidSVG.widths.get(DIM.Y_MOONPHASESHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
+        feastsZoomRatio = SirvidSVG.widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / SirvidSVG.widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
         
         DaoKalenderJDBCSqlite CalendarDAO = iCalc.CalendarDAO;
         
@@ -142,7 +150,7 @@ public class SirvidSVG {
                 
         // init and populate sirvi-containers
         do {
-            months.add(new SirvidMonth(date0));
+            months.add(new SirvidMonth(date0, this.feastsZoomRatio));
         } while (date0.before(date1));
         
         populateEvents();
@@ -161,20 +169,6 @@ public class SirvidSVG {
      */
     private static int generateMonthIndex(GregorianCalendar month) {
         return 12*month.get(Calendar.YEAR) + month.get(Calendar.MONTH);
-    }
-    
-    public int calculateY(DIM atPlace) {
-        int y = 0;
-        switch(atPlace) {
-            case Y_TOTAL : y += widths.get(DIM.Y_MOONPHASESHEIGHT);
-            case Y_MOONPHASESHEIGHT : y += widths.get(DIM.Y_MONTHLINEHEIGHT);
-            case Y_MONTHLINEHEIGHT2 : y += widths.get(DIM.Y_WEEKDAYSHEIGHT);
-            case Y_WEEKDAYSHEIGHT : y += widths.get(DIM.Y_MONTHLINEHEIGHT);
-            case Y_MONTHLINEHEIGHT : y += widths.get(DIM.Y_FEASTSHEIGHT);
-            case Y_FEASTSHEIGHT : y += widths.get(DIM.Y_MARGIN); break;
-            default : ;
-        }
-        return y;
     }
     
     public static String formatDateTimes(GregorianCalendar calUTC, String simpleDateFormat) {
@@ -216,13 +210,13 @@ public class SirvidSVG {
     	    
     		if(event.allDayEvent) {
     		    
-    		    initFeastRune(event, sD);
+    		    initFeastRune(event, sD, sM);
     		    
     		} else {
     		    
     			GregorianCalendar tzdAsUTC = calendarAsUTCCalendar(timeZoned);
     			if(isSolstice(event.dbID)) {
-    			    initFeastRune(event, sD);
+    			    initFeastRune(event, sD, sM);
     			    sM.solstice = tzdAsUTC;
     			}
     			else if(ICalculator.DbIdStatuses.SUNRISE.getDbId() == event.dbID) { sD.sunrise = tzdAsUTC; }
@@ -235,7 +229,7 @@ public class SirvidSVG {
     	}
     }
     
-    private void initFeastRune(ICalEvent event, SirvidDay sirvidDay) {
+    private void initFeastRune(ICalEvent event, SirvidDay sirvidDay, SirvidMonth sirvidMonth) {
         
         boolean runeExists = false;
         int runeID = ICalculator.DbIdStatuses.UNDEFINED.getDbId();
@@ -271,6 +265,7 @@ public class SirvidSVG {
         
         if(runeExists) { 
             sirvidDay.feasts.add(new SirvidFeast(event)); 
+            if(sirvidDay.feasts.size() > 1) { sirvidMonth.needsExtraSpace4Feasts = true; }
             eventsVsRunes.put(event.dbID, runeID);
         }
     }
@@ -328,6 +323,7 @@ public class SirvidSVG {
                                         yuleTitle.append(" ");
                                         yuleTitle.append(solsticeDay.feasts.get(i).event.properties.get(ICalendar.Keys.SUMMARY).value);
                                         solsticeDay.feasts.remove(i);
+                                        sM.needsExtraSpace4Feasts = false;
                                         break;
                                     }
                                 }
@@ -341,16 +337,15 @@ public class SirvidSVG {
                         int paddingX = (getRoot(sM.days, 25) - getRoot(sM.days, 24)) >> 1;
                         if(paddingX < widths.get(DIM.X_WEEKDAYPADDING) -1) { paddingX = widths.get(DIM.X_WEEKDAYPADDING) -1; }
                         int beginX1221 = getRoot(sM.days, 21);
-                        double zoomRatio = widths.get(DIM.Y_FEASTSHEIGHT).doubleValue() / widths.get(DIM.Y_WEEKDAYSHEIGHT).doubleValue();
                         int x = Integer.MIN_VALUE;
                         int x1221 = Integer.MIN_VALUE;
                         for(int d = 21; d < 25; d++) {
-                            x = (int)((paddingX - beginX1221 + getRoot(sM.days, d)) / zoomRatio);
+                            x = (int)((paddingX - beginX1221 + getRoot(sM.days, d)) / feastsZoomRatio);
                             yuleRune.append("\n");
                             yuleRune.append(generateLine(x, 100, x, 200));
                             if(x1221 == Integer.MIN_VALUE) { x1221 = x; }
                         }
-                        int endX = x + (int)(paddingX/zoomRatio);
+                        int endX = x + (int)(paddingX/feastsZoomRatio);
                         int yRadius = 150;
                         yuleRune.append("\n<path d=\"M0 ");
                         yuleRune.append(yRadius);
@@ -419,24 +414,37 @@ public class SirvidSVG {
                     
                     // determine rotation order
                     if(sD.feasts.size() == 2) {
+                        
                         boolean notKihlakud = true;
                         for(int i=0; i<2; i++) {
                             if(isKihlakud(sD.feasts.get(i).event.dbID)) {
                                 notKihlakud = false;
                                 sD.feasts.get((i+1)%2).rotate = sD.feasts.get(i).event.dbID == LIUGUP2EV ? -45 : 45;
+                                generateFoot(sD.feasts.get((i+1)%2), widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
                             }
                         }
+                        
                         if(notKihlakud) {
                             int rot = getRuneByDbID(sD.feasts.get(0).event.dbID).getRightness() > getRuneByDbID(sD.feasts.get(1).event.dbID).getRightness() ? 0 : 1;
                             sD.feasts.get(rot%2).rotate = -45;
                             sD.feasts.get((1 + rot)%2).rotate = 45;
+                            generateFoot(sD.feasts.get(0), widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
+                            generateFoot(sD.feasts.get(1), widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
                         }
+                        
                     }
                 }
             }
             
             date0.add(Calendar.DATE, 1);
         } while (date0.before(date1));
+    }
+    
+    private void generateFoot(SirvidFeast feast, int y0, int y1) {
+        if(y0 < y1) {
+            int cx = getRuneByDbID(feast.event.dbID).getCx();
+            feast.xtraSVG.append(generateLine(cx, y0, cx, y1));
+        }
     }
     
     private int getRoot(ArrayList<SirvidDay> monthDays, int dayNo) {
