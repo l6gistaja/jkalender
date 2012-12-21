@@ -20,6 +20,8 @@ public class SirvidSVG {
     public static final String dataPath = "sirvid/";
     public static final String[] errorTxtTags = { "<text x=\"50\" y=\"60\" fill=\"black\" font-size=\"100\">", "</text>" };
     public static final int J6ULUD = 1221;
+    public static final int LIUGUP2EV = 1953;
+    public static final int TUHKAP2EV = 1954;
     public static final String[] weekDays = {"P","E","T","K","N","R","L"};
     public static enum  DIM {
         X_MARGIN,
@@ -233,14 +235,6 @@ public class SirvidSVG {
     	}
     }
     
-    public static boolean isSolstice(int dbID) {
-        return dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()
-                || dbID == ICalculator.DbIdStatuses.SOLSTICE1.getDbId()
-                || dbID == ICalculator.DbIdStatuses.SOLSTICE2.getDbId()
-                || dbID == ICalculator.DbIdStatuses.SOLSTICE3.getDbId()
-                || dbID == ICalculator.DbIdStatuses.SOLSTICE4.getDbId();
-    }
-    
     private void initFeastRune(ICalEvent event, SirvidDay sirvidDay) {
         
         boolean runeExists = false;
@@ -276,7 +270,7 @@ public class SirvidSVG {
         }
         
         if(runeExists) { 
-            sirvidDay.feasts.add(event); 
+            sirvidDay.feasts.add(new SirvidFeast(event)); 
             eventsVsRunes.put(event.dbID, runeID);
         }
     }
@@ -317,9 +311,9 @@ public class SirvidSVG {
                         yuleTitle.append(" - ");
                         yuleTitle.append(dateFormat.format(new Date(sM.days.get(23).date.getTimeInMillis())));
                         yuleTitle.append("\n");
-                        for(ICalEvent yulEvent : sD.feasts ) {
-                            if(yulEvent.dbID == J6ULUD) {
-                                yuleTitle.append(yulEvent.properties.get(ICalendar.Keys.SUMMARY).value);
+                        for(SirvidFeast yulEvent : sD.feasts ) {
+                            if(yulEvent.event.dbID == J6ULUD) {
+                                yuleTitle.append(yulEvent.event.properties.get(ICalendar.Keys.SUMMARY).value);
                                 break;
                             }
                         }
@@ -328,11 +322,11 @@ public class SirvidSVG {
                             SirvidDay solsticeDay = sM.days.get(sM.solstice.get(Calendar.DATE)-1);
                             if(solsticeDay != null) {
                                 for (int i = 0; i < solsticeDay.feasts.size(); i++) {
-                                    if(isSolstice(solsticeDay.feasts.get(i).dbID)) {
+                                    if(isSolstice(solsticeDay.feasts.get(i).event.dbID)) {
                                         yuleTitle.append("\n");
                                         yuleTitle.append(datetimeFormat.format(new Date(sM.solstice.getTimeInMillis())));
                                         yuleTitle.append(" ");
-                                        yuleTitle.append(solsticeDay.feasts.get(i).properties.get(ICalendar.Keys.SUMMARY).value);
+                                        yuleTitle.append(solsticeDay.feasts.get(i).event.properties.get(ICalendar.Keys.SUMMARY).value);
                                         solsticeDay.feasts.remove(i);
                                         break;
                                     }
@@ -340,7 +334,7 @@ public class SirvidSVG {
                             }
                         }
                         
-                        sD.feastLabels.add(yuleTitle);
+                        if(sD.feasts.size()==1) { sD.feasts.get(0).label = yuleTitle; }
                         
                         // create Yule rune
                         StringBuilder yuleRune = new StringBuilder();
@@ -381,16 +375,14 @@ public class SirvidSVG {
                         
                     } else { // non-yules
                         
-                        for(ICalEvent feast : sD.feasts ) {
-                            StringBuilder fTitle = new StringBuilder();
-                            fTitle.append(dateFormat.format(new Date( ((GregorianCalendar)feast.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
-                            if(!feast.allDayEvent) {
-                                fTitle.append(" ");
-                                fTitle.append(timeFormat.format(new Date( ((GregorianCalendar)feast.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
+                        for(SirvidFeast feast : sD.feasts ) {
+                            feast.label.append(dateFormat.format(new Date( ((GregorianCalendar)feast.event.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
+                            if(!feast.event.allDayEvent) {
+                                feast.label.append(" ");
+                                feast.label.append(timeFormat.format(new Date( ((GregorianCalendar)feast.event.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
                             }
-                            fTitle.append("\n");
-                            fTitle.append(feast.properties.get(ICalendar.Keys.SUMMARY).value);
-                            sD.feastLabels.add(fTitle);
+                            feast.label.append("\n");
+                            feast.label.append(feast.event.properties.get(ICalendar.Keys.SUMMARY).value);
                         }
                         
                     }
@@ -427,7 +419,18 @@ public class SirvidSVG {
                     
                     // determine rotation order
                     if(sD.feasts.size() == 2) {
-                        sD.rotationOrder = getRuneByDbID(sD.feasts.get(0).dbID).getRightness() > getRuneByDbID(sD.feasts.get(1).dbID).getRightness() ? 0 : 1;
+                        boolean notKihlakud = true;
+                        for(int i=0; i<2; i++) {
+                            if(isKihlakud(sD.feasts.get(i).event.dbID)) {
+                                notKihlakud = false;
+                                sD.feasts.get((i+1)%2).rotate = sD.feasts.get(i).event.dbID == LIUGUP2EV ? -45 : 45;
+                            }
+                        }
+                        if(notKihlakud) {
+                            int rot = getRuneByDbID(sD.feasts.get(0).event.dbID).getRightness() > getRuneByDbID(sD.feasts.get(1).event.dbID).getRightness() ? 0 : 1;
+                            sD.feasts.get(rot%2).rotate = -45;
+                            sD.feasts.get((1 + rot)%2).rotate = 45;
+                        }
                     }
                 }
             }
@@ -486,6 +489,18 @@ public class SirvidSVG {
             ICalculator.DbIdStatuses[] other = {ICalculator.DbIdStatuses.SUNRISE, ICalculator.DbIdStatuses.SUNSET};
             for(ICalculator.DbIdStatuses dbID : other) { commonLabels.put(new Integer(dbID.getDbId()), new String[] {dbID.getName(), null } ); }
         }
+    }
+    
+    public static boolean isSolstice(int dbID) {
+        return dbID == ICalculator.DbIdStatuses.SOLSTICE.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE1.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE2.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE3.getDbId()
+                || dbID == ICalculator.DbIdStatuses.SOLSTICE4.getDbId();
+    }
+    
+    public static boolean isKihlakud(int dbID) {
+        return dbID == LIUGUP2EV || dbID == TUHKAP2EV;
     }
     
     public static String generateLine(double x1, double y1, double x2, double y2) {

@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidDay;
+import ee.alkohol.juks.sirvid.containers.graphics.SirvidFeast;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidMonth;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidRune;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG;
@@ -126,17 +127,18 @@ public class ExporterSVG extends Exporter {
             		// feasts
             		if(feastsZoomRatio > 0 && !sD.feasts.isEmpty()) {
             		    for(int i = 0; i < sD.feasts.size(); i++) {
-            		        ICalEvent feast = sD.feasts.get(i);
+            		        
             		        StringBuilder addToTransform = new StringBuilder();
-            		        sb.append("<!-- " + sD.feasts.size() + " -->");
-            		        if(sD.feasts.size() == 2) {
-            		            addToTransform.append(" rotate(");
-            		            if((i + sD.rotationOrder) % 2 == 0) { addToTransform.append("-"); }
-            		            addToTransform.append("45 ");
-            		            addToTransform.append(sSVG.getRuneByDbID(feast.dbID).getCx());
-            		            addToTransform.append(" 200)");
-            		        }
-                            sb.append(generateMoveable(sD, feast.dbID, feastsZoomRatio, feastsHeight, sD.feastLabels.get(i).toString(), "f", addToTransform.toString()));
+            		        SirvidFeast feast = sD.feasts.get(i);
+        		            if(feast.rotate != 0) {
+        		                addToTransform.append(" rotate(");
+                                addToTransform.append(feast.rotate);
+                                addToTransform.append(" ");
+                                addToTransform.append(sSVG.getRuneByDbID(feast.event.dbID).getCx());
+                                addToTransform.append(" 200)");
+        		            }
+            		            
+                            sb.append(generateMoveable(sD, feast.event.dbID, feastsZoomRatio, feastsHeight, feast.label.toString(), "f", addToTransform.toString()));
             		    }
             		}
             		
