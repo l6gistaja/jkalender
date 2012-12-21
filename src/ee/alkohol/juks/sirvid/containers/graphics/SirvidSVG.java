@@ -27,7 +27,10 @@ public class SirvidSVG {
         X_MARGIN,
         X_WEEKDAYPADDING,
         X_MONTHLINESEXTENSION,
+        X_KIHLAKUD_UNIT,
         
+        Y_KIHLAKUDRADIUS,
+        Y_KIHLAKUDFOOT,
         Y_FEASTSEXTRA,
         
         Y_MARGIN,
@@ -275,6 +278,7 @@ public class SirvidSVG {
         GregorianCalendar date0 = getSirvBeginning(iCalc.calendarBegin);
         GregorianCalendar date1 = SirvidMonth.getEndOfMonth(calendarAsUTCCalendar(iCalc.calendarEnd));
         boolean proceed = true;
+        boolean kihlakudProcessed = false;
         int monthIndex;
         
         SimpleDateFormat dateFormat = new SimpleDateFormat(SirvidSVG.props.getProperty("sdfDate"));
@@ -371,6 +375,7 @@ public class SirvidSVG {
                     } else { // non-yules
                         
                         for(SirvidFeast feast : sD.feasts ) {
+                            
                             feast.label.append(dateFormat.format(new Date( ((GregorianCalendar)feast.event.properties.get(ICalendar.Keys.EVENT_START).value).getTimeInMillis() )));
                             if(!feast.event.allDayEvent) {
                                 feast.label.append(" ");
@@ -378,6 +383,30 @@ public class SirvidSVG {
                             }
                             feast.label.append("\n");
                             feast.label.append(feast.event.properties.get(ICalendar.Keys.SUMMARY).value);
+                            
+                            if(!kihlakudProcessed && isKihlakud(feast.event.dbID)) {
+                                if(feast.event.dbID == LIUGUP2EV) {
+                                    
+                                    if(date0.getActualMaximum(Calendar.DATE) == date0.get(Calendar.DATE)) {
+                                        generateKihlakud(0,LIUGUP2EV);
+                                        generateKihlakud(0,TUHKAP2EV);
+                                    } else {
+                                        generateKihlakud(getRoot(sM.days, date0.get(Calendar.DATE) + 1) - getRoot(sM.days, date0.get(Calendar.DATE)), LIUGUP2EV);
+                                        SirvidRune sR;
+                                        try {
+                                            sR = new SirvidRune(0, null, 1);
+                                            sR.setSvgContent(generateLine(0, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT), 0, widths.get(SirvidSVG.DIM.Y_KIHLAKUDFOOT)));
+                                            runes.put(TUHKAP2EV, sR);
+                                            eventsVsRunes.put(TUHKAP2EV, TUHKAP2EV);
+                                        } catch(Exception e) { }
+                                    }
+                                    
+                                } else {
+                                    generateKihlakud(0,TUHKAP2EV);
+                                }
+                                kihlakudProcessed = true;
+                            }
+                            
                         }
                         
                     }
@@ -414,25 +443,23 @@ public class SirvidSVG {
                     
                     // determine rotation order
                     if(sD.feasts.size() == 2) {
-                        
                         boolean notKihlakud = true;
                         for(int i=0; i<2; i++) {
                             if(isKihlakud(sD.feasts.get(i).event.dbID)) {
                                 notKihlakud = false;
                                 sD.feasts.get((i+1)%2).rotate = sD.feasts.get(i).event.dbID == LIUGUP2EV ? -45 : 45;
-                                generateFoot(sD.feasts.get((i+1)%2), widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
+                                generateRotableFoot(sD.feasts.get((i+1)%2));
                             }
                         }
-                        
                         if(notKihlakud) {
                             int rot = getRuneByDbID(sD.feasts.get(0).event.dbID).getRightness() > getRuneByDbID(sD.feasts.get(1).event.dbID).getRightness() ? 0 : 1;
                             sD.feasts.get(rot%2).rotate = -45;
                             sD.feasts.get((1 + rot)%2).rotate = 45;
-                            generateFoot(sD.feasts.get(0), widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
-                            generateFoot(sD.feasts.get(1), widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
+                            generateRotableFoot(sD.feasts.get(0));
+                            generateRotableFoot(sD.feasts.get(1));
                         }
-                        
                     }
+                    
                 }
             }
             
@@ -440,11 +467,37 @@ public class SirvidSVG {
         } while (date0.before(date1));
     }
     
-    private void generateFoot(SirvidFeast feast, int y0, int y1) {
-        if(y0 < y1) {
+    private void generateRotableFoot(SirvidFeast feast) {
+        if(widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA) > 0) {
             int cx = getRuneByDbID(feast.event.dbID).getCx();
-            feast.xtraSVG.append(generateLine(cx, y0, cx, y1));
+            feast.xtraSVG.append(generateLine(cx, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, cx, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA)));
         }
+    }
+    
+    private String generateKihlakud(int centralWidth, int dbID) {
+        if(centralWidth < 1) { centralWidth = widths.get(SirvidSVG.DIM.X_WEEKDAYPADDING); }
+        centralWidth = (int)(centralWidth / feastsZoomRatio);
+        StringBuilder kihlakudRune = new StringBuilder();
+        kihlakudRune.append("\n<path d=\"M0 0 L");
+        kihlakudRune.append(widths.get(SirvidSVG.DIM.X_KIHLAKUD_UNIT));
+        kihlakudRune.append(" 0 A");
+        kihlakudRune.append((int)((centralWidth + widths.get(SirvidSVG.DIM.X_KIHLAKUD_UNIT) *2) / 2));
+        kihlakudRune.append(",");
+        kihlakudRune.append(widths.get(SirvidSVG.DIM.Y_KIHLAKUDRADIUS));
+        kihlakudRune.append(" 0 1,0 ");
+        kihlakudRune.append(centralWidth + (widths.get(SirvidSVG.DIM.X_KIHLAKUD_UNIT) * 3));
+        kihlakudRune.append(",0\"/>\n");
+        int legAt = 2 * widths.get(SirvidSVG.DIM.X_KIHLAKUD_UNIT);
+        kihlakudRune.append(generateLine(legAt, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT), legAt, widths.get(SirvidSVG.DIM.Y_KIHLAKUDFOOT)));
+        kihlakudRune.append("\n");
+        SirvidRune sR;
+        try {
+            sR = new SirvidRune(legAt, null, centralWidth + (widths.get(SirvidSVG.DIM.X_KIHLAKUD_UNIT) * 3));
+            sR.setSvgContent(kihlakudRune.toString());
+            runes.put(dbID, sR);
+            eventsVsRunes.put(dbID, dbID);
+        } catch(Exception e) { }
+        return kihlakudRune.toString();
     }
     
     private int getRoot(ArrayList<SirvidDay> monthDays, int dayNo) {
