@@ -52,6 +52,7 @@ public class ICalendar {
     public static final class Values {
         public static final String DATE = "DATE";
         public static final String DATETIME = "DATE-TIME";
+        public static final String TEXT = "TEXT";
     }
     
     // Structure

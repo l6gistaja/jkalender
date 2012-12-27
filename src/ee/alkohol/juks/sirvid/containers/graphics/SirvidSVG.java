@@ -334,6 +334,11 @@ public class SirvidSVG {
                             }
                         }
                         
+                        if(this.iCalc.inputData.isAddRemark()) {
+                        	yuleTitle.append("\n");
+                        	yuleTitle.append(props.getProperty("remark1224"));
+                        }
+                        
                         if(sD.feasts.size()==1) { sD.feasts.get(0).label = yuleTitle; }
                         
                         // create Yule rune
@@ -383,6 +388,10 @@ public class SirvidSVG {
                             }
                             feast.label.append("\n");
                             feast.label.append(feast.event.properties.get(ICalendar.Keys.SUMMARY).value);
+                            if(this.iCalc.inputData.isAddRemark() && feast.event.properties.get(ICalendar.Keys.DESCRIPTION) != null) {
+                            	feast.label.append("\n");
+                            	feast.label.append(feast.event.properties.get(ICalendar.Keys.DESCRIPTION).value);
+                            }
                             
                             if(!kihlakudProcessed && isKihlakud(feast.event.dbID)) {
                                 if(feast.event.dbID == LIUGUP2EV) {

@@ -1,5 +1,6 @@
 package ee.alkohol.juks.sirvid.containers.ical;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,11 +9,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 import java.util.TimeZone;
 import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar.*;
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.InputData;
+import ee.alkohol.juks.sirvid.containers.PropertiesT;
 import ee.alkohol.juks.sirvid.exporters.Exporter;
 import ee.alkohol.juks.sirvid.math.Astronomy;
 
@@ -25,7 +28,9 @@ public class ICalculator {
     
     public final static String UTC_TZ_ID = "GMT";
     
-    public final static String[] LANG = {Keys.LANGUAGE, "ET"};
+    public final static String LANGUAGE = "et";
+    public final static String[] LANG = {Keys.LANGUAGE, LANGUAGE.toUpperCase()};
+    public final static String[] LANG_DESCR = {Keys.LANGUAGE, LANGUAGE.toUpperCase(), Keys.VALUE, Values.TEXT};
     public final static String MV_TITLE = "maausk";
     public final static String MV_WHERECLAUSE = " and maausk is not null and trim(maausk) <> ''";
     
@@ -82,6 +87,11 @@ public class ICalculator {
     public DaoKalenderJDBCSqlite CalendarDAO;
     public GregorianCalendar calendarBegin;
     public GregorianCalendar calendarEnd;
+    
+    public static final String eventFlagsPrefix = "db.events.flags.";
+    public static final String eventFlagsField = "flags";
+    public static HashMap<Integer,String> eventFlags;
+    public static int eventFlagsMax = -1;
     
     public ICalculator(InputData inputData) throws SQLException {
         
@@ -140,6 +150,7 @@ public class ICalculator {
         String whereClause  = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA) ? MV_WHERECLAUSE : null;
         
         HashMap<String,String> eventTranslations = new HashMap<String,String> ();
+        String[] commonLabel = {DaoKalenderJDBCSqlite.DbTables.EVENTS.getTitle()};
         if(CalendarDAO.isConnected()) {
             ResultSet eventTrRS = CalendarDAO.getRange(
                     DbIdStatuses.MOON_NEW_M2.getDbId(), 
@@ -148,7 +159,12 @@ public class ICalculator {
                     null);
             if(eventTrRS != null) {
                 while(eventTrRS.next()) { 
-                    eventTranslations.put(eventTrRS.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK()), generateDayName(eventTrRS, nameFields, nameDelimiter));
+                	int dbID = eventTrRS.getInt(DaoKalenderJDBCSqlite.DbTables.EVENTS.getPK());
+                	if(dbID > DbIdStatuses.SUNSET.getDbId() && dbID < DbIdStatuses.EASTER.getDbId()) { continue; }
+                    eventTranslations.put(""+dbID, 
+                    		generateDayName(eventTrRS, 
+                    				dbID > DbIdStatuses.SUNSET.getDbId() 
+                    					? nameFields : commonLabel, nameDelimiter));
                 }
             }
         }
@@ -331,13 +347,7 @@ public class ICalculator {
     	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(anniversaries, nameFields, nameDelimiter), LANG));
     	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
     	              generateAllDayEvent(event, cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100);
-    	              String descr = anniversaries.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
-    	              if(isNotEmptyStr(descr)) {
-    	                  event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
-    	              }
-    	              // obvious
-    	              //if(dbID != DbIdStatuses.LEAPDAY.getDbId()) { event.properties.put("rrule", new ICalProperty("FREQ=YEARLY", null));}
-    	              
+    	              generateDescription(event.properties, anniversaries);
     	              iCal.vEvent.add(event);
     	            }
     	        }
@@ -359,10 +369,7 @@ public class ICalculator {
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(gEasterEvents, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID), null));
                           generateAllDayEvent(event, easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE));
-                          String descr = gEasterEvents.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
-                          if(isNotEmptyStr(descr)) {
-                              event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
-                          }
+                          generateDescription(event.properties, gEasterEvents);
                           iCal.vEvent.add(event);
                       }
 
@@ -390,10 +397,7 @@ public class ICalculator {
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(weekdayNths, nameFields, nameDelimiter), LANG));
                           event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
                           generateAllDayEvent(event, weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE));
-                          String descr = weekdayNths.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
-                          if(isNotEmptyStr(descr)) {
-                              event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
-                          }
+                          generateDescription(event.properties, weekdayNths);
                           iCal.vEvent.add(event);
                       }
 
@@ -431,10 +435,7 @@ public class ICalculator {
                             event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(advents, nameFields, nameDelimiter), LANG));
                             event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
                             generateAllDayEvent(event, adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE));
-                            String descr = advents.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
-                            if(isNotEmptyStr(descr)) {
-                                event.properties.put(Keys.DESCRIPTION, new ICalProperty(descr, LANG));
-                            }
+                            generateDescription(event.properties, advents);
                             iCal.vEvent.add(event);
                         }
                     }
@@ -457,11 +458,61 @@ public class ICalculator {
     
     // helpers
     
+    private void generateDescription(LinkedHashMap<String,ICalProperty> eventProps, ResultSet eventRow) {
+    	StringBuilder y = new StringBuilder();
+        try {
+        	
+        	if(inputData.isAddDescription()) {
+        		String descr = eventRow.getString(DaoKalenderJDBCSqlite.DbTables.EVENTS.getDescription());
+        		if(isNotEmptyStr(descr)) { y.append(descr);	}
+        	}
+        	
+        	try {
+	        	if(inputData.isAddRemark()) {
+	        		
+		        	if(eventFlags == null) {
+		        		eventFlags = new HashMap<Integer,String>();
+		    			Properties props = new Properties();
+		            	props.load(this.getClass().getClassLoader().getResourceAsStream("i18n/" + LANGUAGE + "/lists.properties"));
+		    			for(Object key : props.keySet()) {
+		    				String keyS = (String)key;
+		    				if(keyS.indexOf(eventFlagsPrefix) == 0) {
+		    					int keyI = Integer.parseInt(keyS.substring(eventFlagsPrefix.length()));
+		    					if(keyI > eventFlagsMax) { eventFlagsMax = keyI; }
+		    					eventFlags.put(keyI,(String) props.get(key));
+		    				}
+		    			}
+		        	}
+		        	
+		        	int flags = eventRow.getInt(eventFlagsField);
+		        	for(int i = 0; i < eventFlagsMax; i++) {
+		        		String txt = eventFlags.get(i);
+		        		if(txt == null) { continue; }
+		        		if((flags >> i) % 2 == 0) { continue; }
+		        		if(y.length() > 0) { y.append("\n"); }
+		        		y.append(txt);
+		        	}
+		        	
+	        	}
+        	}catch (IOException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+        	
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        if(y.length() > 0) { eventProps.put(Keys.DESCRIPTION, new ICalProperty(y.toString(), LANG_DESCR)); }
+        
+    }
+    
     private String[] getLanguageDescriptor() {
         return CalendarDAO.isConnected() ? LANG : null;
     }
     
-    public void generateAllDayEvent(ICalEvent event, int year, int month, int date) {
+    private void generateAllDayEvent(ICalEvent event, int year, int month, int date) {
     	event.properties.putAll(generateAllDayEvent(year, month, date));
     	event.allDayEvent = true;
     }

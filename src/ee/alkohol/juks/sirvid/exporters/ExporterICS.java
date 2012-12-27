@@ -1,7 +1,13 @@
 package ee.alkohol.juks.sirvid.exporters;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
+
 import ee.alkohol.juks.sirvid.containers.ical.ICalProperty;
+import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public class ExporterICS extends ExporterICalendar{
     
@@ -29,5 +35,18 @@ public class ExporterICS extends ExporterICalendar{
         sb.append("\n");
         return sb.toString();
     }
-
+    
+    /**
+     * @see <a href="http://tools.ietf.org/html/rfc5545#section-3.3.11">RFC 5545 : Property Value Data Types : TEXT</a>
+     */
+    public String formatOutput(ICalProperty prop) {
+        String valueType = prop.parameters.get(ICalendar.Keys.VALUE);
+    	if(valueType != null && valueType.equals(ICalendar.Values.TEXT)) {
+    		Object propVal = prop.value;
+    		if(propVal != null) {
+        		return propVal.toString().replace("\n","\\n");
+        	}
+        }
+        return super.formatOutput(prop);
+    }
 }

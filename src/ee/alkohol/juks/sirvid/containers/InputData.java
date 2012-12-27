@@ -42,6 +42,8 @@ public class InputData {
     private boolean calculateSunrisesSunsets = false;
     private boolean calculateGregorianEaster = false;
     private boolean calculateJulianEaster = false;
+    private boolean addDescription;
+	private boolean addRemark;
     private Double latitude;
     private Double longitude;
     private String calendarData;
@@ -190,6 +192,22 @@ public class InputData {
             criticalErrors.put(memberName,date);
         }
     }
+    
+    public boolean isAddDescription() {
+		return addDescription;
+	}
+
+	public void setAddDescription(Object addDescription) {
+		this.addDescription = isTrue(addDescription);
+	}
+
+	public boolean isAddRemark() {
+		return addRemark;
+	}
+
+	public void setAddRemark(Object addRemark) {
+		this.addRemark = isTrue(addRemark);
+	}
     
     public InputData() {
         initialize();

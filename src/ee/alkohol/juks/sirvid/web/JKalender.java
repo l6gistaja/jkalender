@@ -29,6 +29,8 @@ public class JKalender extends HttpServlet {
       inputData.setLatitude(request.getParameter("lat"));
       inputData.setLongitude(request.getParameter("lon"));
       inputData.setTimespan(request.getParameter("ts"));
+      inputData.setAddDescription(request.getParameter("ad"));
+      inputData.setAddRemark(request.getParameter("ar"));
       inputData.setCalendarData(request.getParameter("ce"));
       inputData.jbdcConnect = "jdbc:sqlite:" + getServletContext().getRealPath("/kalender.sdb");
       

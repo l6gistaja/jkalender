@@ -68,7 +68,7 @@ public abstract class ExporterICalendar extends Exporter {
     abstract public String generateProperty(String key, ICalProperty iCalProp);
 
     
-    public static String formatOutput(ICalProperty prop) {
+    public String formatOutput(ICalProperty prop) {
         
         Object propVal = prop.value;
         if(propVal != null) {
