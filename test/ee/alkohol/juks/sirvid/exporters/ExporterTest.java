@@ -31,13 +31,13 @@ public class ExporterTest {
             ICalculator iCalc;
             try {
                 iCalc = new ICalculator(inputData);
-                iCalc.initExport();
-                String output = iCalc.exporter.generate(iCalc);
+                Exporter xport = Exporter.getExporter(inputData.getOutputFormat());
+                String output = xport.generate(iCalc);
                 if(output == null || output.trim().equals("")) {
                     fail(outputFormat +" format output is null or empty.");
                 }
                 
-                if(!iCalc.exporter.getFileExtension().equalsIgnoreCase("."+outputFormat)) { 
+                if(!xport.getFileExtension().equalsIgnoreCase("."+outputFormat)) { 
                     fail(outputFormat +" fileextension unset."); 
                 }
             }

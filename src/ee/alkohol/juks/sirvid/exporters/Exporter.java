@@ -11,6 +11,12 @@ public abstract class Exporter {
     
     public Exporter() { }
     
+    public static Exporter getExporter(String extension) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        @SuppressWarnings("rawtypes")
+        Class clazz = Class.forName("ee.alkohol.juks.sirvid.exporters.Exporter"+extension.toUpperCase());
+        return (Exporter)clazz.newInstance();
+    }
+    
     abstract public String generate(ICalculator icalendar);
     
     public String getMimeType() {

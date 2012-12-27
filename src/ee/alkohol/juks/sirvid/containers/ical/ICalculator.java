@@ -450,12 +450,6 @@ public class ICalculator {
         
     }
     
-    public void initExport() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        @SuppressWarnings("rawtypes")
-        Class clazz = Class.forName("ee.alkohol.juks.sirvid.exporters.Exporter"+inputData.getOutputFormat().toUpperCase());
-        exporter = (Exporter)clazz.newInstance();
-    }
-    
     // helpers
     
     private void generateDescription(LinkedHashMap<String,ICalProperty> eventProps, ResultSet eventRow) {
