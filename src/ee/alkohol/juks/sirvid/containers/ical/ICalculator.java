@@ -15,8 +15,6 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar.*;
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.InputData;
-import ee.alkohol.juks.sirvid.containers.PropertiesT;
-import ee.alkohol.juks.sirvid.exporters.Exporter;
 import ee.alkohol.juks.sirvid.math.Astronomy;
 
 /**
@@ -80,7 +78,6 @@ public class ICalculator {
     
     public InputData inputData;
     public ICalendar iCal;
-    public Exporter exporter;
     public ArrayList<String> errorMsgs;
     public String timespan;
     public GregorianCalendar gregorianEaster;
