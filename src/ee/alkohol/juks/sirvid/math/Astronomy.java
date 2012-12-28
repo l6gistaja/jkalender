@@ -5,10 +5,16 @@ import java.util.HashMap;
 /**
  * Generic astronomical and calendar calculations
  * 
- * Most math taken from:
- * Meeus, Jean
- * Astronomical algorithms
- * Willmann-Bell Inc., Richmond, 1991
+ * Most math is taken from:
+ * Meeus, Jean. 
+ * Astronomical algorithms. 
+ * Willmann-Bell Inc., Richmond, 1991. 
+ * 
+ * Years here are astronomical, so 1 BC is here year 0, 2 BC is year -1 and so on. 
+ * Note: Julian Day (Number) or JD(N) is continous count of days and their fractions from 
+ * beginning of the year -4172. By tradition, JD begins at Greenwich mean noon, that is, 
+ * at 12h Universal Time. 
+ * Gregorian calendar reform: 1582-10-04 (in Julian calendar) is followed by 1582-10-15 (in Gregorian calendar).
  * 
  * @author juks@alkohol.ee 
  */
@@ -95,7 +101,8 @@ public class Astronomy {
         {0, 0},
         {0, 0}
     };
-
+    
+    // Meeus pp. 166
     public static final double[][] SOLSTICE_J = {
         {1721139.29189, 365242.1374, 0.06134, 0.00111, -0.00071},
         {1721233.25401, 365241.72562, -0.05323, 0.00907, 0.00025},
@@ -107,6 +114,7 @@ public class Astronomy {
         {2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032}
     };
 
+    // Meeus pp. 167
     public static final double[][] SOLSTICE_S = {
         {485, 324.96, 1934.136},
         {203, 337.23, 32964.467},
@@ -140,11 +148,12 @@ public class Astronomy {
     }
 
     /**
-     * Gregorian Easter
+     * Gregorian Easter 
      * 
-     * Meeus, pp. 67-69
-     * Cycle = = 5 700 000 years 
-     * Extremes examples: min 1818-03-22, max 2038-04-25
+     * Meeus, pp. 67-68. 
+     * Unlike Gauss formula, this method is valid for all years in Gregorian calendar, hence since 1583. 
+     * Recurrence cycle is 5 700 000 years, most frequent Gregorian easter date is April 19. 
+     * Extremes examples: min March 22 (as in 1818 and 2285), max April 25 (as in 1886, 1943 and 2038). 
      * 
      * @param year
      * @return Date of Gregorian Easter in given year as {month, day}
@@ -171,10 +180,10 @@ public class Astronomy {
     }
 
     /**
-     * Julian Easter
+     * Julian Easter 
      * 
-     * Meeus, pp. 67-69
-     * Cycle = 532 years 
+     * Meeus, pp. 69.
+     * Recurrence cycle 532 years.  
      * 
      * @param year
      * @return Date of Julian Easter in given year as {month, day}
@@ -194,9 +203,9 @@ public class Astronomy {
     }
 
     /**
-     * Difference between Universal Time and Dynamic Time
+     * Difference between Universal Time and Dynamic Time 
      * 
-     * Meeus, pp. 71-75
+     * Meeus, pp. 71-75. 
      * Calculates time difference between Greenwich Civil Time (also: Universal Time, UT) and Dynamic Time (DT).
      * DT is more accurate because it takes into account Earth rotations slowdown and other irregularities.
      * 
@@ -219,10 +228,10 @@ public class Astronomy {
     }
     
     /**
-     * Calculate solstices
+     * Calculate solstices 
      * 
-     * Meeus, pp. 165-170
-     * Is aproximately true between years -1000 and +3000
+     * Meeus, pp. 165-170. 
+     * Is aproximately true between years -1000 and +3000. 
      * 
      * @param year
      * @param month
@@ -270,6 +279,7 @@ public class Astronomy {
     /**
      * Calculate lunation number
      * 
+     * Meeus pp. 320. 
      * k is the lunation number. partial lunations correspond to partial phases. 
      * Algorithm is valid only for 1/4 parts of a lunation.
      * Approximate value for k is (year - 2000) * 12.3685 .
@@ -279,35 +289,28 @@ public class Astronomy {
      * @param year
      * @param month
      * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
-     * @return k - lunation number
+     * @return k - lunation number ( k - int(k) : 0 - new moon; 0.25 - first quarter; 0.5 - full moon; 0.75 - last quarter)
      */
     public static double getLunationNumber(long year, short month, short phase) {
     	return Math.floor(((double)year +yearFrac(month, 0.5) -2000) *12.3685) + 0.25 * phase;
     }
     
     /**
-     * Calculate Moon phases using lunation number
+     * Calculate Moon phases using lunation number 
      * 
      * Meeus, pp. 319-324. 
      * Use it through {@link #moonPhaseCorrected(long, short, short)}
      * 
-     * @param lunation number
+     * @param lunation number from {@link #getLunationNumber(long, short, short)}
      * @param phase 0 - new, 1 - first quarter, 2 - full, 3 - last quarter
      * @param dynamicTime
-     * @return nearest requested phase moment in Julian Date
+     * @return nearest requested phase moment as Julian Date
      */
     public static double moonPhaseK(double k, short phase, boolean dynamicTime) {
         
         short cycleLen;
         short i;
         double temp;
-
-        // where k = lunation integer,
-        // k+0 - new moon
-        // k+0.25 - first quarter
-        // k+0.5 - full moon
-        // k+0.75 - last quarter
-        // any other value for k will give meaningless results.
         
         double T = k/1236.85; // time in Julian centuries since the epoch 2000
         double Tp2 = T*T;
@@ -444,7 +447,7 @@ public class Astronomy {
     }
     
     /**
-     * Calculate Moon phases
+     * Calculate Moon phases 
      * 
      * Meeus, pp. 319-324. 
      * Use it through {@link #moonPhaseCorrected(long, short, short)}
@@ -462,7 +465,7 @@ public class Astronomy {
     }
     
     /**
-     * Recalculate moon phase, if you missed right month
+     * Recalculate moon phase, if you missed right month 
      * 
      * Sometimes {@link #moonPhase(long, short, short)} returns value which is one month earlier or later.
      * 
@@ -488,7 +491,7 @@ public class Astronomy {
             if(ctl < 1) break;
             m = (short)(currentMonth%12);
             moonF = moonPhase((long)((currentMonth-m) / 12), (short)(m+1), phase, dynamicTime);
-            moonFGregorian = Astronomy.JD2calendarDate(moonF);
+            moonFGregorian = Astronomy.JDN2gregorianDate(moonF);
             calculatedMonth = 12*moonFGregorian[0] + moonFGregorian[1] -1;
             if (desiredMonth == calculatedMonth) {
                 break;
@@ -504,16 +507,16 @@ public class Astronomy {
     }    
     
     /**
-     * Convert Julian Date to Gregorian Date
+     * Convert Julian Day to Gregorian Date 
      * 
-     * NB! Method does not work on negative JD!
-     * Meeus, pp. 63 
+     * NB! Method does not work on negative JD! 
+     * Meeus, pp. 63. 
      * 
-     * @param JD Julian Date
+     * @param JD Julian Day
      * @return Gregorian date (and UTC time) as {year,month,day,hour,minute,second}
      */
     
-    public static int[] JD2calendarDate(double JD) {
+    public static int[] JDN2gregorianDate(double JD) {
         int Z = (int)Math.floor(JD +.5);
         double F = JD +.5 -Z;
         int A;
@@ -550,16 +553,16 @@ public class Astronomy {
     }
     
     /**
-     * Julian Date's dynamic time correction
+     * Julian Day's dynamic time correction
      * 
-     * @param JD Julian Date
+     * @param JD Julian Day
      * @param dynamicTime
      * @return correction
      */
     
     public static double getDT(double JD, boolean dynamicTime) {
         if(dynamicTime) {
-            int[] jTime = JD2calendarDate(JD);
+            int[] jTime = JDN2gregorianDate(JD);
             return JDE2UTdT((double)jTime[0] +yearFrac((short)jTime[1],jTime[2])) / SECONDS_IN_DAY;
         } else {
             return 0;
@@ -603,7 +606,7 @@ public class Astronomy {
     }
     
     /**
-     * Convert Gregorian date to Julian Day Number
+     * Convert Gregorian date to Julian Day Number 
      * 
      * @param year
      * @param month
@@ -612,7 +615,7 @@ public class Astronomy {
      * @see <a href="http://en.wikipedia.org/wiki/Julian_Day#Converting_Gregorian_calendar_date_to_Julian_Day_Number">Converting Gregorian calendar date to Julian Day Number</a>
      */
     
-    public static double gregorian2JDN(int year, int month, int day) {
+    public static double gregorianDate2JDN(int year, int month, int day) {
         int a = (14 -month) / 12;
         int y = year + 4800 -a;
         int m = month + 12*a -3;
@@ -622,12 +625,12 @@ public class Astronomy {
     /**
      * Calculate sunrise and sunset time for given day and location
      * 
-     * It doesn't use dynamicTime.
+     * It doesn't use dynamicTime. 
      * 
-     * @param Jdate Julian date of day for which sunrise and sunset is calculated
+     * @param Jdate Julian Day of day for which sunrise and sunset is calculated
      * @param lw longitude west (west is positive, east is negative) of the observer on the Earth
      * @param ln north latitude of the observer (north is positive, south is negative) on the Earth
-     * @return hashmap consisting Julian Dates of sunrise (Jrise) and sunset (Jset)
+     * @return hashmap consisting Julian Days of sunrise (Jrise) and sunset (Jset)
      * @see <a href="http://en.wikipedia.org/wiki/Sunrise_equation#Complete_calculation_on_Earth">Sunrise and Sunset calculations for Earth</a>
      * @see <a href="http://users.electromagnetic.net/bu/astro/sunrise-set.php">Calculate Sunrise/Sunset</a>
      */

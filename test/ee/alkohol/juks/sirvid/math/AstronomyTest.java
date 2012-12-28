@@ -5,7 +5,12 @@ import java.util.HashMap;
 import org.junit.Test;
 
 /**
- * Astronomical and calendar calculations: unittests
+ * Astronomical and calendar calculations: unittests. 
+ * 
+ * Some testdata is taken from:
+ * Meeus, Jean. 
+ * Astronomical algorithms. 
+ * Willmann-Bell Inc., Richmond, 1991. 
  * 
  * @author juks@alkohol.ee 
  */
@@ -13,9 +18,11 @@ import org.junit.Test;
 public class AstronomyTest {
     
     public static final String DELIMITER = "-";
-
+    
+    //TODO: Julian Easters at April 12 on years: 179, 711, 1243  
+    
     public static final int[][] GREGORIAN_EASTERS = {
-        
+    	// Meeus pp. 68.
         {1954,4,18},
         {1991,3,31},
         {1992,4,19},
@@ -41,7 +48,9 @@ public class AstronomyTest {
         {2016,3,27}
 
     };
-
+    
+    // TODO: December's solstice is incorrect, always 23.
+    
     public static final int[][] SOLSTICES = {
         
         {1962,6,21}, //,21,24},
@@ -57,19 +66,87 @@ public class AstronomyTest {
         // Kutsukalender 2011
         {2011,3,20}, //23,22 // Estonian datetime {2011,3,21}, //1,22
         {2011,6,21}, //20-1-2,18 
-        {2011,9,23} //12-1-2,6 
+        {2011,9,23}, //12-1-2,6 
+        
+        // Meeus pp. 170.
+        {1991, 3, 21},
+        {1991, 6, 21},
+        {1991, 9, 23},
+        //{1991, 12, 22},
+        
+        {1992, 3, 20},
+        {1992, 6, 21},
+        {1992, 9, 22},
+        //{1992, 12, 21},
+        
+        {1993, 3, 20},
+        {1993, 6, 21},
+        {1993, 9, 23},
+        //{1993, 12, 21},
+        
+        {1994, 3, 20},
+        {1994, 6, 21},
+        {1994, 9, 23},
+        //{1994, 12, 22},
+        
+        {1995, 3, 21},
+        {1995, 6, 21},
+        {1995, 9, 23},
+        //{1995, 12, 22},
+        
+        {1996, 3, 20},
+        {1996, 6, 21},
+        {1996, 9, 22},
+        //{1996, 12, 21},
+        
+        {1997, 3, 20},
+        {1997, 6, 21},
+        {1997, 9, 22},
+        //{1997, 12, 21},
+        
+        {1998, 3, 20},
+        {1998, 6, 21},
+        {1998, 9, 23},
+        //{1998, 12, 22},
+        
+        {1999, 3, 21},
+        {1999, 6, 21},
+        {1999, 9, 23},
+        //{1999, 12, 22},
+        
+        {2000, 3, 20},
+        {2000, 6, 21},
+        {2000, 9, 22},
+        //{2000, 12, 21},
         
     };
     
     public static final int[][] GREGORIAN2JD = {
         
-        {2000,1,1, (int)Astronomy.JDN2000_01_01} //January 1, 2000 at midday corresponds to JD = 2451545
+        {2000,1,1, (int)Astronomy.JDN2000_01_01}, //January 1, 2000 at midday corresponds to JD = 2451545
+        // Meeus pp. 61 
+        {1957,10,(int)4.81, (int)2436116.31}, // launch of Sputnik 1
+        //{333,1,(int)27.5, 1842713}
         
+    };
+    
+    /**
+     * Pairs of Gregorian YYYYMMDD.dayfraction and corrensponding Julian Days. Meeus pp. 54.
+     */
+    public static double[][] JD2GREGORIAN = {
+    	{19571004.81, 2436116.31},
+    	{ 3330127.5 , 1842713},
+    	{ -5840000 + 528.63, 1507900.13 }, // 585 BC
+    	{19100420, 2418781.5},
+    	{19860209, 2446470.5},
+    	{19571004.81, 2436116.31}, // launch of Sputnik 1
+    	{20000101, Astronomy.JDN2000_01_01}, //January 1, 2000 at midday
+    	{3330127.5, 1842713}
     };
     
     public static final double[][] SUNRISE_SUNSET = {
         
-        // @Tallinn; Kutsukalender 2011
+        // From Tallinn; Kutsukalender 2011
         {2011,1,2, 9-2,18, 15-2,32, -24.745278, 59.437222},
         {2011,2,6, 8-2,21, 16-2,50, -24.745278, 59.437222},
         {2011,3,6, 7-2,5, 18-2,1, -24.745278, 59.437222},
@@ -151,6 +228,10 @@ public class AstronomyTest {
         {2011,12,10, 16-2,37, 2},
         {2011,12,18, 2-2,49, 3},
         
+        // Meeus pp. 323
+        {1977,2,18, 3,37, 0},
+        {2044,1,21, 23,48, 3}
+        
     };
     
     public String concatenate(int[] array) {
@@ -167,7 +248,7 @@ public class AstronomyTest {
     
     public int[] eeSolstice(long year, short month) {
         
-        int[] calculation = Astronomy.JD2calendarDate(Astronomy.solstice(year,month, true));
+        int[] calculation = Astronomy.JDN2gregorianDate(Astronomy.solstice(year,month, true));
         int calcDate = (calculation[1]<<5)+calculation[2];
         int quarter = (int)Math.floor((calculation[1]-1)/3);
         int solMinDate = 20 + quarter;
@@ -185,6 +266,17 @@ public class AstronomyTest {
         
     }
     
+    
+    @Test
+    public void testJDN2gregorianDate() {
+        for(int i=0; i<JD2GREGORIAN.length; i++) {
+            int[] astronomyRow = Astronomy.JDN2gregorianDate(JD2GREGORIAN[i][1]);
+            assertEquals("Wrong JDN to Gregorian calculation (test no. "+i+")", JD2GREGORIAN[i][0], 
+            		astronomyRow[0]*10000 + astronomyRow[1]*100 + astronomyRow[2] + (
+            				astronomyRow[3] + (astronomyRow[4] + astronomyRow[5]/60)/60
+            		)/24, 0.9);
+        } 
+    }
     
     @Test
     public void testGregorianEaster() {
@@ -220,7 +312,7 @@ public class AstronomyTest {
         for(int i=0; i<GREGORIAN2JD.length; i++) {
             
             assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", (int)GREGORIAN2JD[i][3], 
-                    (int)Astronomy.gregorian2JDN(GREGORIAN2JD[i][0], GREGORIAN2JD[i][1], GREGORIAN2JD[i][2]));
+                    (int)Astronomy.gregorianDate2JDN(GREGORIAN2JD[i][0], GREGORIAN2JD[i][1], GREGORIAN2JD[i][2]));
 
         }
         
@@ -234,7 +326,7 @@ public class AstronomyTest {
         for(int i=0; i<SUNRISE_SUNSET.length; i++) {
             
             HashMap<String,Double> results = Astronomy.gregorianSunrise(
-                    Astronomy.gregorian2JDN((int)SUNRISE_SUNSET[i][0], (int)SUNRISE_SUNSET[i][1], (int)SUNRISE_SUNSET[i][2]), 
+                    Astronomy.gregorianDate2JDN((int)SUNRISE_SUNSET[i][0], (int)SUNRISE_SUNSET[i][1], (int)SUNRISE_SUNSET[i][2]), 
                     SUNRISE_SUNSET[i][7], SUNRISE_SUNSET[i][8]
             );
             
@@ -244,7 +336,7 @@ public class AstronomyTest {
                     String eventName = (j==3) ? "Sunrise" : "Sunset";
                     String rKey = (j==3) ? Astronomy.Keys.J_RISE : Astronomy.Keys.J_SET;
                     double testTime = -0.5 // JDN is at noon, not at midnight
-                        + Astronomy.gregorian2JDN((int)SUNRISE_SUNSET[i][0], (int)SUNRISE_SUNSET[i][1], (int)SUNRISE_SUNSET[i][2])
+                        + Astronomy.gregorianDate2JDN((int)SUNRISE_SUNSET[i][0], (int)SUNRISE_SUNSET[i][1], (int)SUNRISE_SUNSET[i][2])
                         + (3600*SUNRISE_SUNSET[i][j] + 60*SUNRISE_SUNSET[i][j+1]) / Astronomy.SECONDS_IN_DAY;
                     double diffSecs = Astronomy.SECONDS_IN_DAY * Math.abs(testTime - results.get(rKey));
                     if(diffSecs > allowedTimeDifference) {
@@ -254,9 +346,9 @@ public class AstronomyTest {
                                 + " s (test no. "
                                 + i
                                 + "): Testdata = "
-                                + concatenate(Astronomy.JD2calendarDate(testTime))
+                                + concatenate(Astronomy.JDN2gregorianDate(testTime))
                                 + " vs. Calculated = "
-                                + concatenate(Astronomy.JD2calendarDate(results.get(rKey)))
+                                + concatenate(Astronomy.JDN2gregorianDate(results.get(rKey)))
                                 );
                     }
                 }
@@ -273,7 +365,7 @@ public class AstronomyTest {
         for(int i=0; i<MOONPHASES.length; i++) {
             double actual = Astronomy.moonPhaseCorrected((long)MOONPHASES[i][0], (short)(MOONPHASES[i][1]), (short)MOONPHASES[i][5], true);
             double expected = -0.5 // JDN is at noon, not at midnight
-                + Astronomy.gregorian2JDN((int)MOONPHASES[i][0], (int)MOONPHASES[i][1], (int)MOONPHASES[i][2])
+                + Astronomy.gregorianDate2JDN((int)MOONPHASES[i][0], (int)MOONPHASES[i][1], (int)MOONPHASES[i][2])
                 + (3600*MOONPHASES[i][3] + 60*MOONPHASES[i][4]) / (double)Astronomy.SECONDS_IN_DAY;
             double diffSecs = Astronomy.SECONDS_IN_DAY * Math.abs(expected - actual);
             if(diffSecs > allowedTimeDifference) {
@@ -284,9 +376,9 @@ public class AstronomyTest {
                         + " s (test no. "
                         + i
                         + "): Testdata = "
-                        + concatenate(Astronomy.JD2calendarDate(expected))
+                        + concatenate(Astronomy.JDN2gregorianDate(expected))
                         + " vs. Calculated = "
-                        + concatenate(Astronomy.JD2calendarDate(actual))
+                        + concatenate(Astronomy.JDN2gregorianDate(actual))
                         );
             }
         }

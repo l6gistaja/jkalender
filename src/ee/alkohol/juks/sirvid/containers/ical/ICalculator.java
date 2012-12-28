@@ -189,13 +189,13 @@ public class ICalculator {
         	while(true) {
                 
                 HashMap<String,Double> results = Astronomy.gregorianSunrise(
-                        Astronomy.gregorian2JDN(currentDay.get(Calendar.YEAR), currentDay.get(Calendar.MONTH)+1, currentDay.get(Calendar.DATE)), 
+                        Astronomy.gregorianDate2JDN(currentDay.get(Calendar.YEAR), currentDay.get(Calendar.MONTH)+1, currentDay.get(Calendar.DATE)), 
                         -inputData.getLongitude(), inputData.getLatitude()
                 );
                 
                 for(int i=0; i < driverData.length; i+=2) {
                 	
-                    int[] sg = Astronomy.JD2calendarDate(results.get(driverData[i]));
+                    int[] sg = Astronomy.JDN2gregorianDate(results.get(driverData[i]));
                     GregorianCalendar sunCal = getCalendar(UTC_TZ_ID);
                     sunCal.set(sg[0], sg[1]-1, sg[2], sg[3], sg[4], sg[5]);
                     
@@ -225,12 +225,12 @@ public class ICalculator {
         	ArrayList<int[]> sol = new ArrayList<int[]>();
         	if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.YEAR)) {
         		for(short m = 3; m < 13; m+=3) {
-        			sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
+        			sol.add(Astronomy.JDN2gregorianDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
         		}
         	} else {
         	    short m = (short)(1 + cal.get(Calendar.MONTH));
         	    if(m > 2 && (m % 3 == 0)) {
-        	        sol.add(Astronomy.JD2calendarDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
+        	        sol.add(Astronomy.JDN2gregorianDate(Astronomy.solstice(cal.get(Calendar.YEAR), m, inputData.isUseDynamicTime())));
         	    }
         	}
         	
@@ -267,7 +267,7 @@ public class ICalculator {
             GregorianCalendar moonCal = getCalendar(UTC_TZ_ID);
             do {
                 
-                int[] mfd = Astronomy.JD2calendarDate(Astronomy.moonPhaseK(k + (0.25 * lunF), (short)(lunF % 4), inputData.isUseDynamicTime()));
+                int[] mfd = Astronomy.JDN2gregorianDate(Astronomy.moonPhaseK(k + (0.25 * lunF), (short)(lunF % 4), inputData.isUseDynamicTime()));
                 moonCal.set(mfd[0], mfd[1]-1, mfd[2], mfd[3], mfd[4], mfd[5]);
                 if(!moonCal.before(calendarBegin) && !moonCal.after(calendarEnd)) {
                     ICalEvent event = new ICalEvent();
