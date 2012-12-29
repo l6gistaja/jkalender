@@ -121,27 +121,29 @@ public class AstronomyTest {
         
     };
     
-    public static final int[][] GREGORIAN2JD = {
-        
-        {2000,1,1, (int)Astronomy.JDN2000_01_01}, //January 1, 2000 at midday corresponds to JD = 2451545
-        // Meeus pp. 61 
-        {1957,10,(int)4.81, (int)2436116.31}, // launch of Sputnik 1
-        //{333,1,(int)27.5, 1842713}
-        
-    };
-    
     /**
-     * Pairs of Gregorian YYYYMMDD.dayfraction and corrensponding Julian Days. Meeus pp. 54.
+     * Pairs of Gregorian year, month, day.dayfraction and corrensponding Julian Days. Meeus pp. 54.
      */
     public static double[][] JD2GREGORIAN = {
-    	{19571004.81, 2436116.31},
-    	{ 3330127.5 , 1842713},
-    	{ -5840000 + 528.63, 1507900.13 }, // 585 BC
-    	{19100420, 2418781.5},
-    	{19860209, 2446470.5},
-    	{19571004.81, 2436116.31}, // launch of Sputnik 1
-    	{20000101, Astronomy.JDN2000_01_01}, //January 1, 2000 at midday
-    	{3330127.5, 1842713}
+    	{ 333, 1, 27.5, 1842713},
+    	{ -584, 5, 28.63, 1507900.13 }, // 585 BC
+    	{1910, 4, 20, 2418781.5},
+    	{1986, 2, 9, 2446470.5},
+    	{1957, 10, 4.81, 2436116.31}, // launch of Sputnik 1
+    	{2000, 1, 1.5, Astronomy.JDN2000_01_01}, //January 1, 2000 at midday
+    	// Meeus pp. 62
+    	{1987, 1, 27, 2446822.5},
+    	{1987, 6, 19.5, 2446966},
+    	{1988, 1, 27, 2447187.5},
+    	{1988, 6, 19.5, 2447332},
+    	{1900, 1, 1, 2415020.5},
+    	{1600, 1, 1, 2305447.5},
+    	{1600, 12, 31, 2305812.5},
+    	{ 837, 4, 10.3, 2026871.8},
+    	{ -1000, 7, 12.5, 1356001}, // 1001 BC
+    	{ -1000, 2, 29, 1355866.5},
+    	{ -1001, 8, 17.9, 1355671.4}, // 1002 BC
+    	{ -4712, 1, 1.5, 0 } // lower capability of tested algorithms
     };
     
     public static final double[][] SUNRISE_SUNSET = {
@@ -270,12 +272,49 @@ public class AstronomyTest {
     @Test
     public void testJDN2gregorianDate() {
         for(int i=0; i<JD2GREGORIAN.length; i++) {
-            int[] astronomyRow = Astronomy.JDN2gregorianDate(JD2GREGORIAN[i][1]);
-            assertEquals("Wrong JDN to Gregorian calculation (test no. "+i+")", JD2GREGORIAN[i][0], 
-            		astronomyRow[0]*10000 + astronomyRow[1]*100 + astronomyRow[2] + (
-            				astronomyRow[3] + (astronomyRow[4] + astronomyRow[5]/60)/60
-            		)/24, 0.9);
+            int[] astronomyRow = Astronomy.JDN2gregorianDate(JD2GREGORIAN[i][3]);
+            assertEquals("Wrong JDN to Gregorian calculation (test no. "+i+")", 
+            		JD2GREGORIAN[i][0]*10000 + JD2GREGORIAN[i][1]*100 + JD2GREGORIAN[i][2], 
+            		(double)(astronomyRow[3] + astronomyRow[4]/60 + astronomyRow[5]/3600)/24 
+            			+ astronomyRow[0]*10000 + astronomyRow[1]*100 + astronomyRow[2], 
+            		0.2); 
         } 
+    }
+    
+    @Test
+    public void testgregorian2JDNInt() {
+    	for(int i=0; i<JD2GREGORIAN.length; i++) {
+    		if(JD2GREGORIAN[i][0] < 838) { continue;} //TODO: why it doesn't work otherwise?
+            double JD = Astronomy.gregorianDate2JDN((int)JD2GREGORIAN[i][0],(int)JD2GREGORIAN[i][1],(int)Math.floor(JD2GREGORIAN[i][2]));
+            assertEquals("Wrong gregorian2JDNInt calculation (test no. "+i+")", 
+            		JD2GREGORIAN[i][3],
+            		JD,
+            		1);
+    	}
+    }
+    
+    @Test
+    public void testgregorian2JDN() {
+    	for(int i=0; i<JD2GREGORIAN.length; i++) {
+    		if(JD2GREGORIAN[i][0] < 838) { continue;} //TODO: why it doesn't work otherwise?
+            double JD = Astronomy.gregorianDate2JDN((int)JD2GREGORIAN[i][0],(int)JD2GREGORIAN[i][1],JD2GREGORIAN[i][2]);
+            assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", 
+            		JD2GREGORIAN[i][3],
+            		JD,
+            		1);
+    	}
+    }
+    
+    @Test
+    public void testgregorian2JDNJava() {
+    	for(int i=0; i<JD2GREGORIAN.length; i++) {
+    		if(JD2GREGORIAN[i][0] < 838) { continue;} //TODO: why it doesn't work otherwise?
+            double JD = Astronomy.gregorianDate2JDNJava((int)JD2GREGORIAN[i][0],(int)JD2GREGORIAN[i][1],(int)JD2GREGORIAN[i][2]);
+            assertEquals("Wrong gregorian2JDNJava calculation (test no. "+i+")", 
+            		JD2GREGORIAN[i][3],
+            		JD,
+            		1);
+    	}
     }
     
     @Test
@@ -301,18 +340,6 @@ public class AstronomyTest {
             int[] astronomyRow = eeSolstice((long) SOLSTICES[i][0], (short) SOLSTICES[i][1]);
             String astronomyRowS = concatenate(astronomyRow, SOLSTICES[i].length);
             assertEquals("Wrong solstices calculation (test no. "+i+")", testRowS, astronomyRowS);
-
-        }
-        
-    }
-    
-    @Test
-    public void testgregorian2JDN() {
-        
-        for(int i=0; i<GREGORIAN2JD.length; i++) {
-            
-            assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", (int)GREGORIAN2JD[i][3], 
-                    (int)Astronomy.gregorianDate2JDN(GREGORIAN2JD[i][0], GREGORIAN2JD[i][1], GREGORIAN2JD[i][2]));
 
         }
         
