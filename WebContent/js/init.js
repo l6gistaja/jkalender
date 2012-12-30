@@ -140,3 +140,17 @@ $(document).ready(function() {
   });
   
 });
+
+function initMV() {
+  document.forms['input_data'].elements['ad'].checked = false;
+  document.forms['input_data'].elements['mo'].checked = true;
+  document.forms['input_data'].elements['sl'].checked = true;
+  document.forms['input_data'].elements['ge'].checked = true;
+  for(var i = 0; i < document.forms['input_data'].elements['ce'].length; i++) {
+    if(document.forms['input_data'].elements['ce'][i].value == 'm') {
+      document.forms['input_data'].elements['ce'][i].checked = true;
+      break;
+    }
+  }
+  return false;
+}

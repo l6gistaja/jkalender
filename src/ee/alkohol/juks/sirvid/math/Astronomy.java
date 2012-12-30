@@ -623,6 +623,7 @@ public class Astronomy {
         int a = (int)Math.floor((14 -month) / 12);
         int y = year + 4800 -a;
         int m = month + 12*a -3;
+        // Gregorian calendar
         return day + Math.floor((153*m +2)/5)  + 365*y + Math.floor(y/4) -Math.floor(y/100) + Math.floor(y/400) -32045;
     }
     
