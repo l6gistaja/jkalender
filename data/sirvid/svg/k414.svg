@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet href="runes.css" type="text/css"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<title>Künnipäev</title>
+	
+	<path d="M80 130 A300,780 45 0,1 0,0 A300,780 45 0,0 110,60"/>
+	
+	<line y1="200" y2="50" x1="160" x2="160"/>
+	<line y1="155" y2="115" x1="160" x2="120"/>
+	<line y1="115" y2="75" x1="160" x2="120"/>
+</svg>
