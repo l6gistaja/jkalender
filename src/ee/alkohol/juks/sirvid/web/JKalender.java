@@ -33,7 +33,7 @@ public class JKalender extends HttpServlet {
       inputData.setAddDescription(request.getParameter("ad"));
       inputData.setAddRemark(request.getParameter("ar"));
       inputData.setCalendarData(request.getParameter("ce"));
-      inputData.jbdcConnect = "jdbc:sqlite:" + getServletContext().getRealPath("/kalender.sdb");
+      inputData.jbdcConnect = "jdbc:sqlite:" + getServletContext().getRealPath("/sirvid/kalender.sdb");
       
       ICalculator iCalc;
       try {
