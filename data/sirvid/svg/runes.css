@@ -1,10 +1,4 @@
-line
-{
-	stroke: black;
-	stroke-width:5;
-}
-
-polyline, path, circle
+polyline, path, circle, line
 {
 	stroke: black;
 	fill: none;
