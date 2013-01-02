@@ -44,7 +44,7 @@ public class SirvidRune {
 	
     public String loadSVGcontent(String filename) throws IOException {
         
-        filename = SirvidSVG.dataPath + "svg/" + filename;
+        filename = "svg/" + filename;
         StringBuilder svgContent =  new StringBuilder();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(filename), "UTF-8"));
