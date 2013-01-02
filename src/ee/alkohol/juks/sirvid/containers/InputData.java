@@ -29,7 +29,7 @@ public class InputData {
     public static final String LONGITUDE_NAME = "Longitude";
     public static final String DEFAULT_TRUE = "1";
     
-    public String jbdcConnect = "jdbc:sqlite:data/kalender.sdb";
+    public String jbdcConnect = "jdbc:sqlite:kalender.sdb";
     public HashMap<String,String> criticalErrors;
     
     private Date date;
