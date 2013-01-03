@@ -245,14 +245,14 @@ public class SirvidSVG {
                     if(runeID == 0) { break; }
                     SirvidRune sR = SirvidSVG.runes.get(new Integer(runeID));
                     if(sR != null) {
-                        runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
+                        runeExists = ICalculator.isNotEmptyStr(sR.svgContent);
                     } else {
                         ResultSet feastRune = iCalc.CalendarDAO.getRange(runeID, runeID, DaoKalenderJDBCSqlite.DbTables.RUNES, null);
                         if(feastRune != null) {
                             while(feastRune.next()) {
                                 sR = new SirvidRune(feastRune);
                                 runes.put(new Integer(runeID), (SirvidRune) sR);
-                                runeExists = ICalculator.isNotEmptyStr(sR.getSvgContent());
+                                runeExists = ICalculator.isNotEmptyStr(sR.svgContent);
                                 eventsVsRunes.put(event.dbID, runeID);
                                 break;
                             }
@@ -372,7 +372,7 @@ public class SirvidSVG {
                         SirvidRune sR;
                         try {
                             sR = new SirvidRune(x1221, null, endX);
-                            sR.setSvgContent(yuleRune.toString());
+                            sR.svgContent = yuleRune.toString();
                             runes.put(J6ULUD, sR);
                             eventsVsRunes.put(J6ULUD, J6ULUD);
                         } catch(Exception e) { }
@@ -404,7 +404,7 @@ public class SirvidSVG {
                                         SirvidRune sR;
                                         try {
                                             sR = new SirvidRune(0, null, 1);
-                                            sR.setSvgContent(generateLine(0, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT), 0, widths.get(SirvidSVG.DIM.Y_KIHLAKUDFOOT)));
+                                            sR.svgContent = generateLine(0, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT), 0, widths.get(SirvidSVG.DIM.Y_KIHLAKUDFOOT));
                                             runes.put(TUHKAP2EV, sR);
                                             eventsVsRunes.put(TUHKAP2EV, TUHKAP2EV);
                                         } catch(Exception e) { }
@@ -461,7 +461,7 @@ public class SirvidSVG {
                             }
                         }
                         if(notKihlakud) {
-                            int rot = getRuneByDbID(sD.feasts.get(0).event.dbID).getRightness() > getRuneByDbID(sD.feasts.get(1).event.dbID).getRightness() ? 0 : 1;
+                            int rot = getRuneByDbID(sD.feasts.get(0).event.dbID).rightness > getRuneByDbID(sD.feasts.get(1).event.dbID).rightness ? 0 : 1;
                             sD.feasts.get(rot%2).rotate = -45;
                             sD.feasts.get((1 + rot)%2).rotate = 45;
                             generateRotableFoot(sD.feasts.get(0));
@@ -478,7 +478,7 @@ public class SirvidSVG {
     
     private void generateRotableFoot(SirvidFeast feast) {
         if(widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA) > 0) {
-            int cx = getRuneByDbID(feast.event.dbID).getCx();
+            int cx = getRuneByDbID(feast.event.dbID).cx;
             feast.xtraSVG.append(generateLine(cx, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + 1, cx, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA)));
         }
     }
@@ -502,7 +502,7 @@ public class SirvidSVG {
         SirvidRune sR;
         try {
             sR = new SirvidRune(legAt, null, centralWidth + (widths.get(SirvidSVG.DIM.X_KIHLAKUD_UNIT) * 3));
-            sR.setSvgContent(kihlakudRune.toString());
+            sR.svgContent = kihlakudRune.toString();
             runes.put(dbID, sR);
             eventsVsRunes.put(dbID, dbID);
         } catch(Exception e) { }
@@ -510,7 +510,7 @@ public class SirvidSVG {
     }
     
     private int getRoot(ArrayList<SirvidDay> monthDays, int dayNo) {
-        return monthDays.get(dayNo-1).beginX + runes.get(monthDays.get(dayNo-1).weekDay).getCx();
+        return monthDays.get(dayNo-1).beginX + runes.get(monthDays.get(dayNo-1).weekDay).cx;
     }
     
     public SirvidRune getRuneByDbID(int dbID) {
@@ -539,8 +539,8 @@ public class SirvidSVG {
                     try {
                         if(emptyRunes) {
                             SirvidRune sR = new SirvidRune(0, null, 120);
-                            sR.setFilename("dummy" + j + ".svg");
-                            sR.setSvgContent(errorTxtTags[0] + rTxt + errorTxtTags[1]);
+                            sR.filename = "dummy" + j + ".svg";
+                            sR.svgContent = errorTxtTags[0] + rTxt + errorTxtTags[1];
                             runes.put(new Integer(j), sR);
                         }
                         if(emptyCommonLabels) {

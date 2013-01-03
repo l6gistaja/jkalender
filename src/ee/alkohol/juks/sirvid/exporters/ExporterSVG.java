@@ -70,7 +70,7 @@ public class ExporterSVG extends Exporter {
             	sb.append("<g id=\"r");
             	sb.append(sRdbID);
             	sb.append("\">\n");
-            	sb.append(sR.getSvgContent());
+            	sb.append(sR.svgContent);
             	sb.append("</g>\n");
             }
             sb.append("</defs>\n\n");
@@ -135,7 +135,7 @@ public class ExporterSVG extends Exporter {
         		                addToTransform.append(" rotate(");
                                 addToTransform.append(feast.rotate);
                                 addToTransform.append(" ");
-                                addToTransform.append(sSVG.getRuneByDbID(feast.event.dbID).getCx());
+                                addToTransform.append(sSVG.getRuneByDbID(feast.event.dbID).cx);
                                 addToTransform.append(" ");
                                 addToTransform.append(SirvidSVG.widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT) + SirvidSVG.widths.get(SirvidSVG.DIM.Y_FEASTSEXTRA));
                                 addToTransform.append(")");
@@ -190,8 +190,8 @@ public class ExporterSVG extends Exporter {
         StringBuilder transform = new StringBuilder();
         transform.append("translate(");
         transform.append(sD.beginX 
-                + SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(sD.weekDay)).getCx() 
-                - SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(dbID)).getCx() * zoomRatio);
+                + SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(sD.weekDay)).cx 
+                - SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(dbID)).cx * zoomRatio);
         transform.append(" ");
         transform.append(y0);
         transform.append(") scale(");

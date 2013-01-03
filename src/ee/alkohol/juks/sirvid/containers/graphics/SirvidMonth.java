@@ -32,7 +32,7 @@ public class SirvidMonth {
             if(index > 0) {
                 SirvidDay previousDay = days.get(index -1);
                 beginX = previousDay.beginX 
-                        + SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(previousDay.weekDay)).getWidth() 
+                        + SirvidSVG.runes.get(SirvidSVG.eventsVsRunes.get(previousDay.weekDay)).width 
                         + SirvidSVG.widths.get(SirvidSVG.DIM.X_WEEKDAYPADDING);
             }
             days.add(new SirvidDay(m, beginX));
@@ -56,7 +56,7 @@ public class SirvidMonth {
     
     public int getMaxX() {
     	SirvidDay lastDay = days.get(days.size()-1);
-    	return lastDay.beginX + SirvidSVG.runes.get(lastDay.weekDay).getWidth();
+    	return lastDay.beginX + SirvidSVG.runes.get(lastDay.weekDay).width;
     }
     
     public int calculateY(DIM atPlace) {

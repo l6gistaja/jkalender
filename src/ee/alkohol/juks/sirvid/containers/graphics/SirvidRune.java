@@ -11,19 +11,19 @@ import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 
 public class SirvidRune {
 
-	private int cx;
-	private String filename;
-	private int width;
-	private String svgContent;
-	private double rightness;
+	public int cx;
+	public String filename;
+	public int width;
+	public String svgContent;
+	public double rightness;
 
     public SirvidRune(int cx, String filename, int width) throws SQLException, IOException {
-        setCx(cx);
-        setWidth(width);
-        setRightness(cx/width);
+        this.cx =cx;
+        this.width = width;
+        this.rightness = cx/width;
         if(filename != null) {
-            setFilename(filename);
-            setSvgContent(loadSVGcontent(getFilename()));
+            this.filename = filename;
+            this.svgContent = loadSVGcontent(this.filename);
         }
     }
 	
@@ -62,46 +62,6 @@ public class SirvidRune {
         br.close();
 
         return svgContent.toString();
-    }
-    
-	public int getCx() {
-		return cx;
-	}
-
-	public void setCx(int cx) {
-		this.cx = cx;
-	}
-
-	public String getFilename() {
-		return filename;
-	}
-
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public String getSvgContent() {
-		return svgContent;
-	}
-
-	public void setSvgContent(String svgContent) {
-		this.svgContent = svgContent;
-	}
-	
-    public double getRightness() {
-        return rightness;
-    }
-
-    public void setRightness(double rightness) {
-        this.rightness = rightness;
     }
 
 }
