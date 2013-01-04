@@ -1,0 +1,44 @@
+
+body {font-family:verdana,courier; size:12pt;}
+
+div.bodydiv {position:relative; left:5%; width:90%;}
+div.day {position:relative; left:5%; width:90%;}
+
+h1 {font-size:130%}
+h2 {font-size:110%}
+
+a[href]:link	{ color:blue; text-decoration:none; }
+a[href]:visited	{ text-decoration:none; }
+a[href]:hover	{ color:blue; text-decoration:underline; }
+a[href]:active	{ color:red; text-decoration:none; }
+
+table { border-collapse: collapse; }
+table, th, td { border: 1px solid black; padding:5px;}
+th { background-color:#dddddd; }
+
+/* calendar mainpage-specific stuff */
+
+img.lipp { padding: 0px 0px 0px 0px; border:0px; height:15px; width:15px; vertical-align:top;}
+
+table.k_t, th.k_th, td.k_tnp, td.k_tn, td.k_tp, td.k_t2na, td.k_t0  { border: 4px solid white;}
+
+table.r_t, td.r_c { border: 5px solid white;}
+
+td.k_t0 { background-color:white;}
+
+th.k_th { background-color:black; height:50px; color:white; font-weight:bold; font-size:110%}
+td.k_tnp { background-color:#0000ff; color:white; height:50px; width:60px; font-weight:bold; text-align:center; }
+td.k_tn 
+  { background-color:#aba7e3; color:white; height:25px; width:60px; font-weight:bold; text-align:right; vertical-align:top;}
+
+td.k_tp, td.k_t2na 
+  { background-color:#00ffff; height:40px; width:80px; font-weight:bold; text-align:right; vertical-align:bottom;  font-size:120%;}
+td.k_t2na 
+  { background-color:#83ef93; color:red;}
+
+
+a.k_lf:link, a.k_lf:visited, a.k_lf:hover, a.k_lf:active
+  { color:red; text-decoration:none; font-family:courier; }
+  
+a.k_ll:link, a.k_ll:visited, a.k_ll:hover, a.k_ll:active        
+  { color:black; text-decoration:none; }

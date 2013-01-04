@@ -1,0 +1,12 @@
+@CHARSET "UTF-8";
+
+BODY, P {font-family:"Times New Roman", Times, serif; font-size:14px;}
+
+A:link,A:visited,A:active, {
+	color: #1010CC;
+	text-decoration: none;
+}
+
+A:hover {
+	color: #CC1010;
+}

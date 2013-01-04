@@ -1,0 +1,400 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Abilehekülg</title>
+<meta name="Description" content="Eesti gregooriuse kalender"/>
+<link rel="SHORTCUT ICON" href="favicon.ico"/>
+<link rel="StyleSheet" href="kalender.css" type="text/css" media="screen"/>
+<script type="text/javascript" src="kalender.js"></script>
+</head>
+<body>
+
+<div class="bodydiv">
+
+<center><a href="../index.html">Kalender</a>&nbsp;|&nbsp;<a href="tahtpaevad.html">Tähtpäevad</a>&nbsp;|&nbsp;<a href="ruunid.html">Ruunid</a>&nbsp;|&nbsp;<strong>Abilehekülg</strong></center>
+
+<h1><a name="sisukord">Sisukord</a></h1><ol>
+<li><a href="#t2histused">Tähtpäevade tähistused</a></li>
+<li><a href="#greg">Gregooriuse kalender</a></li>
+<li><a href="#ab">Andmebaas</a>
+   <ol type="A">
+    <li><a href="#mallid">Tähtpäevade mallid</a></li>
+    <li><a href="#idd">Sündmuste ID-d</a></li>
+    <li><a href="#tabelid">Tabelid</a>
+        <ol>
+<li><a href="#tabel.events">events<a></li>
+<li><a href="#tabel.runes">runes<a></li>
+<li><a href="#tabel.urlcategories">urlcategories<a></li>
+<li><a href="#tabel.urls">urls<a></li>
+        </ol>
+     </li>
+     <li><a href="#bitmap">Bitmapid</a>
+        <ol>
+<li><a href="#bitmap.events.flags">events.flags<a></li>
+        </ol>
+     </li>
+   </ol> 
+</li>
+<li><a href="#repo">GitHub</a></li>
+</ol>
+
+<h1><a name="t2histused">Tähtpäevade tähistused</a></h1>
+
+<table>
+<tr><th>Sümbol</th><th>T&auml;hendus</th></tr>
+
+<tr><td>+</td><td><a href="tahtpaevad.html#munapyhad">Munapühade</a> või <a href="tahtpaevad.html#advent">advendiga</a> seotud liikuvad kirikupühad.</td></tr>
+
+<tr><td>X</td><td><a href="tahtpaevad.html#liikuvad">Muud liikuvad tähtpäevad</a>, X on tähtpäeva esitäht.</td></tr>
+
+<tr><td><strong style="color:red; font-family:courier;" title="On riigipüha ja puhkepäev.">*</strong></td><td>On riigipüha ja puhkepäev.</td></tr>
+
+<tr><td><img style="lipp" src="lp.gif" title="On lipu(heiskamis)päev." alt="On lipu(heiskamis)päev."/></td><td>On lipu(heiskamis)päev.</td></tr>
+
+</table>
+
+<h1><a name="greg">Gregooriuse kalender</a></h1>
+
+kehtestati paavst Gregorius XIII poolt 1582 (4. oktoobrile 1582 järgnes 15. oktoober 1582) ebatäpsema <a href="http://en.wikipedia.org/wiki/Julian_calendar" target="_blank">juuliuse kalendri</a> asemele ja levis algul peamiselt katoliiklikes maades. Lääne-Euroopa protestantlikud riigid võtsid reformitud kalendri kasutusele alles 18. sajandil ja Ida-Euroopa riigid, kus ametlikuks usuks oli õigeusk, 20. sajandi esimesel veerandil. <strong>Eestis</strong> oli kalendrivahetus 1. veebruaril 1918.a., millele järgnes kohe 14. veebruar 1918.a.
+<br /><br />
+
+Niisiis tuleb arvestada, et <a href="http://en.wikipedia.org/wiki/Gregorian_calendar" target="_blank">gregooriuse kalender</a> pole minevikus alati kehtinud. Varemkehtinud juuliuse kalender jääb seejuures gregooriuse omast maha:<br /><br />
+
+<table>
+<tr><th colspan="2">Aastatevahemik</th><th>Juuliuse kalendri mahajäämus gregooriuse omast päevades</th></tr>
+
+<tr><td>1582</td> <td>1699</td> <td>10</td></tr>
+<tr><td>1700</td> <td>1799</td> <td>11</td></tr>
+<tr><td>1800</td> <td>1899</td> <td>12</td></tr>
+<tr><td>1900</td> <td>2099</td> <td>13</td></tr>
+<tr><td>2100</td> <td>2199</td> <td>14</td></tr>
+
+</table>
+
+Allikas: Poulsen, E. The transition from Julian to Gregorian Calendar. <a href="http://www.rundetaarn.dk/engelsk/observatorium/gregorian.html" target="_blank">http://www.rundetaarn.dk/engelsk/observatorium/gregorian.html</a> 
+<br /><br />
+
+Samuti ei suuda siinkasutatud <a href="tahtpaevad.html#2000">munapüha</a> leidmise nn. <a href="http://en.wikipedia.org/wiki/Computus#Gauss_algorithm" target="_blank">Gaussi valem</a> arvutada kevadisi liikuvaid kirikupühi väljaspool aastavahemikku 1500 ... 2299.
+
+
+<h1><a name="ab">Andmebaas</a></h1>
+
+on 43 kB <a href="http://www.sqlite.com/" target="_blank">SQLite</a> andmebaasifail <a href="kalender.sdb">kalender.sdb</a>, mille kasutamisele autor piiranguid ei sea. <br/>
+
+Eeldusel et igal tähtpäeval on vähemalt 1 link tabelis urls, oleks lihtne päring kõigi andmete kättesaamiseks:
+<blockquote><pre>
+SELECT e.*, u.urlcategory_id, u.url, u.res_type, c.urlcategory, c.urlprefix 
+FROM events e, urls u, urlcategories c 
+WHERE e.id = u.event_id AND u.urlcategory_id = c.id 
+ORDER BY e.id, c.urlcategory, u.url
+</pre></blockquote>
+
+Andmebaasi struktuuri kirjeldus on saadaval 7 kB andmebaasifailina <a href="descriptions.sdb">descriptions.sdb</a>.
+<h1><a name="mallid">Tähtpäevade mallid</a></h1>
+
+<table>
+<tr><th>Tähistus</th><th>Min</th><th>Max</th><th>Pikkus</th><th>Tähendus</th></tr>
+
+<tr><td valign="top">KK</td><td valign="top">1</td><td valign="top">12</td><td valign="top">2</td><td>
+
+Kuu numbrid, 01...12
+
+</td></tr>
+
+<tr><td valign="top">N</td><td valign="top">1</td><td valign="top">5</td><td valign="top">1</td><td>
+
+Nädala number kuu sees, 5 tähendab kuu viimast nädalat.
+
+</td></tr>
+
+<tr><td valign="top"><a name="mallid.n">n</a></td><td valign="top">0</td><td valign="top">6</td><td valign="top">1</td><td>
+
+Nädalapäeva number nädala sees, järjestuses P,E,T,K,N,R,L.
+
+</td></tr>
+
+<tr><td valign="top">PP</td><td valign="top">1</td><td valign="top">31</td><td valign="top">2</td><td>
+
+Kuupäevad, 01...31.
+
+</td></tr>
+
+<tr><td valign="top">VV</td><td valign="top">1</td><td valign="top">53</td><td valign="top">2</td><td>
+
+Nädala number aasta sees, 01...53.
+
+</td></tr>
+
+</table>
+
+
+
+
+
+<h1><a name="idd">Sündmuste ID-d</a></h1>
+
+<table>
+<tr><th>Mall või =valem</th><th>Min</th><th>Max</th><th>Tüüp</th><th>Tähendus</th></tr>
+
+<tr><td valign="top">n</td><td valign="top">0</td><td valign="top">6</td><td valign="top">Nädalapäev</td><td valign="top">
+
+<a href="ruunid.html#0">Nädalapäevad</a>.
+
+</td></tr>
+
+<tr><td valign="top"> </td><td valign="top">10</td><td valign="top">17</td><td valign="top">Astronoomiline</td><td valign="top">
+
+<a href="ruunid.html#10">Kuufaasid</a>.
+
+</td></tr>
+
+<tr><td valign="top">= 20 + ( KK / 3 )</td><td valign="top">20</td><td valign="top">24</td><td valign="top">Astronoomiline</td><td valign="top">
+
+<a href="tahtpaevad.html#pqqrip2evad">Pööripäevad</a>.
+
+</td></tr>
+
+<tr><td valign="top">= 30</td><td valign="top">30</td><td valign="top">30</td><td valign="top">Astronoomiline</td><td valign="top">
+
+Päiksetõus.
+
+</td></tr>
+
+<tr><td valign="top">= 31</td><td valign="top">31</td><td valign="top">31</td><td valign="top">Astronoomiline</td><td valign="top">
+
+Päikseloojang.
+
+</td></tr>
+
+<tr><td valign="top">KKPP</td><td valign="top">101</td><td valign="top">1231</td><td valign="top">Liikumatu</td><td valign="top">
+
+<a href="tahtpaevad.html#q1">Kindlal kalendripäeval olev tähtpäev</a>.
+
+</td></tr>
+
+<tr><td valign="top">= 2000 + x</td><td valign="top">1635</td><td valign="top">2365</td><td valign="top">Liikuv, usuline</td><td valign="top">
+
+<a href="tahtpaevad.html#munapyhad">Munapühad</a>: x päeva 1. ülestõusmispühast.
+
+</td></tr>
+
+<tr><td valign="top">3VVn</td><td valign="top">3010</td><td valign="top">3536</td><td valign="top">Liikuv, usuline</td><td valign="top">
+
+<a href="tahtpaevad.html#advent">Advent</a>: VV-inda nädala n-is nädalapäev enne 1. jõulupüha.
+
+</td></tr>
+
+<tr><td valign="top">1KKNn</td><td valign="top">10110</td><td valign="top">11256</td><td valign="top">Liikuv</td><td valign="top">
+
+<a href="tahtpaevad.html#liikuvad">KK-nda kuu N-da nädala n-is nädalapäev</a>. Vt. <a href="http://www.gnu.org/s/hello/manual/libc/TZ-Variable.html" target="_blank">POSIX TZ muutuja</a> DST osa formaat Mm.w.d.
+
+</td></tr>
+
+</table>
+
+
+<h2><a name="tabelid">Tabelid</a></h2>
+
+<h3><a name="tabel.events">Tabel events</a></h3>
+Tähtpäevad.<br/><br/>
+<table>
+<tr><th>Veeru nimi</th><th>Veeru tüüp</th><th>Võti</th><th>Tähendus</th></tr>
+<tr>
+    <td valign="top"><a name="tabel.events.event">event</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>Tähtpäeva nimi. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.events.flags">flags</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"></td>
+    <td>Bitmap <a href="#bitmap.events.flags">events.flags</a></td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.events.id">id</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top">Esmasvõti</td>
+    <td>Kodeeritud <a href="#mallid">mallide</a> abil <a href="#idd">kindlakujuliste sündmuste ID-dena</a>.  </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.events.maausk">maausk</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>Kui pole NULL või pole tühi string, on tegemist maausu pühaga. Sisaldab püha nimetust.</td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.events.more">more</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>Märkused ja täpsustused. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.events.rune_id">rune_id</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"><a href="#tabel.runes.dbid">runes.dbid</a></td>
+    <td>Ei pruugi igal kirjel olemas olla. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.events.weekday">weekday</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"><a href="#tabel.runes.dbid">runes.dbid</a></td>
+    <td>Kui <a href="#mallid.n">0...6</a>, siis toimub mingil kindlal nädalapäeval. </td>
+</tr>
+</table>
+<h3><a name="tabel.runes">Tabel runes</a></h3>
+<a href="http://maavald.ee/maausk.html?rubriik=21&id=67&op=lugu">Maavalla Koja sirvikalendri ruunid</a> SVG failide kujul.<br/><br/>
+<table>
+<tr><th>Veeru nimi</th><th>Veeru tüüp</th><th>Võti</th><th>Tähendus</th></tr>
+<tr>
+    <td valign="top"><a name="tabel.runes.cx">cx</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"></td>
+    <td>Ruuni jala kaugus pikslites ruuni vasakust servast. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.runes.dbid">dbid</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top">Esmasvõti</td>
+    <td>Kodeeritud <a href="#mallid">mallide</a> abil <a href="#idd">kindlakujuliste sündmuste ID-dena</a>.</td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.runes.filename">filename</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"></td>
+    <td>Ruunigraafikat sisaldava SVG faili nimi. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.runes.width">width</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"></td>
+    <td>Ruuni laius pikslites. </td>
+</tr>
+</table>
+<h3><a name="tabel.urlcategories">Tabel urlcategories</a></h3>
+Saidid, millelt on teavet võetud.<br/><br/>
+<table>
+<tr><th>Veeru nimi</th><th>Veeru tüüp</th><th>Võti</th><th>Tähendus</th></tr>
+<tr>
+    <td valign="top"><a name="tabel.urlcategories.http_status">http_status</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"> </td>
+    <td>HTTP olekukoodid, nagu kirjeldet RFC 2616 poolt. Kõik mis pole 200, pole enam kättesaadav. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urlcategories.id">id</a></td>
+    <td valign="top">INTEGER PRIMARY KEY</td>
+    <td valign="top">Esmasvõti</td>
+    <td> </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urlcategories.site">site</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>Saidi avaleht. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urlcategories.urlcategory">urlcategory</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>Lingirühma silt. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urlcategories.urlprefix">urlprefix</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>URLi nn prefiks, mis lisatakse urls.url ette. </td>
+</tr>
+</table>
+<h3><a name="tabel.urls">Tabel urls</a></h3>
+Lingid mingile tähtpäevale.<br/><br/>
+<table>
+<tr><th>Veeru nimi</th><th>Veeru tüüp</th><th>Võti</th><th>Tähendus</th></tr>
+<tr>
+    <td valign="top"><a name="tabel.urls.event_id">event_id</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"><a href="#tabel.events.id">events.id</a></td>
+    <td></td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urls.http_status">http_status</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"> </td>
+    <td>HTTP olekukoodid, nagu kirjeldet RFC 2616 poolt. Kõik mis pole 200, pole enam kättesaadav. </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urls.id">id</a></td>
+    <td valign="top">INTEGER PRIMARY KEY</td>
+    <td valign="top">Esmasvõti</td>
+    <td> </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urls.res_type">res_type</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>A = audio; V = video </td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urls.url">url</a></td>
+    <td valign="top">TEXT</td>
+    <td valign="top"> </td>
+    <td>URL internetti. Selle ette lisatakse urlcategories.urlprefix.</td>
+</tr>
+<tr>
+    <td valign="top"><a name="tabel.urls.urlcategory_id">urlcategory_id</a></td>
+    <td valign="top">NUMERIC</td>
+    <td valign="top"><a href="#tabel.urlcategories.id">urlcategories.id</a></td>
+    <td></td>
+</tr>
+</table>
+
+<h2><a name="bitmap">Bitmapid</a></h2>
+
+<h3><a name="bitmap.events.flags">Bitmap events.flags</a></h3>
+<table>
+<tr><th>Biti koht</th><th>Väärtus</th><th>Nimi</th><th>Tähendus</th></tr>
+<tr>
+    <td valign="top" align="right"><a name="bitmap.events.flags.events.flags">0</a></td>
+    <td valign="top" align="right">1</td>
+    <td valign="top">daystate</td>
+    <td>Riiklik tähtpäev.</td>
+</tr>
+<tr>
+    <td valign="top" align="right"><a name="bitmap.events.flags.events.flags">1</a></td>
+    <td valign="top" align="right">2</td>
+    <td valign="top">dayfree</td>
+    <td>Riigipüha ja puhkepäev.</td>
+</tr>
+<tr>
+    <td valign="top" align="right"><a name="bitmap.events.flags.events.flags">2</a></td>
+    <td valign="top" align="right">4</td>
+    <td valign="top">dayflag</td>
+    <td>Lipu(heiskamis)päev.</td>
+</tr>
+<tr>
+    <td valign="top" align="right"><a name="bitmap.events.flags.events.flags">3</a></td>
+    <td valign="top" align="right">8</td>
+    <td valign="top">sol</td>
+    <td>Selle päevale langeb (tihti) pööripäev.</td>
+</tr>
+<tr>
+    <td valign="top" align="right"><a name="bitmap.events.flags.events.flags">4</a></td>
+    <td valign="top" align="right">16</td>
+    <td valign="top">shorterworkdayb4</td>
+    <td>Selle päevale eelneb lühendatud  tööpäev.</td>
+</tr>
+</table>
+
+<h1><a name="repo">GitHub</a></h1>
+
+<a href="https://github.com/l6gistaja/kalender">https://github.com/l6gistaja/kalender</a>
+
+<br/><br/>
+Viimati uuendatud 2013-01-04 20:03:12.
+<br/><br/>
+<center><a href="../index.html">Kalender</a>&nbsp;|&nbsp;<a href="tahtpaevad.html">Tähtpäevad</a>&nbsp;|&nbsp;<a href="ruunid.html">Ruunid</a>&nbsp;|&nbsp;<strong>Abilehekülg</strong></center>
+
+</div>
+
+</body>
+</html>
