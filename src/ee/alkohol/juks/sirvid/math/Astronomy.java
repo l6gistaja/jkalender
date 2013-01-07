@@ -623,8 +623,8 @@ public class Astronomy {
         int a = (int)Math.floor((14 -month) / 12);
         int y = year + 4800 -a;
         int m = month + 12*a -3;
-        // Gregorian calendar
-        return day + Math.floor((153*m +2)/5)  + 365*y + Math.floor(y/4) -Math.floor(y/100) + Math.floor(y/400) -32045;
+        return day + Math.floor((153*m +2)/5)  + 365*y + Math.floor(y/4)
+                + (year*10000 + month*100 + day >= 15821015 ? -Math.floor(y/100) + Math.floor(y/400) -32045 : -32083);
     }
     
     /**
@@ -641,7 +641,7 @@ public class Astronomy {
     		month += 12;
     	}
     	int A = (int)Math.floor(year/100);
-    	int B = 2 - A + (int)Math.floor(A/4); // 0 if Julian calendar
+    	int B = year*10000 + month*100 + day >= 15821015 ? B = 2 - A + (int)Math.floor(A/4) : 0;
     	return Math.floor(YEAR_DAYS * (year + 4716)) 
     		+ Math.floor(30.6001 * (month + 1))
     		+ day + B - 1524.5;

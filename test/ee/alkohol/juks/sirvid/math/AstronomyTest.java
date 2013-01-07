@@ -296,7 +296,6 @@ public class AstronomyTest {
     @Test
     public void testgregorian2JDN() {
     	for(int i=0; i<JD2GREGORIAN.length; i++) {
-    		if(JD2GREGORIAN[i][0] < 838) { continue;} //TODO: why it doesn't work otherwise?
             double JD = Astronomy.gregorianDate2JDN((int)JD2GREGORIAN[i][0],(int)JD2GREGORIAN[i][1],JD2GREGORIAN[i][2]);
             assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", 
             		JD2GREGORIAN[i][3],
