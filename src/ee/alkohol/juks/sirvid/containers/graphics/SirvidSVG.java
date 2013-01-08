@@ -10,6 +10,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.PropertiesT;
@@ -68,7 +69,7 @@ public class SirvidSVG {
      */
     public ArrayList<SirvidMonth> months = new ArrayList<SirvidMonth>();
     
-    private ICalculator iCalc;
+    public ICalculator iCalc;
     public ArrayList<String> errorMsgs = new ArrayList<String>();
     /**
      * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
@@ -77,8 +78,7 @@ public class SirvidSVG {
     
     public double mfZoomRatio;
     public double feastsZoomRatio;
-    
-    
+    public TreeSet<Integer> usedRunes = new TreeSet<Integer>();
     
     public SirvidSVG(ICalculator iC) {
         
@@ -210,8 +210,10 @@ public class SirvidSVG {
     
     private void populateEvents() {
         int monthIndex;
+        int runeID;
     	for(ICalEvent event : iCalc.iCal.vEvent) {
     	    
+    		runeID = Integer.MIN_VALUE;
     	    GregorianCalendar timeZoned = event.allDayEvent 
     	            ? (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value
     	            :  fromUTCtoTz( (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value, iCalc.inputData.getTimezone());
@@ -220,16 +222,16 @@ public class SirvidSVG {
             if(sM == null) { continue; }
             SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
             if(sD == null) { continue; }
-    	    
+
     		if(event.allDayEvent) {
     		    
-    		    initFeastRune(event, sD, sM);
+    			runeID = initFeastRune(event, sD, sM);
     		    
     		} else {
     		    
     			GregorianCalendar tzdAsUTC = calendarAsUTCCalendar(timeZoned);
     			if(isSolstice(event.dbID)) {
-    			    initFeastRune(event, sD, sM);
+    				runeID = initFeastRune(event, sD, sM);
     			    sM.solstice = tzdAsUTC;
     			}
     			else if(ICalculator.DbIdStatuses.SUNRISE.getDbId() == event.dbID) { sD.sunrise = tzdAsUTC; }
@@ -239,10 +241,12 @@ public class SirvidSVG {
 					sD.moonphaseID = event.dbID;
 				}
     		}
+    		
+    		if(runeID > Integer.MIN_VALUE) { usedRunes.add(runeID); }
     	}
     }
     
-    private void initFeastRune(ICalEvent event, SirvidDay sirvidDay, SirvidMonth sirvidMonth) {
+    private int initFeastRune(ICalEvent event, SirvidDay sirvidDay, SirvidMonth sirvidMonth) {
         
         boolean runeExists = false;
         int runeID = ICalculator.DbIdStatuses.UNDEFINED.getDbId();
@@ -281,6 +285,8 @@ public class SirvidSVG {
             if(sirvidDay.feasts.size() > 1) { sirvidMonth.needsExtraSpace4Feasts = true; }
             eventsVsRunes.put(event.dbID, runeID);
         }
+        
+        return runeID;
     }
     
     private void prepareEvents() {

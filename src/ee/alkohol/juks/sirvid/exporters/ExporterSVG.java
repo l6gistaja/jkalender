@@ -61,13 +61,16 @@ public class ExporterSVG extends Exporter {
             
             // define runes
             sb.append("\n<defs>\n");
+            int maxPresentRuneID = sSVG.iCalc.inputData.isCalculateMoonphases() ? ICalculator.DbIdStatuses.MOON_LAST.getDbId() : ICalculator.DbIdStatuses.MOON_NEW_M2.getDbId() - 1;
             for(Integer sRdbID : SirvidSVG.runes.keySet()) {
-            	SirvidRune sR = SirvidSVG.runes.get(sRdbID);
-            	sb.append("<g id=\"r");
-            	sb.append(sRdbID);
-            	sb.append("\">\n");
-            	sb.append(sR.svgContent);
-            	sb.append("</g>\n");
+            	if((sRdbID > ICalculator.DbIdStatuses.UNDEFINED.getDbId() && sRdbID <= maxPresentRuneID) || sSVG.usedRunes.contains(sRdbID)) {
+                	SirvidRune sR = SirvidSVG.runes.get(sRdbID);
+                	sb.append("<g id=\"r");
+                	sb.append(sRdbID);
+                	sb.append("\">\n");
+                	sb.append(sR.svgContent);
+                	sb.append("</g>\n");
+            	}
             }
             sb.append("</defs>\n\n");
             
