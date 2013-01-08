@@ -1,7 +1,9 @@
 package ee.alkohol.juks.sirvid.exporters;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
+
 import ee.alkohol.juks.sirvid.containers.InputData;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 

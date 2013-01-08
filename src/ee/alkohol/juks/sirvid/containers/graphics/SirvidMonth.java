@@ -2,8 +2,8 @@ package ee.alkohol.juks.sirvid.containers.graphics;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
+
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG.DIM;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 

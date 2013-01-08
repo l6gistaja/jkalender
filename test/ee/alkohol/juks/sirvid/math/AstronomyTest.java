@@ -1,7 +1,10 @@
 package ee.alkohol.juks.sirvid.math;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.HashMap;
+
 import org.junit.Test;
 
 /**

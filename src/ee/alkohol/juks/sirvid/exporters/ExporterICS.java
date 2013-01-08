@@ -1,12 +1,8 @@
 package ee.alkohol.juks.sirvid.exporters;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
-import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.ical.ICalProperty;
-import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public class ExporterICS extends ExporterICalendar{

@@ -11,10 +11,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.TimeZone;
-import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
-import ee.alkohol.juks.sirvid.containers.ical.ICalendar.*;
+
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.InputData;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar.Keys;
+import ee.alkohol.juks.sirvid.containers.ical.ICalendar.Values;
 import ee.alkohol.juks.sirvid.math.Astronomy;
 
 /**

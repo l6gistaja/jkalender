@@ -1,5 +1,6 @@
 package ee.alkohol.juks.sirvid.containers.graphics;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
@@ -18,11 +20,9 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 public class SirvidSVG {
     
     public static final String dataPath = "sirvid/";
-    public static final String[] errorTxtTags = { "<text x=\"50\" y=\"60\" fill=\"black\" font-size=\"100\">", "</text>" };
     public static final int J6ULUD = 1221;
     public static final int LIUGUP2EV = 1953;
     public static final int TUHKAP2EV = 1954;
-    public static final String[] weekDays = {"P","E","T","K","N","R","L"};
     public static enum  DIM {
         X_MARGIN,
         X_WEEKDAYPADDING,
@@ -44,6 +44,7 @@ public class SirvidSVG {
     }
     
     public static PropertiesT props = null;
+    public static Properties i18n = null;
     /**
      * Different measurements/dimensions from svg_export.properties file
      */
@@ -57,6 +58,10 @@ public class SirvidSVG {
      * Most common events mapping from DB event ID to event's title ([0]) and description ([1])
      */
     public static HashMap<Integer,String[]> commonLabels = null;
+    /**
+     * Weekday names
+     */
+    public static String[] weekDays;
     /**
      * Months in (I)calculation's timespan
      * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
@@ -74,6 +79,7 @@ public class SirvidSVG {
     public double feastsZoomRatio;
     
     
+    
     public SirvidSVG(ICalculator iC) {
         
         iCalc = iC;
@@ -81,12 +87,16 @@ public class SirvidSVG {
         if(props == null) {
             props = new PropertiesT();
         	try {
-                props.load(this.getClass().getClassLoader().getResourceAsStream(dataPath + "svg_export.properties"));
+                loadProperties(props, dataPath + "svg_export.properties");
                 if(widths == null) { widths = new HashMap<DIM,Integer>(); }
                 for (DIM w : DIM.values()) {
                     if(w.equals(DIM.Y_TOTAL) || w.equals(DIM.Y_MONTHLINEHEIGHT2)) { continue; }
                     widths.put(w, props.getPropertyInt(w.toString()));
                 }
+                
+                i18n = new PropertiesT();
+                loadProperties(i18n, props.getProperty("i18nDir") + "/" + props.getProperty("language") + "/" + props.getProperty("i18nProps"));
+                weekDays = i18n.getProperty("weekdaysShort").split(",");
             }
             catch(Exception e) {
                 errorMsgs.add("Failed to open svg_export.properties : " + e.getMessage());
@@ -336,7 +346,7 @@ public class SirvidSVG {
                         
                         if(this.iCalc.inputData.isAddRemark()) {
                         	yuleTitle.append("\n");
-                        	yuleTitle.append(props.getProperty("remark1224"));
+                        	yuleTitle.append(i18n.getProperty("remark1224"));
                         }
                         
                         if(sD.feasts.size()==1) { sD.feasts.get(0).label = yuleTitle; }
@@ -421,6 +431,10 @@ public class SirvidSVG {
                     }
                     
                     // weekday labels
+                    if(sD.today) {
+                    	sD.weekdayLabel.append(i18n.getProperty("today"));
+                        sD.weekdayLabel.append("\n");
+                    }
                     sD.weekdayLabel.append(dateFormat.format(new Date(sD.date.getTimeInMillis())));
                     sD.weekdayLabel.append("\n");
                     sD.weekdayLabel.append(commonLabels.get(sD.weekDay)[0]);
@@ -540,7 +554,7 @@ public class SirvidSVG {
                         if(emptyRunes) {
                             SirvidRune sR = new SirvidRune(0, null, 120);
                             sR.filename = "dummy" + j + ".svg";
-                            sR.svgContent = errorTxtTags[0] + rTxt + errorTxtTags[1];
+                            sR.svgContent = props.getProperty("errorTxtTags0") + rTxt + props.getProperty("errorTxtTags1");
                             runes.put(new Integer(j), sR);
                         }
                         if(emptyCommonLabels) {
@@ -586,4 +600,9 @@ public class SirvidSVG {
         sb.append("\"/>");
         return sb.toString();
     }
+    
+    public void loadProperties(Properties p, String propertiesFilename) throws IOException {
+    	p.load(this.getClass().getClassLoader().getResourceAsStream(propertiesFilename));
+    }
+    
 }

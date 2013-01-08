@@ -2,7 +2,6 @@ package ee.alkohol.juks.sirvid.exporters;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidDay;
@@ -10,11 +9,8 @@ import ee.alkohol.juks.sirvid.containers.graphics.SirvidFeast;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidMonth;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidRune;
 import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG;
-import ee.alkohol.juks.sirvid.containers.graphics.SirvidSVG.DIM;
-import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
 import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
-import ee.alkohol.juks.sirvid.containers.ical.ICalendar.Keys;
 
 public class ExporterSVG extends Exporter {
 	
@@ -39,12 +35,12 @@ public class ExporterSVG extends Exporter {
         
         if(sSVG.errorMsgs.size() > 0) {
         	
-            sb.append(SirvidSVG.errorTxtTags[0]);
+            sb.append(SirvidSVG.props.getProperty("errorTxtTags0"));
             for(String errMsg : sSVG.errorMsgs) {
                 sb.append(errMsg);
                 sb.append("\n");
             }
-            sb.append(SirvidSVG.errorTxtTags[1]);
+            sb.append(SirvidSVG.props.getProperty("errorTxtTags1"));
             
         } else {
             
@@ -80,11 +76,9 @@ public class ExporterSVG extends Exporter {
             sb.append(SirvidSVG.props.getProperty("zoom"));
             sb.append(")\">\n");
             
-            int m = -1;
             int yBefore = 0;
             for(SirvidMonth sM : sSVG.months) {
                 
-                m++;
                 int wdHeight = yBefore + sM.calculateY(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT);
                 int mfHeight = yBefore + sM.calculateY(SirvidSVG.DIM.Y_MOONPHASESHEIGHT);
                 int feastsHeight = yBefore + sM.calculateY(SirvidSVG.DIM.Y_FEASTSHEIGHT);
