@@ -1,10 +1,6 @@
 package ee.alkohol.juks.sirvid.math;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 /**
  * Generic astronomical and calendar calculations
@@ -13,6 +9,7 @@ import java.util.TimeZone;
  * Meeus, Jean. 
  * Astronomical algorithms. 
  * Willmann-Bell Inc., Richmond, 1991. 
+ * ISBN 0943396352
  * 
  * Years here are astronomical, so 1 BC is here year 0, 2 BC is year -1 and so on. 
  * Note: Julian Day (Number) or JD(N) is continous count of days and their fractions from 
