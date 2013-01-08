@@ -287,12 +287,11 @@ public class AstronomyTest {
     @Test
     public void testgregorian2JDNInt() {
     	for(int i=0; i<JD2GREGORIAN.length; i++) {
-    		if(JD2GREGORIAN[i][0] < 838) { continue;} //TODO: why it doesn't work otherwise?
             double JD = Astronomy.gregorianDate2JDN((int)JD2GREGORIAN[i][0],(int)JD2GREGORIAN[i][1],(int)Math.floor(JD2GREGORIAN[i][2]));
             assertEquals("Wrong gregorian2JDNInt calculation (test no. "+i+")", 
             		JD2GREGORIAN[i][3],
             		JD,
-            		1);
+            		0.5);
     	}
     }
     
@@ -303,19 +302,7 @@ public class AstronomyTest {
             assertEquals("Wrong gregorian2JDN calculation (test no. "+i+")", 
             		JD2GREGORIAN[i][3],
             		JD,
-            		1);
-    	}
-    }
-    
-    @Test
-    public void testgregorian2JDNJava() {
-    	for(int i=0; i<JD2GREGORIAN.length; i++) {
-    		if(JD2GREGORIAN[i][0] < 838) { continue;} //TODO: why it doesn't work otherwise?
-            double JD = Astronomy.gregorianDate2JDNJava((int)JD2GREGORIAN[i][0],(int)JD2GREGORIAN[i][1],(int)JD2GREGORIAN[i][2]);
-            assertEquals("Wrong gregorian2JDNJava calculation (test no. "+i+")", 
-            		JD2GREGORIAN[i][3],
-            		JD,
-            		1);
+            		0.4);
     	}
     }
     

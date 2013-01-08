@@ -31,6 +31,7 @@ public class Astronomy {
     public static final long UNIX_EPOCH_JD = 2440588;
     public static final int SECONDS_IN_DAY = 86400;
     public static final long JDN2000_01_01 = 2451545;
+    public static final long FIRST_GREGORIAN_DATE = 15821015;
 
 
     public static final double[][] MF_PLANETARY = {
@@ -624,7 +625,7 @@ public class Astronomy {
         int y = year + 4800 -a;
         int m = month + 12*a -3;
         return day + Math.floor((153*m +2)/5)  + 365*y + Math.floor(y/4)
-                + (year*10000 + month*100 + day >= 15821015 ? -Math.floor(y/100) + Math.floor(y/400) -32045 : -32083);
+                + (year*10000 + month*100 + day >= FIRST_GREGORIAN_DATE ? -Math.floor(y/100) + Math.floor(y/400) -32045 : -32083);
     }
     
     /**
@@ -641,36 +642,10 @@ public class Astronomy {
     		month += 12;
     	}
     	int A = (int)Math.floor(year/100);
-    	int B = year*10000 + month*100 + day >= 15821015 ? B = 2 - A + (int)Math.floor(A/4) : 0;
+    	int B = year*10000 + month*100 + day >= FIRST_GREGORIAN_DATE ? B = 2 - A + (int)Math.floor(A/4) : 0;
     	return Math.floor(YEAR_DAYS * (year + 4716)) 
     		+ Math.floor(30.6001 * (month + 1))
     		+ day + B - 1524.5;
-    }
-    
-    public static GregorianCalendar getUTCGregorianCalendar(int hour) {
-    	GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-        cal.setGregorianChange(new Date(Long.MIN_VALUE));
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal;
-    }
-    
-    /**
-     * Convert Gregorian date to Julian Day Number 
-     * 
-     * @param year
-     * @param month
-     * @param day
-     * @return Julian Day Number
-     */
-    public static double gregorianDate2JDNJava(int year, int month, int day) {
-    	GregorianCalendar jdY2K = getUTCGregorianCalendar(12);
-    	jdY2K.set(2000, 0, 1);
-    	GregorianCalendar actual = getUTCGregorianCalendar(12);
-    	actual.set(year, month-1, day);
-    	return JDN2000_01_01 + ((actual.getTimeInMillis() - jdY2K.getTimeInMillis())/(SECONDS_IN_DAY*1000));
     }
     
     /**
