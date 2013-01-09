@@ -423,6 +423,7 @@ public class SirvidSVG {
                                             sR.svgContent = generateLine(0, widths.get(SirvidSVG.DIM.Y_WEEKDAYSHEIGHT), 0, widths.get(SirvidSVG.DIM.Y_KIHLAKUDFOOT));
                                             runes.put(TUHKAP2EV, sR);
                                             eventsVsRunes.put(TUHKAP2EV, TUHKAP2EV);
+                                            usedRunes.add(TUHKAP2EV);
                                         } catch(Exception e) { }
                                     }
                                     
@@ -526,6 +527,7 @@ public class SirvidSVG {
             runes.put(dbID, sR);
             eventsVsRunes.put(dbID, dbID);
         } catch(Exception e) { }
+        if(dbID == TUHKAP2EV) { usedRunes.add(TUHKAP2EV); }
         return kihlakudRune.toString();
     }
     
