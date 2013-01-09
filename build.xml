@@ -162,7 +162,8 @@
   <property name="foo.jar"
            value="/path/to/foo.jar"/>
 -->
-
+	<property name="sqlite-jdbc.jar" value="${basedir}/lib/sqlite-jdbc-3.7.2.jar"/>
+	
 
 <!-- ==================== Compilation Classpath =========================== -->
 
@@ -343,7 +344,7 @@
   </target>
 
 	<!-- ==================== WAR Target ===================================== -->
-	<target name="war" depends="compile"
+	<target name="war" depends="clean,compile"
 	   description="Create WAR">
 
 	    <!-- Create application JAR file -->
@@ -464,10 +465,12 @@
 <!--
     <copy todir="${build.home}/WEB-INF/lib" file="${foo.jar}"/>
 -->
-
+  	<copy todir="${build.home}/WEB-INF/lib" file="${sqlite-jdbc.jar}"/>
     <!-- Copy static files from external dependencies as needed -->
     <!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
-
+  	<copy toDir="${build.home}/WEB-INF/lib">
+  		<fileset dir="${basedir}/data" includes="**"/>
+  	</copy>
   </target>
 
 
