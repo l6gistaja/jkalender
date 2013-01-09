@@ -342,7 +342,16 @@
 
   </target>
 
+	<!-- ==================== WAR Target ===================================== -->
+	<target name="war" depends="compile"
+	   description="Create WAR">
 
+	    <!-- Create application JAR file -->
+	    <jar jarfile="${dist.home}/${app.name}.war"
+	         basedir="${build.home}"/>
+
+
+	  </target>
 
 <!-- ==================== Install Target ================================== -->
 
