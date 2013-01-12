@@ -148,10 +148,9 @@ public class ExporterSVG extends Exporter {
             	yBefore += sM.calculateY(SirvidSVG.DIM.Y_TOTAL);
             }
             
+            // scaling
+            sb.append("\n</g>");
         }
-        
-        // scaling
-        sb.append("\n</g>");
         
         sb.append("\n</svg>");
         return sb.toString();

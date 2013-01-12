@@ -47,7 +47,7 @@
      set to the current working directory.
 -->
 
-<project name="My Project" default="compile" basedir=".">
+<project name="jkalender" default="compile" basedir=".">
 
 
 
@@ -346,7 +346,7 @@
 	<!-- ==================== WAR Target ===================================== -->
 	<target name="war" depends="clean,compile"
 	   description="Create WAR">
-
+		<mkdir dir="${dist.home}"/>
 	    <!-- Create application JAR file -->
 	    <jar jarfile="${dist.home}/${app.name}.war"
 	         basedir="${build.home}"/>
@@ -461,16 +461,13 @@
 
     <!-- Copy external dependencies as required -->
     <!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
-    <mkdir  dir="${build.home}/WEB-INF/lib"/>
+    <mkdir dir="${build.home}/WEB-INF/lib"/>
 <!--
     <copy todir="${build.home}/WEB-INF/lib" file="${foo.jar}"/>
 -->
   	<copy todir="${build.home}/WEB-INF/lib" file="${sqlite-jdbc.jar}"/>
     <!-- Copy static files from external dependencies as needed -->
     <!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
-  	<copy toDir="${build.home}/WEB-INF/lib">
-  		<fileset dir="${basedir}/data" includes="**"/>
-  	</copy>
   </target>
 
 

@@ -20,7 +20,7 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public class SirvidSVG {
     
-    public static final String dataPath = "sirvid/";
+    public static final String dataPath = "ee/alkohol/juks/sirvid/data/";
     public static final int J6ULUD = 1221;
     public static final int LIUGUP2EV = 1953;
     public static final int TUHKAP2EV = 1954;
@@ -63,13 +63,13 @@ public class SirvidSVG {
      * Weekday names
      */
     public static String[] weekDays;
+    public static ICalculator iCalc;
     /**
      * Months in (I)calculation's timespan
      * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
      */
     public ArrayList<SirvidMonth> months = new ArrayList<SirvidMonth>();
     
-    public ICalculator iCalc;
     public ArrayList<String> errorMsgs = new ArrayList<String>();
     /**
      * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
@@ -87,7 +87,7 @@ public class SirvidSVG {
         if(props == null) {
             props = new PropertiesT();
         	try {
-                loadProperties(props, dataPath + "svg_export.properties");
+                loadProperties(props, dataPath + "sirvid/svg_export.properties");
                 if(widths == null) { widths = new HashMap<DIM,Integer>(); }
                 for (DIM w : DIM.values()) {
                     if(w.equals(DIM.Y_TOTAL) || w.equals(DIM.Y_MONTHLINEHEIGHT2)) { continue; }
@@ -95,7 +95,7 @@ public class SirvidSVG {
                 }
                 
                 i18n = new PropertiesT();
-                loadProperties(i18n, props.getProperty("i18nDir") + "/" + props.getProperty("language") + "/" + props.getProperty("i18nProps"));
+                loadProperties(i18n, dataPath + props.getProperty("i18nDir") + "/" + props.getProperty("language") + "/" + props.getProperty("i18nProps"));
                 weekDays = i18n.getProperty("weekdaysShort").split(",");
             }
             catch(Exception e) {
@@ -140,7 +140,7 @@ public class SirvidSVG {
                             }
                         }
                         catch(Exception e) {
-                            //errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
+                            errorMsgs.add("SVG weekdays init failed : " + e.getMessage());
                         }
                     }
             }

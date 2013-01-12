@@ -139,7 +139,7 @@ public class ICalculator {
         iCal = new ICalendar(initData);
         
         // initialize DB connection
-        CalendarDAO = new DaoKalenderJDBCSqlite(inputData.jbdcConnect);
+        CalendarDAO = new DaoKalenderJDBCSqlite("jdbc:sqlite:" + inputData.webPath + "sirvid/kalender.sdb");
         
         String nameDelimiter = "; ";
         String[] nameFields = inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.MAAVALLA)
@@ -465,7 +465,7 @@ public class ICalculator {
 		        	if(eventFlags == null) {
 		        		eventFlags = new HashMap<Integer,String>();
 		    			Properties props = new Properties();
-		            	props.load(this.getClass().getClassLoader().getResourceAsStream("i18n/" + LANGUAGE + "/lists.properties"));
+		            	props.load(this.getClass().getClassLoader().getResourceAsStream("ee/alkohol/juks/sirvid/data/i18n/" + LANGUAGE + "/lists.properties"));
 		    			for(Object key : props.keySet()) {
 		    				String keyS = (String)key;
 		    				if(keyS.indexOf(eventFlagsPrefix) == 0) {
