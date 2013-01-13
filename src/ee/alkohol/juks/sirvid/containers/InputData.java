@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
+import javax.servlet.ServletContext;
+
 public class InputData {
     
     public static final class FLAGS {
@@ -29,7 +31,8 @@ public class InputData {
     public static final String LONGITUDE_NAME = "Longitude";
     public static final String DEFAULT_TRUE = "1";
     
-    public String webPath = ""; 
+    public String webPath = "";
+    public ServletContext servletContext;
     public HashMap<String,String> criticalErrors;
     
     private Date date;
@@ -172,7 +175,7 @@ public class InputData {
     }
     
     public void setTimezone(String timezone) {
-        this.timezone = timezone != null && Arrays.asList(getAllAvailableTimezones()).contains(timezone) ? timezone : "Etc/GMT";
+        this.timezone = timezone != null && Arrays.asList(getAllAvailableTimezones()).contains(timezone) ? timezone : "GMT";
     }
     
     public Date getDate() {
@@ -219,6 +222,7 @@ public class InputData {
         setTimezone(null);
         setTimespan(null);
         setOutputFormat(null);
+        setCalendarData(InputData.FLAGS.CALDATA.NONE);
     }
     
     private String fetchMemberName(String setterName) {

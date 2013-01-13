@@ -14,6 +14,7 @@ import java.util.TimeZone;
 
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.InputData;
+import ee.alkohol.juks.sirvid.containers.PropertiesT;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar.Keys;
 import ee.alkohol.juks.sirvid.containers.ical.ICalendar.Values;
 import ee.alkohol.juks.sirvid.math.Astronomy;
@@ -91,8 +92,8 @@ public class ICalculator {
     public static HashMap<Integer,String> eventFlags;
     public static int eventFlagsMax = -1;
     
-    public ICalculator(InputData inputData) throws SQLException {
-        
+    public ICalculator(InputData inputData) throws SQLException, IOException {
+    	
         this.inputData = inputData;
         Date t0 = new Date();
         
@@ -465,7 +466,10 @@ public class ICalculator {
 		        	if(eventFlags == null) {
 		        		eventFlags = new HashMap<Integer,String>();
 		    			Properties props = new Properties();
-		            	props.load(this.getClass().getClassLoader().getResourceAsStream("ee/alkohol/juks/sirvid/data/i18n/" + LANGUAGE + "/lists.properties"));
+		    			loadProperties(this, props, 
+		    					ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA
+		            			+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_I18N
+		            			+ LANGUAGE + "/lists.properties");
 		    			for(Object key : props.keySet()) {
 		    				String keyS = (String)key;
 		    				if(keyS.indexOf(eventFlagsPrefix) == 0) {
@@ -553,6 +557,10 @@ public class ICalculator {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+    }
+    
+    public static void loadProperties(Object obj, Properties p, String propertiesFilename) throws IOException {
+    	p.load(obj.getClass().getClassLoader().getResourceAsStream(propertiesFilename));
     }
     
 }	

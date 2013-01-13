@@ -12,6 +12,8 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+import javax.servlet.ServletContext;
+
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
 import ee.alkohol.juks.sirvid.containers.PropertiesT;
 import ee.alkohol.juks.sirvid.containers.ical.ICalEvent;
@@ -20,7 +22,6 @@ import ee.alkohol.juks.sirvid.containers.ical.ICalendar;
 
 public class SirvidSVG {
     
-    public static final String dataPath = "ee/alkohol/juks/sirvid/data/";
     public static final int J6ULUD = 1221;
     public static final int LIUGUP2EV = 1953;
     public static final int TUHKAP2EV = 1954;
@@ -64,6 +65,7 @@ public class SirvidSVG {
      */
     public static String[] weekDays;
     public static ICalculator iCalc;
+    public static ServletContext servletContext;
     /**
      * Months in (I)calculation's timespan
      * @see SirvidSVG#generateMonthIndex(GregorianCalendar)
@@ -83,11 +85,15 @@ public class SirvidSVG {
     public SirvidSVG(ICalculator iC) {
         
         iCalc = iC;
+        servletContext = iC.inputData.servletContext;
         
         if(props == null) {
             props = new PropertiesT();
         	try {
-                loadProperties(props, dataPath + "sirvid/svg_export.properties");
+                ICalculator.loadProperties(this, props, 
+                		ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA 
+                		+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_SIRVID
+                		+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_SIRVID_PROPS);
                 if(widths == null) { widths = new HashMap<DIM,Integer>(); }
                 for (DIM w : DIM.values()) {
                     if(w.equals(DIM.Y_TOTAL) || w.equals(DIM.Y_MONTHLINEHEIGHT2)) { continue; }
@@ -95,11 +101,16 @@ public class SirvidSVG {
                 }
                 
                 i18n = new PropertiesT();
-                loadProperties(i18n, dataPath + props.getProperty("i18nDir") + "/" + props.getProperty("language") + "/" + props.getProperty("i18nProps"));
+                ICalculator.loadProperties(this, i18n, ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA 
+                		+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_I18N 
+                		+ props.getProperty("language") + "/" + props.getProperty("i18nProps"));
                 weekDays = i18n.getProperty("weekdaysShort").split(",");
             }
             catch(Exception e) {
-                errorMsgs.add("Failed to open svg_export.properties : " + e.getMessage());
+                errorMsgs.add("Failed to open " 
+                		+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA 
+                		+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_SIRVID
+                		+ ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_SIRVID_PROPS + " : " + e.getMessage());
             }
         }
         
@@ -607,10 +618,6 @@ public class SirvidSVG {
         sb.append(y2);
         sb.append("\"/>");
         return sb.toString();
-    }
-    
-    public void loadProperties(Properties p, String propertiesFilename) throws IOException {
-    	p.load(this.getClass().getClassLoader().getResourceAsStream(propertiesFilename));
     }
     
 }

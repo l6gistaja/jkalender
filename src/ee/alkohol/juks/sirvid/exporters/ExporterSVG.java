@@ -36,6 +36,9 @@ public class ExporterSVG extends Exporter {
         if(sSVG.errorMsgs.size() > 0) {
         	
             sb.append(SirvidSVG.props.getProperty("errorTxtTags0"));
+            sb.append("\n<title content=\"structured text\">CLASSPATH = ");
+            sb.append(System.getProperty("java.class.path"));
+            sb.append("</title>\n");
             for(String errMsg : sSVG.errorMsgs) {
                 sb.append(errMsg);
                 sb.append("\n");

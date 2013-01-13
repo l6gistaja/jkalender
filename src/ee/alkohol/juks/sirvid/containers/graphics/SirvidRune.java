@@ -2,11 +2,14 @@ package ee.alkohol.juks.sirvid.containers.graphics;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import ee.alkohol.juks.sirvid.containers.DaoKalenderJDBCSqlite;
+import ee.alkohol.juks.sirvid.containers.ical.ICalculator;
 
 public class SirvidRune {
 
@@ -15,6 +18,7 @@ public class SirvidRune {
 	public int width;
 	public String svgContent;
 	public double rightness;
+	public static Properties runeTable;
 
     public SirvidRune(int cx, String filename, int width) throws SQLException, IOException {
         this.cx =cx;
@@ -42,11 +46,30 @@ public class SirvidRune {
      */
 	
     public String loadSVGcontent(String filename) throws IOException {
+    	try {
+    		if(false) { //SirvidSVG.props.getProperty("isWAR").equals("1")) {
+    			if(runeTable == null) {
+    				ICalculator.loadProperties(this, runeTable, 
+    						ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA 
+    			    		  + ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_SIRVID
+    			    		  + SirvidSVG.props.getProperty("runeContentProps"));
+    			}
+    			return runeTable.getProperty(filename);
+    		} else {
+    			filename = SirvidSVG.props.getProperty("pathSVG") + filename;
+                return loadSVGcontent(this.getClass().getClassLoader().getResourceAsStream(filename));
+    		}
+    	} catch (Exception e) {
+    		return "<text fill=\"cyan\">" + this.getClass().getName() + ".loadSVGcontent(String filename) : " + e.getMessage() + "</text>";
+    	}
         
-        filename = "svg/" + filename;
+    }
+    
+    public static String loadSVGcontent(InputStream is) throws IOException {
+        
         StringBuilder svgContent =  new StringBuilder();
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(filename), "UTF-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String strLine;
         boolean beginOfGrafix = false; 
         while ((strLine = br.readLine()) != null)   {
@@ -62,5 +85,4 @@ public class SirvidRune {
 
         return svgContent.toString();
     }
-
 }

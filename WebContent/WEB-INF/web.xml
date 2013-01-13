@@ -23,4 +23,12 @@
     <url-pattern>/ajaxdata</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>GenerateStaticData</servlet-name>
+    <servlet-class>ee.alkohol.juks.sirvid.web.GenerateStaticData</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GenerateStaticData</servlet-name>
+    <url-pattern>/generatestaticdata</url-pattern>
+  </servlet-mapping>
 </web-app>

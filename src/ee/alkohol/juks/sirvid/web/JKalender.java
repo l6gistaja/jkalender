@@ -39,6 +39,7 @@ public class JKalender extends HttpServlet {
       inputData.setAddRemark(request.getParameter("ar"));
       inputData.setCalendarData(request.getParameter("ce"));
       inputData.webPath = getServletContext().getRealPath("/");
+      inputData.servletContext = getServletContext();
       
       ICalculator iCalc;
       try {
