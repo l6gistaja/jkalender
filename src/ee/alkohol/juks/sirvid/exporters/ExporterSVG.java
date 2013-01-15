@@ -1,5 +1,6 @@
 package ee.alkohol.juks.sirvid.exporters;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -23,7 +24,9 @@ public class ExporterSVG extends Exporter {
     @Override
     public String generate(ICalculator iC) {
         
-        SirvidSVG sSVG = new SirvidSVG(iC);
+        SirvidSVG sSVG;
+		sSVG = new SirvidSVG(iC);
+
         StringBuilder sb = new StringBuilder();
         
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");

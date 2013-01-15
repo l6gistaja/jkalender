@@ -348,18 +348,12 @@
 		<propertyfile file="${build.home}/WEB-INF/classes/ee/alkohol/juks/sirvid/data/sirvid/svg_export.properties">
 		<entry  key="isWAR" type="int" default="0" operation="+"/>
 		</propertyfile>
-		<mkdir dir="${build.home}/WEB-INF/classes/ee/alkohol/juks/sirvid/data/sirvid/svg"/>
-        <copy toDir="${build.home}/WEB-INF/classes/ee/alkohol/juks/sirvid/data/sirvid/svg">
-        <fileset dir="${basedir}/WebContent/sirvid/svg" includes="*.svg" excludes="icon.svg"/>
-        </copy>
 		<mkdir dir="${dist.home}"/>
 		<war destfile="${dist.home}/${app.name}.war" webxml="WebContent/WEB-INF/web.xml">
 			<fileset dir="WebContent"/>
 			<lib dir="${build.home}/WEB-INF/lib">
 				<include name="sqlite-jdbc-3.7.2.jar"/>
 			</lib>
-			<webinf dir="${build.home}/sirvid/svg" includes="/classes/ee/alkohol/juks/sirvid/data/sirvid/svg/**/*.svg">
-			</webinf>
 			<classes dir="${build.home}/WEB-INF/classes"/>
 		</war>
 	  </target>

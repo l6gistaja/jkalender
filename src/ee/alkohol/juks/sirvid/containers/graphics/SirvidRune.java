@@ -47,10 +47,11 @@ public class SirvidRune {
 	
     public String loadSVGcontent(String filename) throws IOException {
     	try {
-    		if(false) { //SirvidSVG.props.getProperty("isWAR").equals("1")) {
+    		if(SirvidSVG.props.getProperty("isWAR").equals("1")) {
     			if(runeTable == null) {
+    				runeTable = new Properties();
     				ICalculator.loadProperties(this, runeTable, 
-    						ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA 
+    						  ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA 
     			    		  + ee.alkohol.juks.sirvid.containers.Constants.PATH_DATA_SIRVID
     			    		  + SirvidSVG.props.getProperty("runeContentProps"));
     			}
