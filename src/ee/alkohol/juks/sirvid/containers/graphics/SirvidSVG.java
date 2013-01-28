@@ -229,6 +229,8 @@ public class SirvidSVG {
     	            ? (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value
     	            :  fromUTCtoTz( (GregorianCalendar) event.properties.get(ICalendar.Keys.EVENT_START).value, iCalc.inputData.getTimezone());
             monthIndex = generateMonthIndex(timeZoned);
+            int index = monthIndex - beginMonth;
+            if( index < 0 || index > months.size() -1 ) { continue; }
             SirvidMonth sM = months.get(monthIndex-beginMonth);
             if(sM == null) { continue; }
             SirvidDay sD = sM.days.get(timeZoned.get(Calendar.DATE)-1);
@@ -320,6 +322,7 @@ public class SirvidSVG {
         do {
             proceed = true;
             monthIndex = generateMonthIndex(date0);
+            System.out.println();
             SirvidMonth sM = months.get(monthIndex-beginMonth);
             if(sM == null) { proceed = false; }
             
