@@ -63,7 +63,7 @@ public class AstronomyTest {
         {2007,9,23},
         
         {2008,3,20}, //7,48
-        {2008,6,21}, //2-1,59
+        {2008,6,20}, //1}, //2-1,59
         {2008,9,22}, //18-1,44
         
         // Kutsukalender 2011
@@ -75,52 +75,52 @@ public class AstronomyTest {
         {1991, 3, 21},
         {1991, 6, 21},
         {1991, 9, 23},
-        //{1991, 12, 22},
+        {1991, 12, 22},
         
         {1992, 3, 20},
         {1992, 6, 21},
         {1992, 9, 22},
-        //{1992, 12, 21},
+        {1992, 12, 21},
         
         {1993, 3, 20},
         {1993, 6, 21},
         {1993, 9, 23},
-        //{1993, 12, 21},
+        {1993, 12, 21},
         
         {1994, 3, 20},
         {1994, 6, 21},
         {1994, 9, 23},
-        //{1994, 12, 22},
+        {1994, 12, 22},
         
         {1995, 3, 21},
         {1995, 6, 21},
         {1995, 9, 23},
-        //{1995, 12, 22},
+        {1995, 12, 22},
         
         {1996, 3, 20},
         {1996, 6, 21},
         {1996, 9, 22},
-        //{1996, 12, 21},
+        {1996, 12, 21},
         
         {1997, 3, 20},
         {1997, 6, 21},
         {1997, 9, 22},
-        //{1997, 12, 21},
+        {1997, 12, 21},
         
         {1998, 3, 20},
         {1998, 6, 21},
         {1998, 9, 23},
-        //{1998, 12, 22},
+        {1998, 12, 22},
         
         {1999, 3, 21},
         {1999, 6, 21},
         {1999, 9, 23},
-        //{1999, 12, 22},
+        {1999, 12, 22},
         
         {2000, 3, 20},
         {2000, 6, 21},
         {2000, 9, 22},
-        //{2000, 12, 21},
+        {2000, 12, 21},
         
     };
     
@@ -251,27 +251,6 @@ public class AstronomyTest {
         return y;
     }
     
-    public int[] eeSolstice(long year, short month) {
-        
-        int[] calculation = Astronomy.JDN2gregorianDate(Astronomy.solstice(year,month, true));
-        int calcDate = (calculation[1]<<5)+calculation[2];
-        int quarter = (int)Math.floor((calculation[1]-1)/3);
-        int solMinDate = 20 + quarter;
-        quarter = (quarter+1)*3;
-        if(calcDate < (quarter<<5) +solMinDate) {
-            calculation[1] = quarter;
-            calculation[2] = solMinDate;
-            calculation[3] -= 24;
-        } else if(calcDate > (quarter<<5) +solMinDate +1) {
-            calculation[1] = quarter;
-            calculation[2] = solMinDate +1;
-            calculation[3] += 24;
-        }
-        return calculation;
-        
-    }
-    
-    
     @Test
     public void testJDN2gregorianDate() {
         for(int i=0; i<JD2GREGORIAN.length; i++) {
@@ -326,9 +305,8 @@ public class AstronomyTest {
         for(int i=0; i<SOLSTICES.length; i++) {
             
             String testRowS = concatenate( SOLSTICES[i] );
-            int[] astronomyRow = eeSolstice((long) SOLSTICES[i][0], (short) SOLSTICES[i][1]);
-            String astronomyRowS = concatenate(astronomyRow, SOLSTICES[i].length);
-            assertEquals("Wrong solstices calculation (test no. "+i+")", testRowS, astronomyRowS);
+            int[] astronomyRow = Astronomy.JDN2gregorianDate(Astronomy.solstice((long) SOLSTICES[i][0], (short) SOLSTICES[i][1], true));
+            assertEquals("Wrong solstices calculation (test no. "+i+")", testRowS, astronomyRow[0] + "-" + astronomyRow[1] + "-" + astronomyRow[2] );
 
         }
         
