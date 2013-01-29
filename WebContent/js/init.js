@@ -52,7 +52,7 @@ var geocoder;
 var map;
 var marker;
     
-function initialize(){
+function initializeMap(){
 
     
     
@@ -103,9 +103,29 @@ function populateSelect(xml, name, valueTag, defaultValue) {
   });
 }
 
+function URL2Map () {
+	y = {};
+	query = location.search.substring(1);
+	pairs = query.split('&');
+	for(i=0; i<pairs.length; i++) {
+		parameter = pairs[i].split('=');
+		for(j=0; j<parameter.length; j++) {
+			parameter[j] = decodeURIComponent(parameter[j]);
+		}
+		key = parameter.shift();
+		y[key] = parameter.join('=');
+	}
+	return y;
+}
+
 $(document).ready(function() { 
          
-  initialize();
+  request = URL2Map ();
+  if('jsOnload' in request) {
+	  if(request['jsOnload'] == 'initMV') { initMV(); }
+  }
+  
+  initializeMap();
   
 	$.ajax({
 		type: "GET",
