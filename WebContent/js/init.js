@@ -86,30 +86,39 @@ function initialize(){
         
 }
 
-function populateTz(xml)
-{
-  var select = document.getElementById("tz");
-  $(xml).find("z").each(function()
+function populateTz(xml) { populateSelect(xml, "tz", "z", "Europe/Tallinn"); }
+function populateF(xml) { populateSelect(xml, "f", "f", ""); }
+
+function populateSelect(xml, name, valueTag, defaultValue) {
+  var select = document.getElementById(name);
+  $(xml).find(valueTag).each(function()
   {
     var el = document.createElement("option");
     el.textContent = $(this).text();
     el.value = $(this).text();
-    if($(this).text() == "Europe/Tallinn") {
+    if($(this).text() == defaultValue) {
         el.selected = true;
     }
     select.appendChild(el);
   });
 }
-        
+
 $(document).ready(function() { 
          
   initialize();
   
 	$.ajax({
 		type: "GET",
-		url: "ajaxdata?type=available_timezones&onlyplaces=1",
+		url: "ajaxdata?type=available_timezones&onlyplaces=1&sort=1",
 		dataType: "xml",
 		success: populateTz
+	});
+	
+	$.ajax({
+		type: "GET",
+		url: "ajaxdata?type=supported_formats",
+		dataType: "xml",
+		success: populateF
 	});
                   
   $(function() {

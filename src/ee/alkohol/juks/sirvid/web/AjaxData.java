@@ -25,20 +25,51 @@ public class AjaxData extends HttpServlet {
             StringBuilder sb = new StringBuilder();
             sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ajaxdata>\n");
             response.setContentType("text/xml; charset=UTF-8");
-            if(request.getParameter("type") != null && request.getParameter("type").equals("available_timezones")) {
-                String[] tzs = InputData.getAllAvailableTimezones();
-                java.util.Arrays.sort(tzs);
-                for(String tz : tzs) {
-                    if(request.getParameter("onlyplaces") != null && tz.matches("^((Etc|SystemV).*|[^\\/]+)$")) {
-                        continue;
+            String errorMsg = null;
+            
+            if(request.getParameter("type") != null) {
+            	
+            	String[] sList = null;
+            	String sListTag = "undef";
+            	
+            	if(request.getParameter("type").equals("available_timezones")) {
+            		sList = InputData.getAllAvailableTimezones();
+            		sListTag = "z";
+            	}
+            	
+            	if(request.getParameter("type").equals("supported_formats")) {
+            		sList = InputData.SUPPORTED_OUTPUT_FORMATS.clone();
+            		sListTag = "f";
+            	}
+                
+            	if(sListTag.equals("undef")) { errorMsg = "Nonexisting 'type' parameter, should be 'available_timezones' or 'supported_formats'."; }
+            	
+            	if(sList != null) { 
+                    if(request.getParameter("sort") != null) { java.util.Arrays.sort(sList); }
+                    for(String item : sList) {
+                        if(request.getParameter("onlyplaces") != null && item.matches("^((Etc|SystemV).*|[^\\/]+)$")) {
+                            continue;
+                        }
+                        sb.append("<");
+                        sb.append(sListTag);
+                        sb.append(">");
+                        sb.append(item);
+                        sb.append("</");
+                        sb.append(sListTag);
+                        sb.append(">\n");
                     }
-                    sb.append("<z>");
-                    sb.append(tz);
-                    sb.append("</z>");
-                }
+            	}
+
             } else {
-                sb.append("<errormsg>Missing type parameter.</errormsg>\n");
+            	errorMsg = "Missing 'type' parameter.";
             }
+            
+            if(errorMsg != null) {
+            	sb.append("<errormsg>");
+            	sb.append(errorMsg);
+            	sb.append("</errormsg>\n");
+            }
+            
             sb.append("</ajaxdata>\n");
             PrintWriter out = response.getWriter();
             out.println(sb.toString());
