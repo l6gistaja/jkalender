@@ -79,11 +79,12 @@ function initializeMap(){
   
   //$('#map_picker').hide();
   
+  /*
   $('#date').datepicker({ 
     dateFormat: 'yy-mm-dd',
     firstDay: 1
   });
-        
+  */
 }
 
 function populateTz(xml) { populateSelect(xml, "tz", "z", "Europe/Tallinn"); }
