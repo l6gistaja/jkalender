@@ -1,7 +1,9 @@
 package ee.alkohol.juks.sirvid.containers;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -194,6 +196,24 @@ public class InputData {
         } catch (Exception e) {
             criticalErrors.put(memberName,date);
         }
+    }
+    
+    public static Date parseDate(String input, boolean hasYearZero) {
+    	Date d;
+		try {
+			d = DATEFORMAT.parse(input);
+			if(!hasYearZero) {
+				Calendar calendar = Calendar.getInstance();
+	            calendar.setTime(d);
+	            if(calendar.get(Calendar.ERA) == 0) {
+	            	calendar.add(Calendar.YEAR, 1);
+	            	d = calendar.getTime();
+	            }
+			}
+		} catch (ParseException e) {
+			d = new Date();
+		}
+    	return d;
     }
     
     public boolean isAddDescription() {

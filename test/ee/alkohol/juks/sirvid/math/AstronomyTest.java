@@ -7,6 +7,8 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
+import ee.alkohol.juks.sirvid.containers.InputData;
+
 /**
  * Astronomical and calendar calculations: unittests. 
  * 
@@ -239,6 +241,13 @@ public class AstronomyTest {
         
     };
     
+    public static final String[] ISO8601_AROUND_CE_NO_YEAR_ZERO = {
+    	"-0002-01-01",
+    	"-0001-11-21",
+    	"0001-09-06",
+    	"0002-02-28"
+    };
+    
     public String concatenate(int[] array) {
         return concatenate(array, array.length);
     }
@@ -249,6 +258,14 @@ public class AstronomyTest {
             y += (i==0?"":DELIMITER) + array[i];
         }
         return y;
+    }
+    
+    
+    @Test
+    public void testISO8601NoYear0toAstronomicalYear() {
+        for(int i=0; i<ISO8601_AROUND_CE_NO_YEAR_ZERO.length; i++) {
+            assertEquals("Wrong ISO8601 (zeroless) to astromical year calculation (test no. "+i+")", i-1, Astronomy.getAstronomicalYear(InputData.parseDate(ISO8601_AROUND_CE_NO_YEAR_ZERO[i], false)) ); 
+        } 
     }
     
     @Test

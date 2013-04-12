@@ -1,5 +1,8 @@
 package ee.alkohol.juks.sirvid.math;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 /**
@@ -710,4 +713,29 @@ public class Astronomy {
         return result;
     }
     
+    
+    /**
+     * Convert java.util.Date's year to astronomical year
+     * @param d
+     * @return astronomical year as described in the beginning of class {@link Astronomy}
+     */
+	public static int getAstronomicalYear(Date d) {
+		Calendar calendar = Calendar.getInstance();
+        calendar.setTime(d);
+        return getAstronomicalYear(calendar);
+	}
+	
+    /**
+     * Convert java.util.Calendar's year to astronomical year
+     * @param c
+     * @return astronomical year as described in the beginning of class {@link Astronomy}
+     */
+	public static int getAstronomicalYear(Calendar c) {
+		if(c.get(Calendar.ERA) == 0) {
+        	return 1 - c.get(Calendar.YEAR);
+        } else {
+        	return c.get(Calendar.YEAR);
+        }
+	}
+	
 }
