@@ -191,7 +191,7 @@ public class InputData {
         }
         String memberName = fetchMemberName(Thread.currentThread().getStackTrace()[1].getMethodName());
         try {
-            this.date = DATEFORMAT.parse(date);
+            this.date = parseDate(date, false);
             criticalErrors.remove(memberName);
         } catch (Exception e) {
             criticalErrors.put(memberName,date);
