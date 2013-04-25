@@ -47,7 +47,6 @@ public class ICalendar {
         public static final String VALUE  = "value";
         public static final String GEOGRAPHIC_COORDINATES  = "geo";
         public static final String ICAL_VERSION  = "version";
-        public static final String GENERATION_TIME  = "x-jkalender-generation_time_ms";
     }
     
     public static final class Values {

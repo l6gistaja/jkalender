@@ -27,6 +27,7 @@ import ee.alkohol.juks.sirvid.math.Astronomy;
 public class ICalculator {
     
     public final static String UTC_TZ_ID = "GMT";
+    public final static boolean DEBUGMODE = true;
     
     public final static String LANGUAGE = "et";
     public final static String[] LANG = {Keys.LANGUAGE, LANGUAGE.toUpperCase()};
@@ -116,21 +117,19 @@ public class ICalculator {
 		        	if(inputData.getTimespan().equals(InputData.FLAGS.PERIOD.DAY)) { // day
 		            	calName.append(String.format("-%02d", cal.get(Calendar.DATE)));
 		            	calendarBegin.setTime(inputData.getDate());
-		            	calendarEnd.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE), 23, 59, 59);
-		            	calendarEnd.set(Calendar.MILLISECOND, 999);
+		            	calendarEnd.setTime(inputData.getDate());
 		            } else { // month
-		            	calendarBegin.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 1);
-		            	calendarEnd.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
-		            	calendarEnd.set(Calendar.MILLISECOND, 999);
+		            	calendarBegin.set(Astronomy.getAstronomicalYear(cal), cal.get(Calendar.MONTH), 1);
+		            	calendarEnd.set(Astronomy.getAstronomicalYear(cal), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH));
 		            }
 		        	
         } else { // year
-        	calendarBegin.set(cal.get(Calendar.YEAR), 0, 1);
-        	calendarEnd.set(cal.get(Calendar.YEAR), 11, 31, 23, 59, 59);
-        	calendarEnd.set(Calendar.MILLISECOND, 999);
+        	calendarBegin.set(Astronomy.getAstronomicalYear(cal), 0, 1);
+        	calendarEnd.set(Astronomy.getAstronomicalYear(cal), 11, 31);
         }
         
         goodNight(calendarBegin);
+        goodEvening(calendarEnd);
         this.timespan = calName.toString();
         
         // initialize calendar container
@@ -444,8 +443,13 @@ public class ICalculator {
             }
         }
         
-        Date t1 = new Date();
-        iCal.iCalBody.put(Keys.GENERATION_TIME, new ICalProperty(t1.getTime() - t0.getTime(), null));
+        if(DEBUGMODE) {
+        	Date t1 = new Date();
+            iCal.iCalBody.put("x-jkalender-generation_time_ms", new ICalProperty(t1.getTime() - t0.getTime(), null));
+            iCal.iCalBody.put("x-jkalender-period_start", new ICalProperty(calendarBegin.getTime().toString(), null));
+            iCal.iCalBody.put("x-jkalender-period_end", new ICalProperty(calendarEnd.getTime().toString(), null));
+            iCal.iCalBody.put("x-jkalender-astronomical_year", new ICalProperty(Astronomy.getAstronomicalYear(cal), null));
+        }
         
     }
     
@@ -557,6 +561,13 @@ public class ICalculator {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+    }
+    
+    public static void goodEvening(GregorianCalendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
     }
     
     public static void loadProperties(Object obj, Properties p, String propertiesFilename) throws IOException {

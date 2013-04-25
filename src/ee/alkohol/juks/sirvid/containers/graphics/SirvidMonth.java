@@ -47,10 +47,7 @@ public class SirvidMonth {
         monthEnd.set(Calendar.YEAR, m.get(Calendar.YEAR));
         monthEnd.set(Calendar.MONTH, m.get(Calendar.MONTH));
         monthEnd.set(Calendar.DAY_OF_MONTH, m.getActualMaximum(Calendar.DAY_OF_MONTH));
-        monthEnd.set(Calendar.HOUR_OF_DAY, 23);
-        monthEnd.set(Calendar.MINUTE, 59);
-        monthEnd.set(Calendar.SECOND, 59);
-        monthEnd.set(Calendar.MILLISECOND, 999);
+        ICalculator.goodEvening(monthEnd);
         return monthEnd;
     }
     
