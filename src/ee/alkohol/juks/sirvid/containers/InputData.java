@@ -32,6 +32,7 @@ public class InputData {
     public static final String LATITUDE_NAME = "Latitude";
     public static final String LONGITUDE_NAME = "Longitude";
     public static final String DEFAULT_TRUE = "1";
+    public boolean uiHasYearZero = false;
     
     public String webPath = "";
     public ServletContext servletContext;
@@ -191,10 +192,10 @@ public class InputData {
         }
         String memberName = fetchMemberName(Thread.currentThread().getStackTrace()[1].getMethodName());
         try {
-            this.date = parseDate(date, false);
+            this.date = parseDate(date, uiHasYearZero);
             criticalErrors.remove(memberName);
         } catch (Exception e) {
-            criticalErrors.put(memberName,date);
+            criticalErrors.put(memberName, date);
         }
     }
     
