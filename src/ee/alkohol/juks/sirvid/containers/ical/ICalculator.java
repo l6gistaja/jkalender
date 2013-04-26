@@ -134,8 +134,8 @@ public class ICalculator {
         
         // initialize calendar container
         LinkedHashMap<String,ICalProperty> initData = new LinkedHashMap<String,ICalProperty>();
-        initData.put(Keys.CALENDAR_NAME, new ICalProperty("JKalender " + this.timespan, null));
-        initData.put(Keys.CALENDAR_TIMEZONE, new ICalProperty(inputData.getTimezone(), null));
+        initData.put(Keys.CALENDAR_NAME, new ICalProperty("JKalender " + this.timespan));
+        initData.put(Keys.CALENDAR_TIMEZONE, new ICalProperty(inputData.getTimezone()));
         iCal = new ICalendar(initData);
         
         // initialize DB connection
@@ -184,8 +184,8 @@ public class ICalculator {
             };
         	
         	iCal.vVenue = new LinkedHashMap<String,ICalProperty>();
-        	iCal.vVenue.put(Keys.UID, new ICalProperty("a_" + inputData.getLatitude()+ "_o_" + inputData.getLongitude() + iCal.generateUID(null), null));
-        	iCal.vVenue.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
+        	iCal.vVenue.put(Keys.UID, new ICalProperty("a_" + inputData.getLatitude()+ "_o_" + inputData.getLongitude() + iCal.generateUID(null)));
+        	iCal.vVenue.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates));
         	
         	while(true) {
                 
@@ -208,10 +208,10 @@ public class ICalculator {
                     event.properties.put(Keys.UID, 
                             new ICalProperty("d_"
                             		+ String.format("%d%02d%02d", sg[0], sg[1], sg[2])
-                            		+ "_" +iCal.generateUID(event.dbID), null));
+                            		+ "_" +iCal.generateUID(event.dbID)));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(sunCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                     // use VVENUE component instead
-                    //event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates, null));
+                    //event.properties.put(Keys.GEOGRAPHIC_COORDINATES, new ICalProperty(coordinates));
                     iCal.vEvent.add(event);
                 }
                 
@@ -244,7 +244,7 @@ public class ICalculator {
                     if(event.dbID < DbIdStatuses.SOLSTICE.getDbId() || event.dbID > DbIdStatuses.SOLSTICE4.getDbId()) { event.dbID = DbIdStatuses.SOLSTICE.getDbId(); }
                     String solsticeLabel = eventTranslations.get("" +event.dbID);
                     event.properties.put(Keys.SUMMARY, new ICalProperty(solsticeLabel, getLanguageDescriptor()));
-                    event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID), null));
+                    event.properties.put(Keys.UID, new ICalProperty("m_" + solistice[0] + String.format("%02d",solistice[1]) + "_" + iCal.generateUID(event.dbID)));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(solCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                     iCal.vEvent.add(event);
                 }
@@ -274,7 +274,7 @@ public class ICalculator {
                     ICalEvent event = new ICalEvent();
                     event.dbID = MOONPHASES[lunF % 4].getDbId();
                     event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), getLanguageDescriptor()));
-                    event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                    event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID)));
                     event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                     iCal.vEvent.add(event);
                 }
@@ -287,7 +287,7 @@ public class ICalculator {
                             ICalEvent event = new ICalEvent();
                             event.dbID = MOONPHASES_MV[(lunF%4) + i].getDbId();
                             event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), getLanguageDescriptor()));
-                            event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID), null));
+                            event.properties.put(Keys.UID, new ICalProperty("l_" + (k + (0.25 * lunF)) + "_" + iCal.generateUID(event.dbID)));
                             event.properties.put(Keys.EVENT_START, new ICalProperty(moonCal.clone(), new String[]{Keys.VALUE, Values.DATETIME}));
                             iCal.vEvent.add(event);
                         }
@@ -313,8 +313,8 @@ public class ICalculator {
             if(inputData.getCalendarData().equals(InputData.FLAGS.CALDATA.NONE) && !gregorianEaster.before(calendarBegin) && !gregorianEaster.after(calendarEnd)) {
                 ICalEvent event = new ICalEvent();
                 event.dbID = DbIdStatuses.EASTER.getDbId();
-                event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID), null));
-                event.properties.put(Keys.UID, new ICalProperty("y_" + year + "_e_g_" + iCal.generateUID(event.dbID), null));
+                event.properties.put(Keys.SUMMARY, new ICalProperty(eventTranslations.get("" +event.dbID)));
+                event.properties.put(Keys.UID, new ICalProperty("y_" + year + "_e_g_" + iCal.generateUID(event.dbID)));
                 generateAllDayEvent(event, gregorianEaster.get(Calendar.YEAR), gregorianEaster.get(Calendar.MONTH) +1, gregorianEaster.get(Calendar.DATE));
                 iCal.vEvent.add(event);
             }
@@ -343,7 +343,7 @@ public class ICalculator {
     	              event.dbID = dbID;
     	              
     	              event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(anniversaries, nameFields, nameDelimiter), LANG));
-    	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID), null));
+    	              event.properties.put(Keys.UID, new ICalProperty(iCal.generateUID(dbID)));
     	              generateAllDayEvent(event, cal.get(Calendar.YEAR), (int)(dbID / 100), dbID % 100);
     	              generateDescription(event.properties, anniversaries);
     	              iCal.vEvent.add(event);
@@ -365,7 +365,7 @@ public class ICalculator {
                           ICalEvent event = new ICalEvent();
                           event.dbID = dbID;
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(gEasterEvents, nameFields, nameDelimiter), LANG));
-                          event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID), null));
+                          event.properties.put(Keys.UID, new ICalProperty("y_" + easterEventDate.get(Calendar.YEAR) + "_e_g_" + iCal.generateUID(event.dbID)));
                           generateAllDayEvent(event, easterEventDate.get(Calendar.YEAR), easterEventDate.get(Calendar.MONTH) +1, easterEventDate.get(Calendar.DATE));
                           generateDescription(event.properties, gEasterEvents);
                           iCal.vEvent.add(event);
@@ -393,7 +393,7 @@ public class ICalculator {
                           ICalEvent event = new ICalEvent();
                           event.dbID = dbID;
                           event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(weekdayNths, nameFields, nameDelimiter), LANG));
-                          event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
+                          event.properties.put(Keys.UID, new ICalProperty("y_" + weekdayNthDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID)));
                           generateAllDayEvent(event, weekdayNthDate.get(Calendar.YEAR), weekdayNthDate.get(Calendar.MONTH) +1, weekdayNthDate.get(Calendar.DATE));
                           generateDescription(event.properties, weekdayNths);
                           iCal.vEvent.add(event);
@@ -431,7 +431,7 @@ public class ICalculator {
                             ICalEvent event = new ICalEvent();
                             event.dbID = dbID;
                             event.properties.put(Keys.SUMMARY, new ICalProperty(generateDayName(advents, nameFields, nameDelimiter), LANG));
-                            event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID), null));
+                            event.properties.put(Keys.UID, new ICalProperty("y_" + adventDate.get(Calendar.YEAR) + "_" + iCal.generateUID(event.dbID)));
                             generateAllDayEvent(event, adventDate.get(Calendar.YEAR), adventDate.get(Calendar.MONTH) +1, adventDate.get(Calendar.DATE));
                             generateDescription(event.properties, advents);
                             iCal.vEvent.add(event);
@@ -445,10 +445,11 @@ public class ICalculator {
         
         if(DEBUGMODE) {
         	Date t1 = new Date();
-            iCal.iCalBody.put("x-jkalender-generation_time_ms", new ICalProperty(t1.getTime() - t0.getTime(), null));
-            iCal.iCalBody.put("x-jkalender-period_start", new ICalProperty(calendarBegin.getTime().toString(), null));
-            iCal.iCalBody.put("x-jkalender-period_end", new ICalProperty(calendarEnd.getTime().toString(), null));
-            iCal.iCalBody.put("x-jkalender-astronomical_year", new ICalProperty(Astronomy.getAstronomicalYear(cal), null));
+            iCal.iCalBody.put("x-jkalender-generation_time_ms", new ICalProperty(t1.getTime() - t0.getTime()));
+            iCal.iCalBody.put("x-jkalender-cal", new ICalProperty(cal.getTime().toString()));
+            iCal.iCalBody.put("x-jkalender-period_start", new ICalProperty(calendarBegin.getTime().toString()));
+            iCal.iCalBody.put("x-jkalender-period_end", new ICalProperty(calendarEnd.getTime().toString()));
+            iCal.iCalBody.put("x-jkalender-astronomical_year", new ICalProperty(Astronomy.getAstronomicalYear(cal)));
         }
         
     }

@@ -7,6 +7,10 @@ public class ICalProperty {
     public Object value;
     public LinkedHashMap<String,String> parameters = new LinkedHashMap<String,String>();
     
+    public ICalProperty(Object pValue) {
+    	this(pValue, null);
+    }
+    
     public ICalProperty(Object pValue, String[] pParameters) {
         value = pValue;
         if(pParameters != null) { 
