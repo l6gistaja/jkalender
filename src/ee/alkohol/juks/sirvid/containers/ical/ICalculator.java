@@ -3,6 +3,7 @@ package ee.alkohol.juks.sirvid.containers.ical;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -99,10 +100,11 @@ public class ICalculator {
         Date t0 = new Date();
         
         // initialize current time
+        GregorianCalendar calLocal = getCalendar(null);
+        calLocal.setTime(inputData.getDate());
         String tzID = this.inputData.getTimezone();
         GregorianCalendar cal = getCalendar(tzID);
-        cal.setTime(inputData.getDate());
-        goodNight(cal);
+        cal.set(calLocal.get(Calendar.YEAR), calLocal.get(Calendar.MONTH), calLocal.get(Calendar.DATE));
         boolean isLeapYear = cal.isLeapYear(cal.get(Calendar.YEAR));
         
         // initialize period of calculation
@@ -444,12 +446,21 @@ public class ICalculator {
         }
         
         if(DEBUGMODE) {
+        	SimpleDateFormat dateFormat = new SimpleDateFormat(ICalendar.SDF_DATETIME_UTC);
+        	dateFormat.setTimeZone(TimeZone.getTimeZone(ICalculator.UTC_TZ_ID));
         	Date t1 = new Date();
-            iCal.iCalBody.put("x-jkalender-generation_time_ms", new ICalProperty(t1.getTime() - t0.getTime()));
-            iCal.iCalBody.put("x-jkalender-cal", new ICalProperty(cal.getTime().toString()));
-            iCal.iCalBody.put("x-jkalender-period_start", new ICalProperty(calendarBegin.getTime().toString()));
-            iCal.iCalBody.put("x-jkalender-period_end", new ICalProperty(calendarEnd.getTime().toString()));
-            iCal.iCalBody.put("x-jkalender-astronomical_year", new ICalProperty(Astronomy.getAstronomicalYear(cal)));
+        	String[] debugData = {
+        			"x-jkalender-generation_time_ms", "" + (t1.getTime() - t0.getTime()),
+                    "x-jkalender-inputdate", dateFormat.format(inputData.getDate()),
+                    "x-jkalender-cal", dateFormat.format(cal.getTime()),
+                    "x-jkalender-period_start", dateFormat.format(calendarBegin.getTime()),
+                    "x-jkalender-period_end", dateFormat.format(calendarEnd.getTime()),
+                    "x-jkalender-astronomical_year", "" + Astronomy.getAstronomicalYear(cal),
+                    "x-jkalender-ymd",  calLocal.get(Calendar.YEAR)+"." +calLocal.get(Calendar.MONTH)+"." +calLocal.get(Calendar.DATE)
+        	};
+        	for(int i = 0; i<debugData.length; i+=2) {
+        		iCal.iCalBody.put(debugData[i], new ICalProperty(debugData[i+1]));
+        	}
         }
         
     }
@@ -551,7 +562,7 @@ public class ICalculator {
     }
     
     public static GregorianCalendar getCalendar(String TzID) {
-        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone(TzID));
+        GregorianCalendar cal = TzID == null ? new GregorianCalendar() : new GregorianCalendar(TimeZone.getTimeZone(TzID));
         cal.setGregorianChange(new Date(Long.MIN_VALUE));
         goodNight(cal);
         return cal;

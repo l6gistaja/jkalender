@@ -66,9 +66,9 @@ public class ICalendar {
     public InputData inputData;
     
     public ICalendar(LinkedHashMap<String,ICalProperty> initData) {
-        iCalBody.put(Keys.CALENDAR_TYPE, new ICalProperty("GREGORIAN",null));
-        iCalBody.put(Keys.PRODUCT_ID, new ICalProperty("-//" + ID_SITE + "//NONSGML Java (sirvi)kalender//ET", null));
-        iCalBody.put(Keys.ICAL_VERSION, new ICalProperty("2.0", null));
+        iCalBody.put(Keys.CALENDAR_TYPE, new ICalProperty("GREGORIAN"));
+        iCalBody.put(Keys.PRODUCT_ID, new ICalProperty("-//" + ID_SITE + "//NONSGML Java (sirvi)kalender//ET"));
+        iCalBody.put(Keys.ICAL_VERSION, new ICalProperty("2.0"));
         if(initData != null) { iCalBody.putAll(initData); }
     }
     
